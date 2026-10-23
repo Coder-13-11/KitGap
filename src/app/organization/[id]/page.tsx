@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ActivityList } from "@/components/site/activity-list";
 import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
-import { Container, EmptyState, Panel, Section } from "@/components/ui/layout-bits";
+import { Container, EmptyState, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
 import { PhaseBadge, Pill } from "@/components/ui/status";
 import { formatCalendarDate, formatTimestamp } from "@/domain/dates";
