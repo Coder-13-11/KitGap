@@ -179,17 +179,15 @@ export function validateRequestInput(
       components.push({ name: unitName, normalizedKey: normalizeItemKey(unitName), quantityPerUnit: 1, details });
     }
   } else if (requestType === "kit") {
-    const rows = (input.components ?? []).filter(
-      (row) => text(row.name) || text(String(row.quantityPerUnit ?? "")) || text(row.details),
-    );
+    // A row with no name and no details is an unused blank line, whatever its quantity.
+    const rows = (input.components ?? []).filter((row) => text(row.name) || text(row.details));
     if (rows.length === 0 && complete) errors.components = "Add at least one item to the kit";
     if (rows.length > MAX_COMPONENTS) errors.components = `A kit can list up to ${MAX_COMPONENTS} items`;
     const seen = new Map<string, number>();
     (input.components ?? []).forEach((row, index) => {
       const name = text(row.name);
       const details = text(row.details);
-      const rawQty = text(String(row.quantityPerUnit ?? ""));
-      if (!name && !rawQty && !details) return;
+      if (!name && !details) return;
       if (!name) {
         errors[`components.${index}.name`] = "Name this item";
         return;

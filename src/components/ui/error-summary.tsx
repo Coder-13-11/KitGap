@@ -34,7 +34,7 @@ export function ErrorSummary({
       className="appear rounded-lg border-2 border-danger bg-surface px-4 py-3 outline-none focus-visible:ring-4 focus-visible:ring-focus/40"
     >
       <h2 id="error-summary-title" className="text-lg font-semibold text-danger">
-        {entries.length > 0 ? "There is a problem" : "This wasn't saved"}
+        There is a problem
       </h2>
       <p className="mt-1">{message}</p>
       {entries.length > 0 ? (
