@@ -5,12 +5,13 @@
 // the submit button disabled while saving, errors next to fields plus a
 // focused summary, entries kept on error, and a short success message.
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import type { ActionResult } from "@/lib/action-result";
 import { newIdempotencyKey } from "@/lib/keys";
 import { cn } from "./cn";
 import { ErrorSummary, fieldId } from "./error-summary";
 import { Notice } from "./notice";
+import { useToast } from "./toast";
 import { PendingContext, useActionSubmit } from "./use-action-submit";
 
 type Action = (prev: unknown, formData: FormData) => Promise<ActionResult<unknown>>;
@@ -39,7 +40,12 @@ export function ActionForm({
 }) {
   const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
   const [formKey, setFormKey] = useState(0);
-  const { state, pending, onSubmit } = useActionSubmit<unknown>(action);
+  const toast = useToast();
+  const { state, pending, onSubmit } = useActionSubmit<unknown>(action, (result) => {
+    if (!result.ok) return;
+    if (success) toast(typeof success === "function" ? success(result.data) : success);
+    onSuccess?.(result.data);
+  });
   // Reset after each success: new idempotency key, and (optionally) empty fields.
   const [seenState, setSeenState] = useState(state);
   if (state !== seenState) {
@@ -49,16 +55,10 @@ export function ActionForm({
       if (resetOnSuccess) setFormKey((k) => k + 1);
     }
   }
-  const handled = useRef<unknown>(null);
   const autoId = useId();
   const prefix = id ?? autoId.replace(/[^a-zA-Z0-9_-]/g, "");
   const idFor = (name: string) => fieldId(`${prefix}-${name}`);
 
-  useEffect(() => {
-    if (!state || handled.current === state) return;
-    handled.current = state;
-    if (state.ok) onSuccess?.(state.data);
-  }, [state, onSuccess]);
 
   const errors = state && !state.ok ? state.fieldErrors : {};
   const successText = state && state.ok && success ? (typeof success === "function" ? success(state.data) : success) : null;
@@ -67,9 +67,8 @@ export function ActionForm({
     <div className={cn("space-y-3", className)}>
       {state && !state.ok ? <ErrorSummary message={state.message} fieldErrors={state.fieldErrors} token={state} idFor={idFor} /> : null}
       {successText ? (
-        <Notice tone="success" live="polite">
-          {successText}
-        </Notice>
+        // Announced once by the page's status toast; this copy stays beside the form.
+        <Notice tone="success">{successText}</Notice>
       ) : null}
       <PendingContext value={pending}>
         <form key={formKey} id={id} onSubmit={onSubmit} noValidate className="space-y-4" aria-label={ariaLabel}>

@@ -94,7 +94,7 @@ export async function createPledge(
       workspaceId: state.commitment.groupId,
       data: { component: component.name, quantity },
     });
-    return { pledgeId };
+    return { pledgeId, component: component.name, quantity };
   });
 }
 
@@ -208,7 +208,7 @@ export async function recordCollection(
       data: { component: component.name, usable, unusable, pledged: Boolean(pledge) },
     });
     await assertInvariants(tx, state.request.id, state.commitment.id);
-    return { entryId };
+    return { entryId, component: component.name, usable, unusable };
   });
 }
 
@@ -339,7 +339,7 @@ export async function moveKits(
       data: { quantity, note: (input.note ?? "").trim().slice(0, 300) },
     });
     await assertInvariants(tx, state.request.id, state.commitment.id);
-    return { ok: true };
+    return { kind: input.kind, quantity, unit };
   });
 }
 
@@ -385,7 +385,7 @@ export async function submitDelivery(
       data: { quantity, deliveryId },
     });
     await assertInvariants(tx, state.request.id, state.commitment.id);
-    return { deliveryId };
+    return { deliveryId, quantity, unit };
   });
 }
 

@@ -227,7 +227,7 @@ export async function withdrawDriveAction(_prev: unknown, formData: FormData): R
 
 // Supplies -----------------------------------------------------------------------
 
-export async function pledgeAction(_prev: unknown, formData: FormData): Result<{ pledgeId: string }> {
+export async function pledgeAction(_prev: unknown, formData: FormData): Result<{ pledgeId: string; component: string; quantity: number }> {
   return runAction(async (ctx) => {
     const result = await createPledge(ctx, {
       commitmentId: formText(formData, "commitmentId"),
@@ -249,7 +249,10 @@ export async function closePledgeAction(_prev: unknown, formData: FormData): Res
   });
 }
 
-export async function recordCollectionAction(_prev: unknown, formData: FormData): Result<{ entryId: string }> {
+export async function recordCollectionAction(
+  _prev: unknown,
+  formData: FormData,
+): Result<{ entryId: string; component: string; usable: number; unusable: number }> {
   return runAction(async (ctx) => {
     const result = await recordCollection(ctx, {
       commitmentId: formText(formData, "commitmentId"),
@@ -274,9 +277,9 @@ export async function voidCollectionAction(_prev: unknown, formData: FormData): 
   });
 }
 
-export async function moveKitsAction(_prev: unknown, formData: FormData): Result {
+export async function moveKitsAction(_prev: unknown, formData: FormData): Result<{ kind: string; quantity: number; unit: string }> {
   return runAction(async (ctx) => {
-    await moveKits(ctx, {
+    const result = await moveKits(ctx, {
       commitmentId: formText(formData, "commitmentId"),
       kind: formText(formData, "kind") as KitMovementRecord["kind"],
       quantity: formText(formData, "quantity"),
@@ -284,11 +287,11 @@ export async function moveKitsAction(_prev: unknown, formData: FormData): Result
       idempotencyKey: formText(formData, "idempotencyKey"),
     });
     refresh();
-    return { done: true };
+    return result;
   });
 }
 
-export async function submitDeliveryAction(_prev: unknown, formData: FormData): Result<{ deliveryId: string }> {
+export async function submitDeliveryAction(_prev: unknown, formData: FormData): Result<{ deliveryId: string; quantity: number; unit: string }> {
   return runAction(async (ctx) => {
     const result = await submitDelivery(ctx, {
       commitmentId: formText(formData, "commitmentId"),

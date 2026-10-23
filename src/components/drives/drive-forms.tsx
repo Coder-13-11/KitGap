@@ -41,7 +41,10 @@ export function PledgeForm({ commitmentId, components }: { commitmentId: string;
     <ActionForm
       action={pledgeAction}
       hidden={{ commitmentId }}
-      success="Pledge saved. Your coordinator will record it when the items arrive."
+      success={(data) => {
+        const d = data as { component: string; quantity: number };
+        return `You pledged ${countNoun(d.quantity, d.component)}. Your coordinator will record them when they arrive.`;
+      }}
       aria-label="Pledge supplies"
     >
       {(errors, f) => (
@@ -98,7 +101,10 @@ export function RecordCollectionForm({
     <ActionForm
       action={recordCollectionAction}
       hidden={{ commitmentId }}
-      success="Saved. The totals above now include these supplies."
+      success={(data) => {
+        const d = data as { component: string; usable: number; unusable: number };
+        return `Recorded ${formatCount(d.usable)} usable ${(d.usable === 1 ? d.component : pluralize(d.component)).toLowerCase()}${d.unusable ? ` and ${formatCount(d.unusable)} not usable` : ""}. The totals above include them.`;
+      }}
       aria-label="Record received supplies"
     >
       {(errors, f) => (
@@ -169,7 +175,10 @@ export function PackForm({ commitmentId, packableNow, unitName }: { commitmentId
     <ActionForm
       action={moveKitsAction}
       hidden={{ commitmentId, kind: "packed" }}
-      success="Saved. Those kits are now ready to hand over."
+      success={(data) => {
+        const d = data as { quantity: number; unit: string };
+        return `Recorded ${countNoun(d.quantity, d.unit)} packed and ready to hand over.`;
+      }}
       aria-label="Record packed kits"
     >
       {(errors, f) => (
@@ -195,7 +204,7 @@ export function PackForm({ commitmentId, packableNow, unitName }: { commitmentId
 
 export function UnpackForm({ commitmentId, ready, unitName }: { commitmentId: string; ready: number; unitName: string }) {
   return (
-    <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "unpacked" }} success="Saved. The supplies are back in the collected totals." aria-label="Unpack kits">
+    <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "unpacked" }} success={(data) => `Unpacked ${countNoun((data as { quantity: number }).quantity, unitName)}. Their supplies are back in the collected totals.`} aria-label="Unpack kits">
       {(errors, f) => (
         <>
           <TextField
@@ -231,7 +240,7 @@ export function DeliveryForm({
     <ActionForm
       action={submitDeliveryAction}
       hidden={{ commitmentId }}
-      success={`Delivery reported. ${orgName} will confirm what it received.`}
+      success={(data) => `Reported a delivery of ${countNoun((data as { quantity: number }).quantity, unitName)}. ${orgName} will confirm what it received.`}
       aria-label="Report a delivery"
     >
       {(errors, f) => (
@@ -270,7 +279,7 @@ export function FollowUpForms({ commitmentId, needsFollowUp, unitName, active }:
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {active ? (
-        <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "repaired" }} success="Saved. They're ready to hand over again." aria-label="Mark fixed">
+        <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "repaired" }} success={(data) => `Marked ${countNoun((data as { quantity: number }).quantity, unitName)} fixed and ready to hand over again.`} aria-label="Mark fixed">
           {(errors, f) => (
             <>
               <TextField
@@ -288,7 +297,7 @@ export function FollowUpForms({ commitmentId, needsFollowUp, unitName, active }:
           )}
         </ActionForm>
       ) : null}
-      <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "set_aside" }} success="Saved. Pack replacements if you can." aria-label="Set aside">
+      <ActionForm action={moveKitsAction} hidden={{ commitmentId, kind: "set_aside" }} success={(data) => `Set aside ${countNoun((data as { quantity: number }).quantity, unitName)}. Pack replacements if you can.`} aria-label="Set aside">
         {(errors, f) => (
           <>
             <TextField

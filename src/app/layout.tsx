@@ -5,6 +5,7 @@ import { DemoBanner } from "@/components/site/demo-banner";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type AccountLink, type NavItem } from "@/components/site/header";
 import { BaseProvider } from "@/components/ui/base";
+import { ToastProvider } from "@/components/ui/toast";
 import { getMyWorkspaces } from "@/server/queries/organization";
 import { getAppContext } from "@/server/next/context";
 import "./globals.css";
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <BaseProvider base={ctx.base}>
+          <ToastProvider>
           {ctx.demo ? <DemoBanner persona={ctx.demo.persona} /> : null}
           <SiteHeader
             nav={nav}
@@ -66,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </main>
           <SiteFooter />
+          </ToastProvider>
         </BaseProvider>
       </body>
     </html>
