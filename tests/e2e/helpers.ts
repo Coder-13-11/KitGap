@@ -60,3 +60,38 @@ export async function makeReviewer(email: string) {
     await sql.end();
   }
 }
+
+// Removes everything created by test accounts (emails ending @example.com).
+// Refuses to run against anything but a local database.
+export async function cleanupTestAccounts() {
+  const url = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  if (!/@(127\.0\.0\.1|localhost)[:/]/.test(url)) throw new Error("Refusing to clean up test data outside a local database");
+  const sql = postgres(url, { max: 1, onnotice: () => {} });
+  try {
+    await sql.begin(async (tx) => {
+      await tx`set local search_path to kitgap`;
+      await tx`create temp table test_users on commit drop as select id from auth.users where email like '%@example.com'`;
+      await tx`create temp table test_ws on commit drop as select id from workspaces where created_by in (select id from test_users)`;
+      await tx`create temp table test_req on commit drop as select id from requests where org_id in (select id from test_ws)`;
+      await tx`create temp table test_com on commit drop as
+        select id from commitments where request_id in (select id from test_req) or group_id in (select id from test_ws)`;
+      await tx`delete from activity where request_id in (select id from test_req) or commitment_id in (select id from test_com)
+               or workspace_id in (select id from test_ws) or actor_id in (select id from test_users)`;
+      for (const table of ["deliveries", "kit_movements", "collection_entries", "pledges"]) {
+        await tx`delete from ${tx(table)} where commitment_id in (select id from test_com)`;
+      }
+      await tx`delete from commitments where id in (select id from test_com)`;
+      await tx`update requests set copied_from = null where copied_from in (select id from test_req)`;
+      await tx`delete from requests where id in (select id from test_req)`;
+      await tx`delete from workspace_members where workspace_id in (select id from test_ws) or user_id in (select id from test_users)`;
+      await tx`update workspaces set contact_confirmed_by = null where contact_confirmed_by in (select id from test_users)`;
+      await tx`delete from workspaces where id in (select id from test_ws)`;
+      await tx`delete from platform_admins where user_id in (select id from test_users)`;
+      await tx`delete from idempotency_keys where user_id in (select id from test_users)`;
+      await tx`delete from profiles where id in (select id from test_users)`;
+      await tx`delete from auth.users where id in (select id from test_users)`;
+    });
+  } finally {
+    await sql.end();
+  }
+}

@@ -18,6 +18,8 @@ export function useBase(): "" | "/demo" {
 
 export function withBase(base: string, href: string): string {
   if (!href.startsWith("/") || href.startsWith("//")) return href;
+  // Inside the demo, "home" is the demo's start page.
+  if (base && href === "/") return base;
   if (base && (href === "/demo" || href.startsWith("/demo/") || href.startsWith("/demo?"))) return href;
   return base + href;
 }

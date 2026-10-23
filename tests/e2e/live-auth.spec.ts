@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { latestLink, makeReviewer, signIn, signUpAndConfirm, uniqueEmail } from "./helpers";
+import { cleanupTestAccounts, latestLink, makeReviewer, signIn, signUpAndConfirm, uniqueEmail } from "./helpers";
 
 // The real, signed-in path with Supabase Auth (not the demo): accounts are
 // created and confirmed by email, a reviewer approves the request, and a
 // second person adopts part of it after being sent through sign-in.
 
 const PASSWORD = "correct-horse-42";
+
+// These tests create real accounts and records in the local database.
+test.beforeAll(cleanupTestAccounts);
+test.afterAll(cleanupTestAccounts);
 
 test("organization posts a request, reviewer approves it, a coordinator adopts after signing up", async ({ browser }) => {
   const orgContext = await browser.newContext();
