@@ -154,6 +154,16 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
 
   await actAs(page, "coordinator", drivePath);
   await expect(page.getByRole("heading", { name: "Drive complete" })).toBeVisible();
+
+  // Records: the CSV export and the printable packing sheet.
+  const csv = await page.request.get(`/demo${drivePath}/export`);
+  expect(csv.status()).toBe(200);
+  const text = await csv.text();
+  expect(text).toContain("Supplies,Notebook,40,40,0,0,0,0");
+  expect(text).toContain("Pledge,Notebook,10,10,0,received,Sam Patel");
+  await page.goto(`/demo${drivePath}/packing-sheet`);
+  await expect(page.getByRole("heading", { name: /Packing sheet/ })).toBeVisible();
+  await expect(page.getByText("20 kits committed · 20 confirmed received")).toBeVisible();
   await page.goto(requestUrl);
   await expect(page.getByText("20 of 100 kits promised by groups; 20 confirmed received")).toBeVisible();
 });
