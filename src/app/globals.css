@@ -69,8 +69,12 @@
     text-wrap: pretty;
   }
 
+  /* Links are underlined so they never rely on color alone; navigation and
+     button-style links opt out with the no-underline utility. */
   a {
     color: var(--color-forest);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
   }
 

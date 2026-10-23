@@ -25,8 +25,10 @@ export function StageSummary({ stages, committed, requestType, unitName }: { sta
       <dl className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
         {rows.map((r) => (
           <div key={r.key} className="flex items-baseline gap-2">
-            <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full", r.swatch)} />
-            <dt className="text-muted">{r.label}</dt>
+            <dt className="flex items-baseline gap-2 text-muted">
+              <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full", r.swatch)} />
+              {r.label}
+            </dt>
             <dd className="tabular ml-auto font-semibold">{formatCount(r.value)}</dd>
           </div>
         ))}

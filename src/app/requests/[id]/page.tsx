@@ -68,29 +68,29 @@ export default async function RequestPage({ params }: Params) {
               <ContactConfirmed at={org.contactConfirmedAt} />
             </div>
             <dl className="grid gap-3 sm:grid-cols-3">
-              <div className="flex gap-2">
-                <Package aria-hidden className="mt-0.5 size-5 shrink-0 text-forest" />
-                <div>
-                  <dt className="text-sm text-muted">Requested</dt>
-                  <dd className="font-semibold">{countNoun(totals.target, unit)}</dd>
-                </div>
+              <div>
+                <dt className="flex items-center gap-2 text-sm text-muted">
+                  <Package aria-hidden className="size-5 shrink-0 text-forest" />
+                  Requested
+                </dt>
+                <dd className="pl-7 font-semibold">{countNoun(totals.target, unit)}</dd>
               </div>
-              <div className="flex gap-2">
-                <CalendarDays aria-hidden className="mt-0.5 size-5 shrink-0 text-forest" />
-                <div>
-                  <dt className="text-sm text-muted">Needed by</dt>
-                  <dd className="font-semibold">{formatCalendarDate(request.neededBy)}</dd>
-                  {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
-                    <dd className={deadline.passed ? "text-sm font-semibold text-amber" : "text-sm text-muted"}>{deadline.description}</dd>
-                  ) : null}
-                </div>
+              <div>
+                <dt className="flex items-center gap-2 text-sm text-muted">
+                  <CalendarDays aria-hidden className="size-5 shrink-0 text-forest" />
+                  Needed by
+                </dt>
+                <dd className="pl-7 font-semibold">{formatCalendarDate(request.neededBy)}</dd>
+                {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
+                  <dd className={deadline.passed ? "pl-7 text-sm font-semibold text-amber" : "pl-7 text-sm text-muted"}>{deadline.description}</dd>
+                ) : null}
               </div>
-              <div className="flex gap-2">
-                <MapPin aria-hidden className="mt-0.5 size-5 shrink-0 text-forest" />
-                <div>
-                  <dt className="text-sm text-muted">Location</dt>
-                  <dd className="font-semibold">{request.location}</dd>
-                </div>
+              <div>
+                <dt className="flex items-center gap-2 text-sm text-muted">
+                  <MapPin aria-hidden className="size-5 shrink-0 text-forest" />
+                  Location
+                </dt>
+                <dd className="pl-7 font-semibold">{request.location}</dd>
               </div>
             </dl>
           </header>

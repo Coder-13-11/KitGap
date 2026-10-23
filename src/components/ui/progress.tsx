@@ -27,7 +27,7 @@ export function RequestProgress({
         />
         <span className="h-full bg-[#b9cdbf]" style={{ width: `${pct(inProgress)}%` }} />
       </div>
-      <dl className={cn("grid gap-x-4 gap-y-1.5 text-sm", compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
+      <dl className={cn("grid gap-x-8 gap-y-1.5 text-sm", compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
         <Stat swatch="bg-forest" label="Confirmed received" value={accepted} />
         {!compact || pendingReview > 0 ? (
           <Stat swatch="bg-[repeating-linear-gradient(135deg,#234d3b_0_3px,#5f8b75_3px_6px)]" label="Delivered, awaiting review" value={pendingReview} />
@@ -47,9 +47,11 @@ export function RequestProgress({
 function Stat({ swatch, label, value }: { swatch: string; label: string; value: number }) {
   return (
     <div aria-hidden className="flex items-baseline gap-2">
-      <span className={cn("inline-block size-2.5 shrink-0 translate-y-[-1px] rounded-full", swatch)} />
-      <dt className="order-2 text-muted">{label.charAt(0).toLowerCase() + label.slice(1)}</dt>
-      <dd className="tabular order-1 min-w-[2.5ch] text-right font-semibold text-ink">{formatCount(value)}</dd>
+      <dt className="flex items-baseline gap-2 text-muted">
+        <span className={cn("inline-block size-2.5 shrink-0 translate-y-[-1px] rounded-full", swatch)} />
+        {label}
+      </dt>
+      <dd className="tabular ml-auto font-semibold text-ink">{formatCount(value)}</dd>
     </div>
   );
 }
