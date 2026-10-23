@@ -65,7 +65,7 @@ export function ActionForm({
 
   return (
     <div className={cn("space-y-3", className)}>
-      {state && !state.ok ? <ErrorSummary message={state.message} fieldErrors={state.fieldErrors} token={state} idFor={idFor} /> : null}
+      {state && !state.ok ? <ErrorSummary message={state.message} fieldErrors={state.fieldErrors} token={state} idFor={idFor} code={state.code} /> : null}
       {successText ? (
         // Announced once by the page's status toast; this copy stays beside the form.
         <Notice tone="success">{successText}</Notice>

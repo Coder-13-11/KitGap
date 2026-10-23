@@ -70,7 +70,7 @@ export function AdoptForm({
     <form onSubmit={onSubmit} className="space-y-8" noValidate>
       <input type="hidden" name="requestId" value={requestId} />
       <input type="hidden" name="idempotencyKey" value={key} />
-      {failed ? <ErrorSummary message={failed.message} fieldErrors={failed.fieldErrors} token={state} /> : null}
+      {failed ? <ErrorSummary message={failed.message} fieldErrors={failed.fieldErrors} token={state} code={failed.code} /> : null}
 
       <Fieldset legend="Which group is running this drive?" id={fieldId("groupId")} error={errors.groupId}>
         <div className="space-y-2">

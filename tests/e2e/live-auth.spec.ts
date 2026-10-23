@@ -119,9 +119,14 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   const cookies = await visitor.context().cookies();
   const auth = cookies.filter((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
   expect(auth.length).toBeGreaterThan(0);
+  const pledge = visitor.getByRole("form", { name: "Pledge supplies" });
+  await pledge.getByLabel("How many will you bring?").fill("2");
   await visitor.context().clearCookies();
   await visitor.context().addCookies(auth.map((c) => ({ ...c, value: "base64-eyJleHBpcmVkIjp0cnVlfQ" })));
-  await visitor.goto(`/requests/${requestId}`);
+  await pledge.getByRole("button", { name: "Pledge these items" }).click();
+  await expect(visitor.getByText("Your session expired. Sign in again to continue; your answers are still on this page.")).toBeVisible();
+  await expect(visitor.getByRole("link", { name: "Sign in again in a new tab" })).toBeVisible();
+  await expect(pledge.getByLabel("How many will you bring?")).toHaveValue("2");
   await visitor.goto("/drives");
   await visitor.waitForURL(/\/sign-in/);
   await expect(visitor.getByText("Your session expired")).toBeVisible();

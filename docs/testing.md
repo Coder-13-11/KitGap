@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | Unit | `npm test` (part) | Quantity math, form validation, dates, wording, migrations bundle | 36 passed |
 | Integration | `npm test` (part) | Services against a real Postgres 17 (local Supabase): permissions, concurrency, retries, privacy, demo isolation | 35 passed |
-| End-to-end | `npm run test:e2e` | Chromium driving the production build with real Supabase Auth and the local mail catcher | 5 passed |
+| End-to-end | `npm run test:e2e` | Chromium driving the production build with real Supabase Auth and the local mail catcher | 6 passed |
 | Accessibility (automated) | part of `test:e2e` | axe-core WCAG 2.0/2.1/2.2 A and AA rules on 17 screens and states | 0 violations |
 | Types and lint | `npm run typecheck`, `npm run lint` | | clean |
 | Production build | `npm run build` | | succeeds with no warnings |
@@ -36,12 +36,12 @@ A few checks prove a test can actually fail:
 | 12 | Invalid quantities, unavailable quantities, deadlines and unsafe links are rejected on the server | `drives.test.ts` "rejects invalid and unavailable quantities…", "blocks new drives after… the needed-by date"; `access.test.ts` "validates requests on the server…"; unit `request form validation`; e2e (javascript: link rejected in the form) |
 | 13 | Public pages don't disclose private data | `access.test.ts` "never include private contacts, handover details or contributor identities" |
 | 14 | The demo can't change real data or another visitor's sandbox | `demo-sandbox.test.ts` (all five tests) |
-| 15 | Sign-in return navigation, failed saves, session expiry, keyboard use | e2e `live-auth`: visitor → sign-up → email confirmation → back to the adopt page with the chosen quantity; a corrupted session cookie shows "Your session expired"; keyboard-only sign-in with focus moved to the error summary. e2e `demo-walkthrough`: a review saved without an explanation is refused and the entered number is kept |
+| 15 | Sign-in return navigation, failed saves, session expiry, keyboard use | e2e `live-auth`: visitor → sign-up → email confirmation → back to the adopt page with the chosen quantity; when the session expires mid-form, the pledge form says so, offers sign-in in a new tab and keeps the entry; an expired session on page load leads to sign-in with "Your session expired"; keyboard-only sign-in with focus moved to the error summary. e2e `invite`: a signed-out contributor opens an invitation, signs up, confirms, returns to the invitation, joins and pledges. e2e `demo-walkthrough`: a review saved without an explanation is refused and the entered number is kept |
 | 16 | Withdrawing during a pending delivery releases only the unsubmitted part | unit "keeps a pending delivery reserved after its group withdraws…"; `drives.test.ts` "keeps a delivery awaiting review reserved after withdrawal…" |
 
 ## Not covered by automated tests
 
-- The request form's recovery after an expired session (the answers are kept in the browser tab and offered back after signing in again). Check this by hand: start a request, delete the `sb-…-auth-token` cookies in the browser's developer tools, press **Save and continue**, sign in again, and choose **Restore answers**.
+- The request form's own recovery after an expired session (its answers are kept in the browser tab and offered back after signing in again). Check this by hand: start a request, delete the `sb-…-auth-token` cookies in the browser's developer tools, press **Save and continue**, sign in again, and choose **Restore answers**.
 - Real email delivery through a production SMTP provider. Locally, emails go to the Mailpit catcher.
 - Browsers other than Chromium; real phones and tablets (layouts were checked in Chromium at 320, 390, 768 and 1440 px).
 - Screen readers. See `docs/accessibility.md`.

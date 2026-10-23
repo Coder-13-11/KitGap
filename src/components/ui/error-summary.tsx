@@ -14,12 +14,14 @@ export function ErrorSummary({
   fieldErrors,
   token,
   idFor = fieldId,
+  code,
 }: {
   message: string;
   fieldErrors: Record<string, string>;
   // Changes on every failed submission so focus moves again.
   token: unknown;
   idFor?: (name: string) => string;
+  code?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -37,6 +39,14 @@ export function ErrorSummary({
         There is a problem
       </h2>
       <p className="mt-1">{message}</p>
+      {code === "sign_in_required" ? (
+        <p className="mt-2">
+          <a href="/sign-in?next=/welcome" target="_blank" rel="noopener" className="font-semibold">
+            Sign in again in a new tab
+          </a>
+          , then come back to this tab and press the button again. Your entries are still here.
+        </p>
+      ) : null}
       {entries.length > 0 ? (
         <ul className="mt-2 list-disc space-y-1 pl-5">
           {entries.map(([name, text]) => (
