@@ -17,7 +17,8 @@ export interface Migration {
 let cached: Migration[] | null = null;
 
 export function loadMigrations(directory = path.join(process.cwd(), "db", "migrations")): Migration[] {
-  if (cached) return cached;
+  // Cached only in production, where a new migration always comes with a restart.
+  if (cached && process.env.NODE_ENV === "production") return cached;
   cached = readdirSync(directory)
     .filter((file) => file.endsWith(".sql"))
     .sort()

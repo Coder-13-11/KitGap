@@ -11,7 +11,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { addDays, todayIn } from "@/domain/dates";
 import { normalizeItemKey } from "@/domain/text";
 import { inSchema, isSandboxSchema, type Sql, type Tx } from "../db/client";
-import { dropSchema, ensureMetaSchema, migrateSchema } from "../db/migrations";
+import { dropSchema, ensureMetaSchema, loadMigrations, migrateSchema } from "../db/migrations";
 import { newInviteToken } from "../services/workspaces";
 
 export const DEMO_COOKIE = "kg_demo";
@@ -117,6 +117,16 @@ export function verifySandboxCookie(value: string | undefined): string | null {
 
 export async function sandboxExists(sql: Sql, sandboxId: string): Promise<boolean> {
   const schema = schemaFor(sandboxId);
+  const ok = await sandboxRow(sql, schema);
+  if (ok) {
+    // A sandbox made before a new migration shipped gets it on next use.
+    const [{ count }] = await sql`select count(*)::int as count from kitgap_meta.applied_migrations where schema_name = ${schema}`;
+    if (Number(count) < loadMigrations().length) await migrateSchema(sql, schema);
+  }
+  return ok;
+}
+
+async function sandboxRow(sql: Sql, schema: string): Promise<boolean> {
   const rows = await sql`
     update kitgap_meta.demo_sandboxes set last_used_at = now()
     where schema_name = ${schema} and last_used_at < now() - interval '5 minutes'

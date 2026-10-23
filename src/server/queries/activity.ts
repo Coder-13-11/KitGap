@@ -157,3 +157,79 @@ export async function activityFor(
     context: options.commitmentId ? null : row.requestTitle,
   }));
 }
+
+// "Updates": recent activity in every workspace the person belongs to, from
+// other people. Contributors see their group's events without other
+// members' names, the same as on the drive page.
+export async function updatesFor(
+  tx: Tx,
+  userId: string,
+  options: { limit: number },
+): Promise<{ items: (ActivityItem & { link: string | null; unread: boolean })[]; unread: number }> {
+  const [profile] = await tx`select coalesce(updates_seen_at, created_at) as seen from profiles where id = ${userId}`;
+  const seen: Date = profile?.seen ?? new Date(0);
+  const rows = (await tx`
+    with mine as (
+      select m.workspace_id, m.role, w.kind from workspace_members m join workspaces w on w.id = m.workspace_id
+      where m.user_id = ${userId}
+    )
+    select a.id, a.kind, a.actor_id, p.display_name as actor_name, a.data, a.created_at, a.commitment_id,
+           g.name as group_name, r.title as request_title, r.unit_name, r.id as request_id, r.org_id,
+           (select role from mine where mine.workspace_id = c.group_id) as group_role,
+           exists (select 1 from mine where mine.workspace_id = r.org_id) as in_org
+    from activity a
+    left join profiles p on p.id = a.actor_id
+    left join commitments c on c.id = a.commitment_id
+    left join workspaces g on g.id = c.group_id
+    left join requests r on r.id = a.request_id
+    where a.actor_id is distinct from ${userId}
+      and (
+        (a.audience in ('org', 'both') and r.org_id in (select workspace_id from mine where kind = 'organization'))
+        or (a.audience in ('group', 'both') and c.group_id in (select workspace_id from mine where kind = 'group'))
+      )
+    order by a.id desc
+    limit ${options.limit}
+  `) as unknown as (Row & {
+    commitmentId: string | null;
+    requestId: string | null;
+    orgId: string | null;
+    groupRole: "admin" | "member" | null;
+    inOrg: boolean;
+  })[];
+  const [{ count }] = await tx`
+    with mine as (
+      select m.workspace_id, w.kind from workspace_members m join workspaces w on w.id = m.workspace_id where m.user_id = ${userId}
+    )
+    select count(*)::int as count from activity a
+    left join commitments c on c.id = a.commitment_id
+    left join requests r on r.id = a.request_id
+    where a.actor_id is distinct from ${userId} and a.created_at > ${seen}
+      and (
+        (a.audience in ('org', 'both') and r.org_id in (select workspace_id from mine where kind = 'organization'))
+        or (a.audience in ('group', 'both') and c.group_id in (select workspace_id from mine where kind = 'group'))
+      )
+  `;
+  return {
+    unread: Number(count),
+    items: rows.map((row) => {
+      const contributorView = row.groupRole === "member" && !row.inOrg;
+      const link = row.commitmentId && row.groupRole
+        ? `/drives/${row.commitmentId}`
+        : row.requestId && row.inOrg
+          ? `/organization/${row.orgId}/requests/${row.requestId}`
+          : row.requestId
+            ? `/requests/${row.requestId}`
+            : null;
+      return {
+        id: String(row.id),
+        kind: row.kind,
+        actorName: contributorView ? "A member" : row.actorName ?? "Someone",
+        text: describeActivity(row.kind, row.data ?? {}, row.unitName ?? "unit", row.groupName),
+        createdAt: row.createdAt,
+        context: row.requestTitle,
+        link,
+        unread: row.createdAt > seen,
+      };
+    }),
+  };
+}

@@ -10,6 +10,19 @@ import { LogoMark } from "./logo";
 export interface NavItem {
   href: string;
   label: string;
+  count?: number;
+}
+
+function NavCount({ count }: { count?: number }) {
+  if (!count) return null;
+  return (
+    <>
+      <span aria-hidden className="tabular ml-1.5 inline-flex min-w-6 justify-center rounded-full bg-clay px-1.5 text-sm font-semibold text-white">
+        {count > 99 ? "99+" : count}
+      </span>
+      <span className="sr-only"> ({count} new)</span>
+    </>
+  );
 }
 
 export interface AccountLink {
@@ -83,6 +96,7 @@ export function SiteHeader({
                   )}
                 >
                   {item.label}
+                  <NavCount count={item.count} />
                 </AppLink>
               </li>
             ))}
@@ -166,6 +180,7 @@ export function SiteHeader({
                   )}
                 >
                   {item.label}
+                  <NavCount count={item.count} />
                 </AppLink>
               </li>
             ))}

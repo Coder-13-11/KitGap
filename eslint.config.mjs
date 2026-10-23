@@ -21,6 +21,7 @@ const eslintConfig = defineConfig([
     "supabase/**",
     "test-results/**",
     "playwright-report/**",
+    ".shots.mjs",
   ]),
 ]);
 

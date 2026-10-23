@@ -33,6 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     nav.push({ href: "/organization", label: "My organizations" });
   }
   if (workspaces.isReviewer) nav.push({ href: "/admin", label: "Review queue" });
+  if (ctx.user) nav.push({ href: "/updates", label: "Updates", count: workspaces.unreadUpdates });
 
   const accountLinks: AccountLink[] = [];
   if (ctx.user) {

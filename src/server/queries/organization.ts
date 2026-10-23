@@ -13,7 +13,7 @@ import type {
   RequestRecord,
 } from "@/domain/types";
 import { isPlatformAdmin, isUuid, now, read, roleIn, type ServiceContext } from "../services/core";
-import { activityFor, type ActivityItem } from "./activity";
+import { activityFor, updatesFor, type ActivityItem } from "./activity";
 
 export interface OrgWorkspaceInfo {
   id: string;
@@ -336,7 +336,7 @@ export async function getReviewQueue(ctx: ServiceContext): Promise<ReviewQueue |
 }
 
 export async function getMyWorkspaces(ctx: ServiceContext) {
-  if (!ctx.userId) return { organizations: [], groups: [], isReviewer: false, displayName: null as string | null };
+  if (!ctx.userId) return { organizations: [], groups: [], isReviewer: false, displayName: null as string | null, unreadUpdates: 0 };
   return read(ctx, async (tx) => {
     const rows = await tx`
       select w.id, w.name, w.kind, m.role from workspace_members m join workspaces w on w.id = m.workspace_id
@@ -347,11 +347,13 @@ export async function getMyWorkspaces(ctx: ServiceContext) {
       rows
         .filter((r) => r.kind === kind)
         .map((r) => ({ id: r.id as string, name: r.name as string, role: r.role as "admin" | "member" }));
+    const { unread } = await updatesFor(tx, ctx.userId!, { limit: 0 });
     return {
       organizations: pick("organization"),
       groups: pick("group"),
       isReviewer: await isPlatformAdmin(tx, ctx.userId),
       displayName: (profile?.displayName as string | undefined) ?? null,
+      unreadUpdates: unread,
     };
   });
 }
@@ -450,4 +452,10 @@ export async function getInvitation(ctx: ServiceContext, token: string) {
       alreadyMember: Boolean(role),
     };
   });
+}
+
+export async function getUpdates(ctx: ServiceContext) {
+  if (!ctx.userId) return { items: [], unread: 0 };
+  const userId = ctx.userId;
+  return read(ctx, (tx) => updatesFor(tx, userId, { limit: 60 }));
 }

@@ -45,6 +45,7 @@ import {
   rotateInviteToken,
   setContactConfirmed,
   setMemberRole,
+  markUpdatesSeen,
   updateDisplayName,
   updateWorkspace,
   type WorkspaceKind,
@@ -395,6 +396,13 @@ export async function updateDisplayNameAction(_prev: unknown, formData: FormData
   return runAction(async (ctx) => {
     await updateDisplayName(ctx, { displayName: formText(formData, "displayName") });
     refresh();
+    return { done: true };
+  });
+}
+
+export async function markUpdatesSeenAction(): Result {
+  return runAction(async (ctx) => {
+    await markUpdatesSeen(ctx);
     return { done: true };
   });
 }

@@ -233,3 +233,10 @@ export async function setContactConfirmed(ctx: ServiceContext, input: { workspac
     return { ok: true };
   });
 }
+
+export async function markUpdatesSeen(ctx: ServiceContext) {
+  return mutate(ctx, { action: "updates.seen" }, async (tx, userId) => {
+    await tx`update profiles set updates_seen_at = ${now(ctx)} where id = ${userId}`;
+    return { ok: true };
+  });
+}

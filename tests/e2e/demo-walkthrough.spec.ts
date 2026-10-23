@@ -122,8 +122,10 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await page.goto(requestUrl);
   await expect(page.getByText("20 of 100 kits promised by groups; 13 confirmed received")).toBeVisible();
 
-  // 5. Jordan follows up and finishes.
-  await actAs(page, "coordinator", drivePath);
+  // 5. Jordan sees the decision in Updates, then follows up and finishes.
+  await actAs(page, "coordinator", "/updates");
+  await expect(page.getByText("accepted 13 of 15 kits from Lakeside High Service Club (sample); 2 not accepted", { exact: false })).toBeVisible();
+  await page.goto(`/demo${drivePath}`);
   await expect(page.getByRole("heading", { name: "Decide what to do with 2 kits not accepted" })).toBeVisible();
   const fixed = page.getByRole("form", { name: "Mark fixed" });
   await fill(page, fixed, "Fixed kits", "2");
