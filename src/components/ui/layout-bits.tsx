@@ -57,8 +57,19 @@ export function Section({
   );
 }
 
-export function Panel({ children, className, as: As = "div" }: { children: ReactNode; className?: string; as?: "div" | "section" | "article" | "aside" }) {
-  return <As className={cn("rounded-lg border border-line bg-surface p-5", className)}>{children}</As>;
+export function Panel({
+  children,
+  className,
+  as: As = "div",
+  tone = "default",
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "div" | "section" | "article" | "aside";
+  tone?: "default" | "forest";
+}) {
+  const toneClass = tone === "forest" ? "border-forest/40 bg-forest-tint" : "border-line bg-surface";
+  return <As className={cn("rounded-lg border p-5", toneClass, className)}>{children}</As>;
 }
 
 export function Container({ children, className, narrow = false }: { children: ReactNode; className?: string; narrow?: boolean }) {

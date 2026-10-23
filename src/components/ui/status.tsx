@@ -40,7 +40,7 @@ export function Pill({ children, tone = "neutral" }: { children: React.ReactNode
     clay: "bg-clay-tint text-clay border-clay/30",
   };
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap", tones[tone])}>
+    <span className={cn("inline-flex max-w-full items-center gap-1 rounded-full border px-2.5 py-0.5 text-sm font-semibold", tones[tone])}>
       {children}
     </span>
   );

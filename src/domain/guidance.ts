@@ -61,14 +61,20 @@ export function describeBottleneck(progress: DriveProgress, unitName: string): B
     };
   }
 
-  const needList = shortages.map((s) => countNoun(s.quantity, s.name));
+  const pledgedFor = new Map(progress.components.map((c) => [c.name, Math.min(c.openPledged, c.stillNeeded)]));
+  const needList = shortages.map((s) => {
+    const pledged = pledgedFor.get(s.name) ?? 0;
+    return countNoun(s.quantity, s.name) + (pledged > 0 ? ` (${formatCount(pledged)} pledged)` : "");
+  });
   let headline: string;
   if (!isKit) {
     const only = shortages[0];
-    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} ${only.quantity === 1 ? "is" : "are"} needed.`;
+    const pledged = pledgedFor.get(only.name) ?? 0;
+    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} ${only.quantity === 1 ? "is" : "are"} needed${pledged > 0 ? ` (${formatCount(pledged)} already pledged)` : ""}.`;
   } else if (shortages.length === 1) {
     const only = shortages[0];
-    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} ${only.quantity === 1 ? "completes" : "complete"} the remaining ${remaining}.`;
+    const pledged = pledgedFor.get(only.name) ?? 0;
+    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} ${only.quantity === 1 ? "completes" : "complete"} the remaining ${remaining}${pledged > 0 ? ` (${formatCount(pledged)} already pledged)` : ""}.`;
   } else {
     headline = `To complete the remaining ${remaining}, you still need ${listPhrase(needList)}.`;
   }

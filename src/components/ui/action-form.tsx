@@ -71,12 +71,15 @@ export function ActionForm({
         <Notice tone="success">{successText}</Notice>
       ) : null}
       <PendingContext value={pending}>
-        <form key={formKey} id={id} onSubmit={onSubmit} noValidate className="space-y-4" aria-label={ariaLabel}>
+        <form key={formKey} id={id} onSubmit={onSubmit} noValidate aria-label={ariaLabel}>
           <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
           {Object.entries(hidden).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
           ))}
-          {children(errors, idFor)}
+          {/* Fields are locked while saving, so nothing typed now is lost when the form resets. */}
+          <fieldset disabled={pending} className="m-0 min-w-0 space-y-4 border-0 p-0">
+            {children(errors, idFor)}
+          </fieldset>
         </form>
       </PendingContext>
     </div>

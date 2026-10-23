@@ -181,7 +181,7 @@ export default async function OrganizationPage({
         {drives.length === 0 ? (
           <p className="text-muted">No groups are running drives for your requests yet.</p>
         ) : (
-          <Panel className="p-0">
+          <div className="rounded-lg border border-line bg-surface">
             <ul className="divide-y divide-line">
               {drives.map((d) => (
                 <li key={d.commitmentId} className="grid gap-2 px-4 py-3 md:grid-cols-[1.4fr_1fr_auto] md:items-center">
@@ -204,7 +204,7 @@ export default async function OrganizationPage({
                 </li>
               ))}
             </ul>
-          </Panel>
+          </div>
         )}
       </Section>
 

@@ -62,8 +62,8 @@ export function DirectoryFilters({
           Sort by
         </label>
         <select id="sort" name="sort" defaultValue={sort} className={inputClass()}>
-          <option value="deadline">Needed-by date, soonest first</option>
-          <option value="newest">Newest first</option>
+          <option value="deadline">Soonest needed</option>
+          <option value="newest">Newest</option>
         </select>
       </div>
       <button type="submit" className={buttonClass("primary")}>

@@ -30,6 +30,14 @@ import { siteUrl } from "@/server/next/supabase";
 
 export const metadata: Metadata = { title: "Drive" };
 
+const NEXT_ANCHOR: Partial<Record<string, { href: string; label: string }>> = {
+  follow_up: { href: "#follow-up", label: "Go to kits not accepted" },
+  deliver: { href: "#deliver", label: "Go to report a delivery" },
+  pack: { href: "#pack", label: "Go to pack kits" },
+  record: { href: "#record", label: "Go to record received supplies" },
+  share: { href: "#share", label: "Go to share and invite" },
+};
+
 const PLEDGE_STATUS: Record<PledgeView["status"], string> = {
   waiting: "Waiting to arrive",
   partly_received: "Partly received",
@@ -68,6 +76,7 @@ export default async function DrivePage({
   const units = pluralize(unit).toLowerCase();
   const isKit = request.requestType === "kit";
   const isCoordinator = role === "coordinator";
+  const isGroupMember = role !== "organization";
   const active = commitment.status === "active";
   const canChange = active && ["published", "closed"].includes(request.status);
   const { stages } = progress;
@@ -152,10 +161,19 @@ export default async function DrivePage({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-8">
           {isCoordinator ? (
-            <Panel className="space-y-2 border-forest/40 bg-forest-tint">
+            <>
+          {isCoordinator ? (
+            <Panel tone="forest" className="space-y-2">
               <p className="text-sm font-semibold text-forest-dark">Next step</p>
               <h2 className="text-xl font-semibold">{drive.nextStep.title}</h2>
               {drive.nextStep.detail ? <p>{drive.nextStep.detail}</p> : null}
+              {NEXT_ANCHOR[drive.nextStep.action] ? (
+                <p>
+                  <a href={NEXT_ANCHOR[drive.nextStep.action]!.href} className="font-semibold">
+                    {NEXT_ANCHOR[drive.nextStep.action]!.label}
+                  </a>
+                </p>
+              ) : null}
             </Panel>
           ) : null}
 
@@ -177,43 +195,6 @@ export default async function DrivePage({
               <SuppliesTable components={progress.components} committed={commitment.quantity} unitName={unit} requestType={request.requestType} />
             </Panel>
           </Section>
-
-          {role !== "organization" && active ? (
-            <Section title="Pledge supplies" id="pledge" description="Tell your coordinator what you'll bring so the group doesn't collect too much of one thing.">
-              <Panel>
-                <PledgeForm
-                  commitmentId={commitment.id}
-                  components={progress.components.map((c) => ({ id: c.componentId, name: c.name, uncovered: c.uncovered, stillNeeded: c.stillNeeded }))}
-                />
-              </Panel>
-            </Section>
-          ) : null}
-
-          {role !== "organization" && drive.pledges.length > 0 ? (
-            <Section title={isCoordinator ? "Pledges" : "Your pledges"} id="pledges">
-              <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
-                {drive.pledges.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold">
-                        {countNoun(p.quantity, p.componentName)}
-                        {isCoordinator ? <span className="font-normal text-muted"> from {p.isMine ? "you" : p.contributorName}</span> : null}
-                      </p>
-                      <p className="text-sm text-muted">
-                        {PLEDGE_STATUS[p.status]}
-                        {p.received > 0 ? ` · ${formatCount(p.received)} received` : ""}
-                        {p.outstanding > 0 && p.received > 0 ? ` · ${formatCount(p.outstanding)} still to come` : ""}
-                        {p.note ? ` · “${p.note}”` : ""}
-                      </p>
-                    </div>
-                    {p.outstanding > 0 && (p.isMine || isCoordinator) && active ? (
-                      <ClosePledgeButton pledgeId={p.id} label={p.isMine ? "Withdraw pledge" : "Close unfulfilled pledge"} />
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          ) : null}
 
           {isCoordinator && active ? (
             <Section title="Record received supplies" id="record" description="Count only what has physically arrived. Check each item and record anything unusable separately.">
@@ -302,6 +283,44 @@ export default async function DrivePage({
             ) : null}
           </Section>
 
+          {isGroupMember && drive.pledges.length > 0 ? (
+            <Section title={isCoordinator ? "Pledges" : "Your pledges"} id="pledges">
+              <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+                {drive.pledges.map((p) => (
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">
+                        {countNoun(p.quantity, p.componentName)}
+                        {isCoordinator ? <span className="font-normal text-muted"> from {p.isMine ? "you" : p.contributorName}</span> : null}
+                      </p>
+                      <p className="text-sm text-muted">
+                        {PLEDGE_STATUS[p.status]}
+                        {p.received > 0 ? ` · ${formatCount(p.received)} received` : ""}
+                        {p.outstanding > 0 && p.received > 0 ? ` · ${formatCount(p.outstanding)} still to come` : ""}
+                        {p.note ? ` · “${p.note}”` : ""}
+                      </p>
+                    </div>
+                    {p.outstanding > 0 && (p.isMine || isCoordinator) && active ? (
+                      <ClosePledgeButton pledgeId={p.id} label={p.isMine ? "Withdraw pledge" : "Close unfulfilled pledge"} />
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
+
+          {isGroupMember && active ? (
+            <Section title="Pledge supplies" id="pledge" description="Tell your coordinator what you'll bring so the group doesn't collect too much of one thing.">
+              <Panel>
+                {isCoordinator ? <p className="mb-4 text-sm text-muted">Coordinators can pledge too. Most pledges come from members using the invitation link.</p> : null}
+                <PledgeForm
+                  commitmentId={commitment.id}
+                  components={progress.components.map((c) => ({ id: c.componentId, name: c.name, uncovered: c.uncovered, stillNeeded: c.stillNeeded }))}
+                />
+              </Panel>
+            </Section>
+          ) : null}
+
           {isCoordinator && drive.collections.length > 0 ? (
             <Section title="Received supplies log" id="log">
               <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
@@ -332,12 +351,110 @@ export default async function DrivePage({
           <Section title="Activity" id="activity">
             <ActivityList items={drive.activity} timezone={request.timezone} />
           </Section>
+            </>
+          ) : (
+            <>
+          <Section title={isKit ? "Kits" : "Items"} id="stages">
+            <Panel>
+              <StageSummary stages={stages} committed={commitment.quantity} requestType={request.requestType} unitName={unit} />
+            </Panel>
+          </Section>
+
+          <Section title="Supplies" id="supplies" description={drive.bottleneck.headline}>
+            <Panel className="space-y-2">
+              {drive.bottleneck.detail ? <p className="text-[0.95rem]">{drive.bottleneck.detail}</p> : null}
+              {isKit && progress.supportedByCollected > 0 ? (
+                <p className="text-sm text-muted">
+                  The usable supplies collected so far make {countNoun(progress.supportedByCollected, unit)} in total, counting{" "}
+                  {formatCount(stages.built)} already packed.
+                </p>
+              ) : null}
+              <SuppliesTable components={progress.components} committed={commitment.quantity} unitName={unit} requestType={request.requestType} />
+            </Panel>
+          </Section>
+
+          {isGroupMember && active ? (
+            <Section title="Pledge supplies" id="pledge" description="Tell your coordinator what you'll bring so the group doesn't collect too much of one thing.">
+              <Panel>
+                {isCoordinator ? <p className="mb-4 text-sm text-muted">Coordinators can pledge too. Most pledges come from members using the invitation link.</p> : null}
+                <PledgeForm
+                  commitmentId={commitment.id}
+                  components={progress.components.map((c) => ({ id: c.componentId, name: c.name, uncovered: c.uncovered, stillNeeded: c.stillNeeded }))}
+                />
+              </Panel>
+            </Section>
+          ) : null}
+
+          {isGroupMember && drive.pledges.length > 0 ? (
+            <Section title={isCoordinator ? "Pledges" : "Your pledges"} id="pledges">
+              <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+                {drive.pledges.map((p) => (
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">
+                        {countNoun(p.quantity, p.componentName)}
+                        {isCoordinator ? <span className="font-normal text-muted"> from {p.isMine ? "you" : p.contributorName}</span> : null}
+                      </p>
+                      <p className="text-sm text-muted">
+                        {PLEDGE_STATUS[p.status]}
+                        {p.received > 0 ? ` · ${formatCount(p.received)} received` : ""}
+                        {p.outstanding > 0 && p.received > 0 ? ` · ${formatCount(p.outstanding)} still to come` : ""}
+                        {p.note ? ` · “${p.note}”` : ""}
+                      </p>
+                    </div>
+                    {p.outstanding > 0 && (p.isMine || isCoordinator) && active ? (
+                      <ClosePledgeButton pledgeId={p.id} label={p.isMine ? "Withdraw pledge" : "Close unfulfilled pledge"} />
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
+
+          <Section title="Deliveries" id="deliveries">
+            {drive.deliveries.length === 0 ? (
+              <p className="text-muted">No deliveries reported yet.</p>
+            ) : (
+              <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+                {drive.deliveries.map((d) => (
+                  <li key={d.id} className="space-y-1 px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold">{countNoun(d.quantity, unit)} reported {formatTimestamp(d.submittedAt, request.timezone)}</p>
+                      {d.status === "submitted" ? (
+                        <Pill tone="info">Awaiting {org.name}'s review</Pill>
+                      ) : d.status === "cancelled" ? (
+                        <Pill>Taken back</Pill>
+                      ) : d.notAccepted ? (
+                        <Pill tone="amber">
+                          {formatCount(d.accepted ?? 0)} accepted, {formatCount(d.notAccepted)} not accepted
+                        </Pill>
+                      ) : (
+                        <Pill tone="forest">All {formatCount(d.accepted ?? 0)} accepted</Pill>
+                      )}
+                    </div>
+                    {d.note ? <p className="text-sm text-muted">Your note: “{d.note}”</p> : null}
+                    {d.reviewNote ? <p className="text-sm">{org.name}: “{d.reviewNote}”</p> : null}
+                    {isCoordinator && d.status === "submitted" ? <CancelDeliveryButton deliveryId={d.id} /> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {pending.length > 0 ? (
+              <p className="text-sm text-muted">Reported deliveries stay reserved for your group until {org.name} reviews them.</p>
+            ) : null}
+          </Section>
+
+          <Section title="Activity" id="activity">
+            <ActivityList items={drive.activity} timezone={request.timezone} />
+          </Section>
+            </>
+          )}
         </div>
 
         <aside className="space-y-4" aria-label="Drive details">
           {isCoordinator && active ? (
             <Panel className="space-y-4">
-              <h2 className="text-lg font-semibold">Share and invite</h2>
+              <h2 id="share" className="text-lg font-semibold">Share and invite</h2>
               <div className="space-y-1">
                 <h3 className="font-semibold">Invite members</h3>
                 <p className="text-sm text-muted">People who open this link and sign in join {group.name} and can pledge.</p>

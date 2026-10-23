@@ -14,7 +14,7 @@ export function DemoBanner({ persona }: { persona: Persona }) {
           </span>
         </p>
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-          <form action={switchPersonaAction} className="flex items-center gap-2">
+          <form action={switchPersonaAction} className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
             <label htmlFor="demo-persona" className="text-sm font-semibold whitespace-nowrap">
               Acting as
             </label>
@@ -22,7 +22,7 @@ export function DemoBanner({ persona }: { persona: Persona }) {
               id="demo-persona"
               name="persona"
               defaultValue={persona.key}
-              className="min-h-10 max-w-[15rem] rounded-md border border-line-strong bg-surface px-2 text-sm"
+              className="min-h-10 min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-2 text-sm sm:w-60 sm:flex-none"
             >
               {PERSONAS.map((p) => (
                 <option key={p.key} value={p.key}>
