@@ -9,6 +9,8 @@ const ORG = "00000000-0000-4000-8000-00000000b001";
 const REQUEST = "00000000-0000-4000-8000-00000000c001";
 
 async function scan(page: Page, label: string) {
+  // Next.js streams the <title> after the first bytes of the page.
+  await expect(page).toHaveTitle(/\S/);
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
   const summary = results.violations.map((v) => `${label}: ${v.id} (${v.impact}) ${v.nodes.length}x – ${v.nodes[0]?.target.join(" ")}`);
   expect(summary, summary.join("\n")).toEqual([]);
