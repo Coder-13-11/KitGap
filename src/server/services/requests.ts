@@ -434,3 +434,30 @@ export function requestToInput(
     fundraisingUrl: request.fundraisingUrl ?? "",
   };
 }
+
+// A short public note from the organization ("We've received 40 kits so far,
+// thank you!"). Shown on the request page; never changes quantities.
+export async function postRequestUpdate(
+  ctx: ServiceContext,
+  input: { requestId: string; body: string; idempotencyKey?: string },
+) {
+  return mutate(ctx, { action: "request.post_update", idempotencyKey: input.idempotencyKey }, async (tx, userId) => {
+    const state = await loadRequestState(tx, input.requestId, { lock: false });
+    await requireRole(tx, state.request.orgId, userId, "member", "Only the organization can post updates.");
+    if (!["published", "closed", "cancelled"].includes(state.request.status)) {
+      throw new DomainError("conflict", "Updates can be posted once the request is published.");
+    }
+    const body = (input.body ?? "").trim();
+    if (body.length < 5) fieldError({ body: "Write an update of at least 5 characters" });
+    if (body.length > 1000) fieldError({ body: "Keep the update to 1,000 characters or fewer" });
+    await logActivity(tx, {
+      kind: "request.update_posted",
+      audience: "both",
+      actorId: userId,
+      requestId: input.requestId,
+      workspaceId: state.request.orgId,
+      data: { body },
+    });
+    return { ok: true };
+  });
+}

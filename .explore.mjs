@@ -1,0 +1,14 @@
+import { chromium } from "@playwright/test";
+const SP = process.argv[2];
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+page.on("console", (m) => { if (m.type() === "error") console.log("console error:", m.text()); });
+await page.goto("http://localhost:3000/demo");
+await page.getByRole("button", { name: "Start the demo" }).click();
+await page.waitForURL(/\/demo\/requests\//, { timeout: 30000 });
+console.log("url", page.url());
+await page.screenshot({ path: `${SP}/shots/demo-request-1440.png`, fullPage: true });
+await page.setViewportSize({ width: 390, height: 844 });
+await page.reload();
+await page.screenshot({ path: `${SP}/shots/demo-request-390.png`, fullPage: true });
+await browser.close();

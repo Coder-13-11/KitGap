@@ -47,6 +47,7 @@ export interface OrgRequestItem {
   totals: RequestTotals | null;
   unitName: string;
   neededBy: string | null;
+  timezone: string;
   deadline: DeadlineInfo | null;
   statusNote: string;
   updatedAt: Date;
@@ -120,6 +121,7 @@ export async function getOrgDashboard(ctx: ServiceContext, orgId: string): Promi
         totals,
         unitName: r.unitName,
         neededBy: r.neededBy,
+        timezone: r.timezone,
         deadline: r.neededBy ? describeDeadline(r.neededBy, r.timezone, at) : null,
         statusNote: r.statusNote,
         updatedAt: r.updatedAt,
@@ -214,7 +216,7 @@ export interface DeliveryForReview {
   orgId: string;
   orgName: string;
   groupName: string;
-  request: Pick<RequestRecord, "id" | "title" | "requestType" | "unitName" | "conditionNotes" | "substitutions">;
+  request: Pick<RequestRecord, "id" | "title" | "requestType" | "unitName" | "conditionNotes" | "substitutions" | "timezone">;
   supply: SupplyLine[]; // recipe for one unit, to check against
   drive: { commitmentId: string; quantity: number; accepted: number; pendingReview: number; status: CommitmentRecord["status"] };
   submittedByName: string;
@@ -259,6 +261,7 @@ export async function getDeliveryForReview(
         unitName: request.unitName,
         conditionNotes: request.conditionNotes,
         substitutions: request.substitutions,
+        timezone: request.timezone,
       },
       supply: supplyList(components, 1),
       drive: {
@@ -349,6 +352,102 @@ export async function getMyWorkspaces(ctx: ServiceContext) {
       groups: pick("group"),
       isReviewer: await isPlatformAdmin(tx, ctx.userId),
       displayName: (profile?.displayName as string | undefined) ?? null,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// One request, as its organization manages it.
+
+export interface OrgRequestView {
+  request: RequestRecord;
+  components: ComponentRecord[];
+  orgName: string;
+  role: "admin" | "member";
+  totals: RequestTotals | null;
+  phase: RequestPhase;
+  deadline: DeadlineInfo | null;
+  hasAnyDrive: boolean;
+  drives: OrgDriveItem[];
+  pendingDeliveries: PendingDeliveryItem[];
+  activity: ActivityItem[];
+}
+
+export async function getOrgRequest(ctx: ServiceContext, orgId: string, requestId: string): Promise<OrgRequestView | "not_allowed" | null> {
+  if (!isUuid(orgId) || !isUuid(requestId)) return null;
+  const dashboard = await getOrgDashboard(ctx, orgId);
+  if (!dashboard || dashboard === "not_allowed") return dashboard;
+  const at = now(ctx);
+  return read(ctx, async (tx) => {
+    const [request] = (await tx`select * from requests where id = ${requestId} and org_id = ${orgId}`) as unknown as RequestRecord[];
+    if (!request) return null;
+    const components = (await tx`select * from request_components where request_id = ${requestId} order by position`) as unknown as ComponentRecord[];
+    const item = dashboard.requests.find((r) => r.id === requestId)!;
+    const [{ count }] = await tx`select count(*)::int as count from commitments where request_id = ${requestId}`;
+    const activity = await activityFor(tx, { requestId, audiences: ["org", "both"], showNames: true, viewerId: ctx.userId, limit: 30 });
+    return {
+      request,
+      components,
+      orgName: dashboard.org.name,
+      role: dashboard.role,
+      totals: item.totals,
+      phase: item.phase,
+      deadline: request.neededBy ? describeDeadline(request.neededBy, request.timezone, at) : null,
+      hasAnyDrive: Number(count) > 0,
+      drives: dashboard.drives.filter((d) => d.requestId === requestId),
+      pendingDeliveries: dashboard.pendingDeliveries.filter((d) => d.requestId === requestId),
+      activity,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+
+export interface GroupView {
+  id: string;
+  name: string;
+  city: string;
+  about: string;
+  role: "admin" | "member";
+  inviteToken: string | null;
+  members: { userId: string; name: string; role: "admin" | "member" }[];
+}
+
+export async function getGroup(ctx: ServiceContext, groupId: string): Promise<GroupView | "not_allowed" | null> {
+  if (!isUuid(groupId)) return null;
+  return read(ctx, async (tx) => {
+    const [group] = await tx`select * from workspaces where id = ${groupId} and kind = 'group'`;
+    if (!group) return null;
+    const role = await roleIn(tx, groupId, ctx.userId);
+    if (!role) return "not_allowed";
+    const members = await tx`
+      select m.user_id, p.display_name as name, m.role from workspace_members m join profiles p on p.id = m.user_id
+      where m.workspace_id = ${groupId} order by m.role, p.display_name
+    `;
+    return {
+      id: group.id,
+      name: group.name,
+      city: group.city,
+      about: group.about,
+      role,
+      inviteToken: role === "admin" ? group.inviteToken : null,
+      members: members.map((m) => ({ userId: m.userId as string, name: m.name as string, role: m.role as "admin" | "member" })),
+    };
+  });
+}
+
+export async function getInvitation(ctx: ServiceContext, token: string) {
+  const clean = token.slice(0, 100);
+  return read(ctx, async (tx) => {
+    const [workspace] = await tx`select id, kind, name, city from workspaces where invite_token = ${clean}`;
+    if (!workspace) return null;
+    const role = await roleIn(tx, workspace.id as string, ctx.userId);
+    return {
+      workspaceId: workspace.id as string,
+      kind: workspace.kind as "organization" | "group",
+      name: workspace.name as string,
+      city: workspace.city as string,
+      alreadyMember: Boolean(role),
     };
   });
 }

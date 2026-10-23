@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  KitGap design tokens. Contrast ratios (WCAG 2.2) were checked by hand:
+    ink #1c2921 on paper #f8f7f3 ............ 14.1:1
+    muted #56605a on paper / white / sunken . 6.1 / 6.5 / 5.7:1
+    forest #234d3b on white (and white on it)  9.6:1
+    clay #9a4426 on paper / white / tint .... 6.1 / 6.5 / 5.6:1
+    field border #858c86 on white / paper ... 3.5 / 3.2:1 (non-text UI)
+    focus #1e6b9a on paper / white .......... 5.4 / 5.8:1
+    status text on its tint (amber, danger, info) >= 6.3:1
+  The original proposed clay (#a64b2a) was darkened slightly for small text.
+*/
+@theme {
+  --color-paper: #f8f7f3;
+  --color-surface: #ffffff;
+  --color-sunken: #f1efe8;
+  --color-ink: #1c2921;
+  --color-muted: #56605a;
+  --color-line: #e2dfd6;
+  --color-line-strong: #858c86;
+  --color-forest: #234d3b;
+  --color-forest-dark: #183829;
+  --color-forest-tint: #e7efe9;
+  --color-clay: #9a4426;
+  --color-clay-tint: #f7ebe4;
+  --color-amber: #7a5000;
+  --color-amber-tint: #fbf1d9;
+  --color-danger: #a3261b;
+  --color-danger-tint: #fbeae7;
+  --color-info: #1e5a85;
+  --color-info-tint: #e6eff6;
+  --color-focus: #1e6b9a;
+
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, "Times New Roman", serif;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--color-forest);
+    text-underline-offset: 0.18em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: #d6e6db;
+  }
+
+  /* Number inputs: no spinners; people type quantities. */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  [hidden] {
+    display: none !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* State changes fade in briefly; nothing moves for people who prefer less motion. */
+  .appear {
+    animation: kg-appear 180ms ease-out;
+  }
+}
+
+@keyframes kg-appear {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+  .no-print {
+    display: none !important;
+  }
 }
