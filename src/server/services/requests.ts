@@ -152,6 +152,13 @@ export async function approveRequest(ctx: ServiceContext, input: { requestId: st
     if (state.request.status !== "in_review") {
       throw new DomainError("conflict", "This request isn't waiting for review. Reload to see its current state.");
     }
+    const [org] = await tx`select contact_confirmed_at from workspaces where id = ${state.request.orgId}`;
+    if (!org?.contactConfirmedAt) {
+      throw new DomainError(
+        "conflict",
+        "Confirm the organization's contact before publishing its request. Reach the contact person, then mark the contact confirmed.",
+      );
+    }
     // Re-check the full request at approval time (dates may have passed).
     const { errors } = validateRequestInput(requestToInput(state.request, state.components), "submit", now(ctx));
     if (Object.keys(errors).length > 0) {

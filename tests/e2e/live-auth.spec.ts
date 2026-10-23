@@ -79,6 +79,8 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   await makeReviewer(reviewerEmail);
   await reviewer.reload();
   const card = reviewer.locator("li", { hasText: title });
+  await expect(card.getByText("Publishing is available once the contact is confirmed.")).toBeVisible();
+  await card.getByRole("button", { name: "Mark contact confirmed" }).click();
   await card.getByRole("button", { name: "Approve and publish" }).click();
   await expect(reviewer.locator("li", { hasText: title })).toHaveCount(0);
 

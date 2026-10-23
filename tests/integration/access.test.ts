@@ -60,6 +60,9 @@ describe("publishing", () => {
     expect(queue !== "not_allowed" && queue.requests.some((r) => r.id === requestId)).toBe(true);
     expect(await getReviewQueue(h.as(manager))).toBe("not_allowed");
 
+    // A reviewer must confirm the organization's contact before publishing.
+    await expect(approveRequest(h.as(reviewer), { requestId })).rejects.toThrow(/Confirm the organization's contact/);
+    await setContactConfirmed(h.as(reviewer), { workspaceId: orgId, confirmed: true });
     await approveRequest(h.as(reviewer), { requestId });
     expect(await isListed()).toBe(true);
   });

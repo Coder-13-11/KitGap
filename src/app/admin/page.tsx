@@ -53,11 +53,21 @@ export default async function AdminPage() {
                         {r.orgContact.email ? ` · ${r.orgContact.email}` : ""}
                         {r.orgContact.phone ? ` · ${r.orgContact.phone}` : ""}
                       </p>
-                      <p className="mt-1">{r.orgContact.confirmedAt ? <Pill tone="forest">Contact confirmed</Pill> : <Pill tone="amber">Contact not confirmed yet</Pill>}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {r.orgContact.confirmedAt ? <Pill tone="forest">Contact confirmed</Pill> : <Pill tone="amber">Contact not confirmed yet</Pill>}
+                        <ContactConfirmButton workspaceId={r.orgId} confirmed={Boolean(r.orgContact.confirmedAt)} />
+                      </div>
+                      {!r.orgContact.confirmedAt ? (
+                        <p className="mt-2">Reach this person by phone or email and check the request with them before publishing.</p>
+                      ) : null}
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <ApproveButton requestId={r.id} />
+                    {r.orgContact.confirmedAt ? (
+                      <ApproveButton requestId={r.id} />
+                    ) : (
+                      <p className="text-sm text-muted">Publishing is available once the contact is confirmed.</p>
+                    )}
                     <ReturnForm requestId={r.id} />
                   </div>
                 </Panel>

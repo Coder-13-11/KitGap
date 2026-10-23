@@ -6,7 +6,7 @@ import { createSql, type Sql } from "@/server/db/client";
 import { dropSchema, migrateSchema } from "@/server/db/migrations";
 import type { ServiceContext } from "@/server/services/core";
 import { createRequestDraft, submitRequestForReview, approveRequest } from "@/server/services/requests";
-import { createWorkspace, joinWorkspace } from "@/server/services/workspaces";
+import { createWorkspace, joinWorkspace, setContactConfirmed } from "@/server/services/workspaces";
 import { EMPTY_REQUEST_INPUT, type RequestInput } from "@/domain/request-input";
 import { addDays, todayIn } from "@/domain/dates";
 
@@ -101,6 +101,7 @@ export async function standardScenario(h: Harness, input: RequestInput = kitRequ
 
   const { requestId } = await createRequestDraft(h.as(orgManager), { orgId, fields: input });
   await submitRequestForReview(h.as(orgManager), { requestId, fields: input });
+  await setContactConfirmed(h.as(reviewer), { workspaceId: orgId, confirmed: true });
   await approveRequest(h.as(reviewer), { requestId });
 
   return { reviewer, orgManager, orgStaff, coordA, coordB, contributor, outsider, orgId, groupA, groupB, requestId, token };
