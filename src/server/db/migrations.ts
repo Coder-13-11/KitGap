@@ -1,12 +1,11 @@
-// Applies db/migrations/*.sql, in name order, to one schema. The same files
+// Applies the migrations in db/migrations, in name order, to one schema. The same files
 // build the real "kitgap" schema and every demo sandbox, so a sandbox always
 // has exactly the real tables, constraints and indexes.
 
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
 import type { Sql } from "./client";
 import { isAppSchema } from "./client";
+import { MIGRATION_FILES } from "./migrations-bundle";
 
 export interface Migration {
   name: string;
@@ -14,19 +13,14 @@ export interface Migration {
   checksum: string;
 }
 
-let cached: Migration[] | null = null;
-
-export function loadMigrations(directory = path.join(process.cwd(), "db", "migrations")): Migration[] {
-  // Cached only in production, where a new migration always comes with a restart.
-  if (cached && process.env.NODE_ENV === "production") return cached;
-  cached = readdirSync(directory)
-    .filter((file) => file.endsWith(".sql"))
-    .sort()
-    .map((name) => {
-      const sql = readFileSync(path.join(directory, name), "utf8");
-      return { name, sql, checksum: createHash("sha256").update(sql).digest("hex") };
-    });
-  return cached;
+// The SQL text comes from db/migrations via the generated bundle module, so
+// it is always deployed with the server code.
+export function loadMigrations(): Migration[] {
+  return MIGRATION_FILES.map(({ name, sql }) => ({
+    name,
+    sql,
+    checksum: createHash("sha256").update(sql).digest("hex"),
+  }));
 }
 
 export async function ensureMetaSchema(sql: Sql): Promise<void> {

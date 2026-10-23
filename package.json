@@ -11,12 +11,16 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:e2e": "playwright test",
-    "db:migrate": "tsx scripts/migrate.ts",
+    "db:migrate": "npm run bundle-migrations && tsx scripts/migrate.ts",
     "db:start": "supabase start -x studio,realtime,storage-api,imgproxy,edge-runtime,logflare,vector,postgres-meta,supavisor",
     "db:stop": "supabase stop",
     "db:make-reviewer": "tsx scripts/make-reviewer.ts",
     "demo:cleanup": "tsx scripts/demo-cleanup.ts",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "bundle-migrations": "tsx scripts/bundle-migrations.ts",
+    "predev": "npm run bundle-migrations",
+    "prebuild": "npm run bundle-migrations",
+    "pretest": "npm run bundle-migrations"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

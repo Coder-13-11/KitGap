@@ -5,10 +5,6 @@ const nextConfig: NextConfig = {
   // request instead of being prerendered and cached (Cache Components off).
   cacheComponents: false,
   poweredByHeader: false,
-  // The demo sandbox builds its tables from these SQL files at runtime.
-  outputFileTracingIncludes: {
-    "/**": ["./db/migrations/*.sql"],
-  },
   turbopack: {
     rules: {
       "*.css": {
