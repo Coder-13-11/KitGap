@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { StartItem } from "@/domain/onboarding";
 import { AppLink } from "../ui/base";
 import { cn } from "../ui/cn";
@@ -19,6 +19,11 @@ function wasHiddenHere(id: string) {
   return window.localStorage.getItem(`kg-start-hidden:${id}`) === "1";
 }
 
+function subscribeToStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
 // A short first-run list. Dismissing it is remembered in this browser;
 // it also stops showing once every item is done.
 export function GettingStarted({
@@ -32,14 +37,20 @@ export function GettingStarted({
   items: StartItem[];
   defaultHidden?: boolean;
 }) {
-  const [hidden, setHidden] = useState(defaultHidden);
+  const [dismissed, setDismissed] = useState(false);
+  // Read on the client only; the server can't see localStorage, so it renders
+  // the list unless the cookie already told it to hide.
+  const hiddenHere = useSyncExternalStore(
+    subscribeToStorage,
+    () => wasHiddenHere(id),
+    () => false,
+  );
+  const hidden = defaultHidden || dismissed || hiddenHere;
 
-  useLayoutEffect(() => {
-    if (!defaultHidden && wasHiddenHere(id)) {
-      rememberHidden(id);
-      setHidden(true);
-    }
-  }, [defaultHidden, id]);
+  useEffect(() => {
+    // Copy a hide from localStorage into the cookie so the server skips it next time.
+    if (!defaultHidden && hiddenHere) rememberHidden(id);
+  }, [defaultHidden, hiddenHere, id]);
 
   const done = items.filter((i) => i.done).length;
   if (hidden || done === items.length) return null;
@@ -50,7 +61,7 @@ export function GettingStarted({
         type="button"
         onClick={() => {
           rememberHidden(id);
-          setHidden(true);
+          setDismissed(true);
         }}
         className="absolute top-3 right-3 grid size-9 place-items-center rounded-md text-muted hover:bg-white/70 hover:text-ink"
       >

@@ -1,9 +1,9 @@
-import { Backpack, BookOpen, Pencil } from "lucide-react";
+import { Bath, Droplet, Sparkles } from "lucide-react";
 
 const ITEMS = [
-  { name: "Backpacks", count: 20, Icon: Backpack },
-  { name: "Notebooks", count: 40, Icon: BookOpen },
-  { name: "Pencil packs", count: 20, Icon: Pencil },
+  { name: "Toothbrushes", count: 20, Icon: Sparkles },
+  { name: "Tubes of toothpaste", count: 20, Icon: Droplet },
+  { name: "Bars of soap", count: 40, Icon: Bath },
 ];
 
 // A sample request shown only when nothing live is listed. It is not a link.

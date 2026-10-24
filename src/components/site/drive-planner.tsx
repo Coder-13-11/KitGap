@@ -13,32 +13,45 @@ const RECIPE = [
 
 const MIN = 1;
 const MAX = 200;
+const ORG = "Riverbend Family Center";
+
+// Who acts at each step: the club packs and hands over, then only the
+// organization can confirm what arrived.
+type Phase = "packing" | "handed_over" | "confirmed";
+
+const HATCH = "repeating-linear-gradient(135deg, var(--color-forest) 0 4px, var(--color-forest-500) 4px 8px)";
 
 /**
- * A labelled example of one drive. Nothing is saved. "Ready" is packed and
- * not yet received. The hole fills only when the organization confirms.
+ * A labelled example of one drive. Nothing is saved. Packed is not received,
+ * handed over is not received; the hole fills only when the organization
+ * confirms.
  */
 export function DrivePlanner() {
   const [kits, setKits] = useState(20);
   const [ready, setReady] = useState(12);
-  const [confirmed, setConfirmed] = useState(false);
+  const [phase, setPhase] = useState<Phase>("packing");
 
   const setGoal = (next: number) => {
     const clamped = Math.min(MAX, Math.max(MIN, Math.round(next) || MIN));
     setKits(clamped);
     setReady((current) => Math.min(current, clamped));
-    setConfirmed(false);
-  };
-
-  const setReadyCount = (next: number) => {
-    setReady(Math.min(kits, Math.max(0, next)));
-    setConfirmed(false);
+    setPhase("packing");
   };
 
   const fill = kits > 0 ? (ready / kits) * 100 : 0;
-  const status = confirmed
-    ? `The organization confirmed ${ready} of ${kits} kits. ${kits - ready} still to pack.`
-    : `${ready} of ${kits} kits ready. Not yet confirmed by the organization.`;
+  const barColor = phase === "confirmed" ? "var(--color-forest)" : phase === "handed_over" ? HATCH : "var(--color-forest-500)";
+  const caption =
+    phase === "confirmed"
+      ? `Confirmed by ${ORG}`
+      : phase === "handed_over"
+        ? `Handed over. Waiting for ${ORG} to confirm.`
+        : "Packed by the club. Not yet received.";
+  const status =
+    phase === "confirmed"
+      ? `${ORG} confirmed ${ready} of ${kits} kits. ${kits - ready} still to pack.`
+      : phase === "handed_over"
+        ? `${ready} of ${kits} kits handed over, waiting for ${ORG} to confirm.`
+        : `${ready} of ${kits} kits packed. Not yet received by ${ORG}.`;
 
   return (
     <section
@@ -48,9 +61,9 @@ export function DrivePlanner() {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 id="planner-title" className="font-serif text-2xl font-semibold tracking-tight">
-            Lincoln High Key Club
+            Lakeside High Service Club
           </h2>
-          <p className="mt-1 text-muted">An example drive. Nothing here is saved.</p>
+          <p className="mt-1 text-muted">An example drive for {ORG}. Nothing here is saved.</p>
         </div>
         <span className="shrink-0 rounded-[2px_8px_8px_2px] border border-clay/30 bg-clay-tint px-2.5 py-1 text-sm font-semibold text-clay">
           Example
@@ -59,7 +72,7 @@ export function DrivePlanner() {
 
       <div className="mt-5">
         <label htmlFor="planner-kits" className="text-sm font-semibold">
-          How many kits will the group make?
+          How many kits will the club make?
         </label>
         <div className="mt-2 flex items-center rounded-md border border-line-strong">
           <button
@@ -97,20 +110,17 @@ export function DrivePlanner() {
         <p className="font-serif text-4xl leading-none font-semibold tracking-tight">
           <span className="tabular">{ready} of {kits}</span>
         </p>
-        <p className="mt-1 font-semibold">kits ready</p>
+        <p className="mt-1 font-semibold">{phase === "confirmed" ? "kits confirmed received" : "kits packed"}</p>
         <div aria-hidden className="mt-3 flex h-11 overflow-hidden rounded-[2px_14px_14px_2px] border border-line-strong bg-surface">
           <span className="grid w-11 shrink-0 place-items-center border-r border-line-strong">
-            <span className={cn("size-3.5 rounded-full", confirmed ? "bg-forest" : "bg-paper ring-2 ring-line-strong")} />
+            <span className={cn("size-3.5 rounded-full", phase === "confirmed" ? "bg-forest" : "bg-paper ring-2 ring-line-strong")} />
           </span>
-          <span
-            className="min-w-0 flex-1"
-            style={{
-              background: `linear-gradient(90deg, ${confirmed ? "var(--color-forest)" : "var(--color-forest-500)"} ${fill}%, var(--color-sunken) ${fill}%)`,
-            }}
-          />
+          <span className="min-w-0 flex-1 bg-sunken">
+            <span className="block h-full transition-[width] duration-300" style={{ width: `${fill}%`, background: barColor }} />
+          </span>
         </div>
-        <p className={cn("mt-3 text-sm font-semibold", confirmed ? "stamp" : "text-ink")} aria-live="polite">
-          {confirmed ? "Confirmed by the organization" : "Not yet confirmed by the organization"}
+        <p className={cn("mt-3 text-sm font-semibold", phase === "confirmed" ? "stamp" : "text-ink")} aria-live="polite">
+          {caption}
         </p>
         <p className="sr-only">{status}</p>
       </div>
@@ -132,21 +142,41 @@ export function DrivePlanner() {
         <p className="mt-2 text-sm text-muted">Bring only what is on this list.</p>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {confirmed ? (
-          <button type="button" onClick={() => { setReady(12); setKits(20); setConfirmed(false); }} className={buttonClass("secondary")}>
+      <div className="mt-5 border-t border-line pt-4">
+        {phase === "packing" ? (
+          <>
+            <p className="text-sm font-semibold text-muted">The club&rsquo;s turn</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setPhase("handed_over")} disabled={ready < 1} className={buttonClass("primary")}>
+                Hand over {ready} {ready === 1 ? "kit" : "kits"}
+              </button>
+              <button type="button" onClick={() => setReady(Math.min(kits, ready + 1))} disabled={ready >= kits} className={buttonClass("quiet")}>
+                Pack one more
+              </button>
+            </div>
+          </>
+        ) : phase === "handed_over" ? (
+          <>
+            <p className="text-sm font-semibold text-muted">{ORG}&rsquo;s turn. Only they can confirm.</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setPhase("confirmed")} className={buttonClass("primary")}>
+                Confirm {ready} received
+              </button>
+            </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setReady(12);
+              setKits(20);
+              setPhase("packing");
+            }}
+            className={buttonClass("secondary")}
+          >
             <RotateCcw className="size-4" aria-hidden="true" />
             Start the example over
           </button>
-        ) : (
-          <>
-            <button type="button" onClick={() => setConfirmed(true)} disabled={ready < 1} className={buttonClass("primary")}>
-              Confirm these {ready}
-            </button>
-            <button type="button" onClick={() => setReadyCount(ready + 1)} disabled={ready >= kits} className={buttonClass("quiet")}>
-              Pack one more
-            </button>
-          </>
         )}
       </div>
     </section>

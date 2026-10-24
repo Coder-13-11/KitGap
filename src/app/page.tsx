@@ -52,6 +52,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 An organization posts the list. A club takes a share, packs it, and hands it over. The number on the tag moves
                 only when the organization confirms what arrived.
               </p>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <AppLink href="/demo" className={buttonClass("primary")}>
+                  Try the demo
+                </AppLink>
+                <AppLink href="/requests" className={buttonClass("secondary")}>
+                  Explore requests
+                </AppLink>
+              </div>
+              <p className="mt-3 text-sm text-muted">The demo uses fictional sample people. Nothing in it is real.</p>
             </div>
             <DrivePlanner />
           </div>
