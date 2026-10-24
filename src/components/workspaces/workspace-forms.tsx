@@ -18,16 +18,20 @@ export function WorkspaceForm({
   kind,
   workspaceId,
   values,
+  returnTo,
+  onboarding = false,
 }: {
   kind: "organization" | "group";
   workspaceId?: string;
-  values?: WorkspaceValues;
+  values?: Partial<WorkspaceValues>;
+  returnTo?: string;
+  onboarding?: boolean;
 }) {
   const isOrg = kind === "organization";
   return (
     <ActionForm
       action={workspaceId ? updateWorkspaceAction : createWorkspaceAction}
-      hidden={workspaceId ? { workspaceId } : { kind }}
+      hidden={workspaceId ? { workspaceId } : { kind, ...(returnTo ? { next: returnTo } : {}) }}
       resetOnSuccess={false}
       success={
         workspaceId
@@ -60,16 +64,29 @@ export function WorkspaceForm({
             maxLength={120}
             className="max-w-md"
           />
-          <TextArea
-            id={f("about")}
-            name="about"
-            label={isOrg ? "About your organization" : "About your group"}
-            optional
-            defaultValue={values?.about}
-            error={errors.about}
-            rows={3}
-            maxLength={1000}
-          />
+          {onboarding && !isOrg ? (
+            <TextField
+              id={f("about")}
+              name="about"
+              label="School or community"
+              optional
+              hint="For example “Lakeside High School” or “St. Mark's youth group”."
+              defaultValue={values?.about}
+              error={errors.about}
+              maxLength={200}
+            />
+          ) : onboarding ? null : (
+            <TextArea
+              id={f("about")}
+              name="about"
+              label={isOrg ? "About your organization" : "About your group"}
+              optional
+              defaultValue={values?.about}
+              error={errors.about}
+              rows={3}
+              maxLength={1000}
+            />
+          )}
           {isOrg ? (
             <fieldset className="space-y-4 rounded-md border border-line bg-paper p-4">
               <legend className="px-1 font-semibold">Contact for KitGap reviewers (private)</legend>

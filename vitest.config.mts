@@ -9,7 +9,9 @@ export default defineConfig({
     setupFiles: ["tests/setup-env.ts"],
     // Integration tests share one database; run files one at a time.
     fileParallelism: false,
-    testTimeout: 30_000,
+    // The longest scenarios make dozens of round trips; against a hosted
+    // database that can take over 30 seconds.
+    testTimeout: 120_000,
     hookTimeout: 60_000,
   },
 });

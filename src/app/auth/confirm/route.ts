@@ -5,7 +5,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
-import { safeNext } from "@/lib/safe-next";
+import { INTENT_COOKIE, safeNext, welcomeIntent } from "@/lib/safe-next";
 import { createSupabaseServerClient } from "@/server/next/supabase";
 
 const TYPES: EmailOtpType[] = ["signup", "email", "recovery", "invite", "magiclink", "email_change"];
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const type = params.get("type") as EmailOtpType | null;
   const code = params.get("code");
   const cookieStore = await cookies();
-  const next = safeNext(params.get("next") ?? cookieStore.get("kg_next")?.value ?? null, "/requests");
+  const next = safeNext(params.get("next") ?? cookieStore.get("kg_next")?.value ?? null, "/home");
   const supabase = await createSupabaseServerClient();
 
   let ok = false;
@@ -29,7 +29,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (!ok) redirect("/sign-in?error=link");
+  const intent = welcomeIntent(cookieStore.get(INTENT_COOKIE)?.value);
   cookieStore.delete("kg_next");
+  cookieStore.delete(INTENT_COOKIE);
   if (type === "recovery" || next === "/reset-password") redirect("/reset-password");
-  redirect(`/welcome?next=${encodeURIComponent(next)}`);
+  redirect(`/welcome?next=${encodeURIComponent(next)}${intent ? `&intent=${intent}` : ""}`);
 }

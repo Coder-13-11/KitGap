@@ -19,7 +19,7 @@ export function PhaseBadge({ phase, className }: { phase: RequestPhase; classNam
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-[2px_8px_8px_2px] border px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap",
         tone,
         className,
       )}
@@ -40,7 +40,7 @@ export function Pill({ children, tone = "neutral" }: { children: React.ReactNode
     clay: "bg-clay-tint text-clay border-clay/30",
   };
   return (
-    <span className={cn("inline-flex max-w-full items-center gap-1 rounded-full border px-2.5 py-0.5 text-sm font-semibold", tones[tone])}>
+    <span className={cn("inline-flex max-w-full items-center gap-1 rounded-[2px_8px_8px_2px] border px-2.5 py-0.5 text-sm font-semibold", tones[tone])}>
       {children}
     </span>
   );

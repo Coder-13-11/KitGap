@@ -1,4 +1,4 @@
-import { BadgeCheck, Plus, Settings } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Inbox, PackageCheck, Plus, Settings, Undo2 } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { ActivityList } from "@/components/site/activity-list";
@@ -6,10 +6,12 @@ import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, EmptyState, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
+import { RequestProgress } from "@/components/ui/progress";
 import { PhaseBadge, Pill } from "@/components/ui/status";
 import { formatCalendarDate, formatTimestamp } from "@/domain/dates";
 import { countNoun, formatCount } from "@/domain/text";
 import { getOrgDashboard } from "@/server/queries/organization";
+import { getConfirmedReceipts } from "@/server/queries/records";
 import { getAppContext } from "@/server/next/context";
 
 export const metadata: Metadata = { title: "My organization" };
@@ -36,11 +38,19 @@ export default async function OrganizationPage({
     );
   }
   const { org, pendingDeliveries, requests, drives } = data;
+  const receipts = await getConfirmedReceipts(ctx, id);
+  const receiptList = receipts && receipts !== "not_allowed" ? receipts : [];
   // Organizations post in one timezone; show times in the one their requests use.
   const timezone = requests[0]?.timezone ?? "America/New_York";
   const unresolved = requests.filter((r) => ["open", "fully_committed", "past_due", "closed"].includes(r.phase));
   const drafts = requests.filter((r) => ["draft", "returned", "in_review"].includes(r.phase));
+  const returned = drafts.filter((r) => r.phase === "returned");
   const finished = requests.filter((r) => ["fulfilled", "cancelled"].includes(r.phase));
+  const inboxCount = pendingDeliveries.length + returned.length;
+  const receiptUnits = new Set(receiptList.map((r) => r.unitName.toLowerCase()));
+  const confirmedTotal =
+    receiptUnits.size === 1 ? countNoun(receiptList.reduce((sum, r) => sum + r.accepted, 0), receiptList[0].unitName) : null;
+  const activeDrives = drives.filter((d) => d.status === "active").length;
 
   return (
     <Container className="space-y-8">
@@ -83,34 +93,76 @@ export default async function OrganizationPage({
           <ButtonLink href={`/organization/${org.id}/requests/new`}>
             <Plus aria-hidden className="size-4" /> New request
           </ButtonLink>
+          <ButtonLink href={`/record/organization/${org.id}`} variant="secondary">
+            Confirmed record
+          </ButtonLink>
           <ButtonLink href={`/organization/${org.id}/settings`} variant="secondary">
             <Settings aria-hidden className="size-4" /> Settings
           </ButtonLink>
         </div>
       </header>
 
-      <Section
-        title="Deliveries awaiting your review"
-        id="pending"
-        description="Confirm what arrived. Only what you accept counts toward your requests."
-      >
-        {pendingDeliveries.length === 0 ? (
-          <p className="rounded-lg border border-line bg-surface px-4 py-3 text-muted">No deliveries are waiting for you.</p>
+      <dl className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Need your review", value: inboxCount, href: "#pending", strong: inboxCount > 0 },
+          { label: "Groups collecting for you", value: activeDrives, href: "#drives", strong: false },
+          { label: receiptList.length === 1 ? "Delivery confirmed" : "Deliveries confirmed", value: receiptList.length, href: "#receipts", strong: false },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className={`flex flex-col rounded-xl border px-4 py-3 ${stat.strong ? "border-info/50 bg-info-tint" : "border-line bg-surface"}`}
+          >
+            <dt className="order-2 text-sm text-muted">
+              <a href={stat.href} className="text-inherit no-underline hover:underline">
+                {stat.label}
+              </a>
+            </dt>
+            <dd className="tabular order-1 font-serif text-3xl leading-tight font-semibold">{formatCount(stat.value)}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <Section title="Needs your review" id="pending" description="Confirm what arrived. Only what you accept counts toward your requests.">
+        {inboxCount === 0 ? (
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-4">
+            <CheckCircle2 aria-hidden className="size-6 shrink-0 text-forest" />
+            <div>
+              <p className="font-semibold">You're all caught up</p>
+              <p className="text-sm text-muted">No deliveries are waiting for you. When a group hands kits over, they show up here to confirm.</p>
+            </div>
+          </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
             {pendingDeliveries.map((d) => (
-              <li key={d.deliveryId} className="flex flex-col gap-3 rounded-lg border-2 border-info/40 bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="font-semibold">
-                    {d.groupName} reported {countNoun(d.quantity, d.unitName)}
-                  </p>
-                  <p className="text-sm text-muted">
-                    For “{d.requestTitle}” · {formatTimestamp(d.submittedAt, timezone)}
-                  </p>
-                  {d.note ? <p className="mt-1 text-sm">“{d.note}”</p> : null}
+              <li key={d.deliveryId} className="flex flex-col gap-3 border-l-4 border-l-info p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 gap-3">
+                  <Inbox aria-hidden className="mt-0.5 size-5 shrink-0 text-info" />
+                  <div className="min-w-0">
+                    <p className="font-semibold">
+                      {d.groupName} handed over {countNoun(d.quantity, d.unitName)}
+                    </p>
+                    <p className="text-sm text-muted">
+                      For “{d.requestTitle}” · {formatTimestamp(d.submittedAt, timezone)}
+                    </p>
+                    {d.note ? <p className="mt-1 text-sm">“{d.note}”</p> : null}
+                  </div>
                 </div>
                 <ButtonLink href={`/organization/${org.id}/deliveries/${d.deliveryId}`} className="shrink-0">
                   Review delivery
+                </ButtonLink>
+              </li>
+            ))}
+            {returned.map((r) => (
+              <li key={r.id} className="flex flex-col gap-3 border-l-4 border-l-amber p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 gap-3">
+                  <Undo2 aria-hidden className="mt-0.5 size-5 shrink-0 text-amber" />
+                  <div className="min-w-0">
+                    <p className="font-semibold">A reviewer asked for changes to “{r.title}”</p>
+                    {r.statusNote ? <p className="text-sm text-muted">“{r.statusNote}”</p> : null}
+                  </div>
+                </div>
+                <ButtonLink href={`/organization/${org.id}/requests/${r.id}`} variant="secondary" className="shrink-0">
+                  Fix and resubmit
                 </ButtonLink>
               </li>
             ))}
@@ -118,70 +170,91 @@ export default async function OrganizationPage({
         )}
       </Section>
 
-      <Section title="Open requests" id="requests">
-        {unresolved.length === 0 ? (
-          <EmptyState
-            title={drafts.length ? "No published requests yet" : "No requests yet"}
-            action={<ButtonLink href={`/organization/${org.id}/requests/new`}>Post a request</ButtonLink>}
-          >
-            Describe exactly what you need, for example 100 school-supply kits with a set list of items.
+      <Section title="Your requests" id="requests">
+        {unresolved.length === 0 && drafts.length === 0 ? (
+          <EmptyState title="No requests yet" action={<ButtonLink href={`/organization/${org.id}/requests/new`}>Post a request</ButtonLink>}>
+            Start from a template, for example a school-supply kit, and change it to match exactly what you need.
           </EmptyState>
         ) : (
-          <ul className="space-y-3">
-            {unresolved.map((r) => (
-              <li key={r.id} className="relative rounded-lg border border-line bg-surface p-4 hover:border-line-strong">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 space-y-1">
-                    <h3 className="font-semibold">
-                      <AppLink href={`/organization/${org.id}/requests/${r.id}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
-                        {r.title}
-                      </AppLink>
-                    </h3>
-                    {r.totals ? (
-                      <p className="tabular text-sm">
-                        {countNoun(r.totals.target, r.unitName)} requested · {formatCount(r.totals.promised)} promised ·{" "}
-                        {formatCount(r.totals.accepted)} received
-                        {r.totals.pendingReview > 0 ? ` · ${formatCount(r.totals.pendingReview)} awaiting your review` : ""}
-                      </p>
-                    ) : null}
-                    {r.neededBy ? (
-                      <p className="text-sm text-muted">
-                        Needed by {formatCalendarDate(r.neededBy)}
-                        {r.deadline ? ` · ${r.deadline.description}` : ""}
-                      </p>
-                    ) : null}
-                  </div>
+          <ul className="grid gap-3 md:grid-cols-2">
+            {[...unresolved, ...drafts].map((r) => (
+              <li key={r.id} className="relative flex flex-col gap-3 rounded-xl border border-line bg-surface p-4 shadow-card hover:border-line-strong">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="min-w-0 font-semibold">
+                    <AppLink href={`/organization/${org.id}/requests/${r.id}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
+                      {r.title}
+                    </AppLink>
+                  </h3>
                   <PhaseBadge phase={r.phase} />
                 </div>
+                {r.totals && unresolved.includes(r) ? (
+                  <>
+                    <RequestProgress totals={r.totals} unitName={r.unitName} compact />
+                    <p className="tabular text-sm">
+                      {countNoun(r.totals.target, r.unitName)} requested
+                      {r.totals.pendingReview > 0 ? (
+                        <span className="font-semibold text-info"> · {formatCount(r.totals.pendingReview)} awaiting your review</span>
+                      ) : null}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted">
+                    {r.phase === "in_review"
+                      ? "A KitGap reviewer is checking it. It goes live once approved."
+                      : r.phase === "returned"
+                        ? "Sent back with a note. Fix it and resubmit."
+                        : "Draft. Only your organization can see it."}
+                  </p>
+                )}
+                {r.neededBy ? (
+                  <p className="text-sm text-muted">
+                    Needed by {formatCalendarDate(r.neededBy)}
+                    {r.deadline && unresolved.includes(r) ? ` · ${r.deadline.description}` : ""}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>
         )}
       </Section>
 
-      {drafts.length > 0 ? (
-        <Section title="Drafts and requests under review" id="drafts">
-          <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
-            {drafts.map((r) => (
-              <li key={r.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <AppLink href={`/organization/${org.id}/requests/${r.id}`} className="font-semibold">
-                    {r.title}
-                  </AppLink>
-                  {r.phase === "returned" ? <p className="text-sm text-amber">Reviewer's note: “{r.statusNote}”</p> : null}
-                </div>
-                <PhaseBadge phase={r.phase} />
-              </li>
-            ))}
-          </ul>
-        </Section>
-      ) : null}
-
-      <Section title="Drives in progress" id="drives" description="Groups working on your requests. You'll see their deliveries above when they hand items over.">
-        {drives.length === 0 ? (
-          <p className="text-muted">No groups are running drives for your requests yet.</p>
+      <Section title="Kits you've confirmed" id="receipts" description="Your record of what arrived. This list is only for your organization.">
+        {receiptList.length === 0 ? (
+          <p className="rounded-xl border border-line bg-surface px-4 py-3 text-muted">
+            Nothing confirmed yet. When you accept a delivery, it&apos;s recorded here.
+          </p>
         ) : (
-          <div className="rounded-lg border border-line bg-surface">
+          <div className="overflow-hidden rounded-xl border border-line bg-surface">
+            <p className="flex items-center gap-2 border-b border-line bg-forest-tint px-4 py-2.5 text-sm font-semibold text-forest">
+              <PackageCheck aria-hidden className="size-4" />
+              {confirmedTotal ? `${confirmedTotal} confirmed in total, from ` : "Confirmed from "}
+              {countNoun(receiptList.length, "delivery")}
+            </p>
+            <ul className="divide-y divide-line">
+              {receiptList.map((receipt) => (
+                <li key={receipt.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-baseline">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{receipt.groupName}</p>
+                    <p className="text-sm text-muted">{receipt.requestTitle}</p>
+                  </div>
+                  <div className="sm:text-right">
+                    <p className="tabular font-semibold">{countNoun(receipt.accepted, receipt.unitName)}</p>
+                    <p className="text-sm text-muted">{formatTimestamp(receipt.reviewedAt, timezone)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Section>
+
+      <Section title="Drives in progress" id="drives" description="Groups working on your requests. Their deliveries appear under Needs your review.">
+        {drives.length === 0 ? (
+          <p className="rounded-xl border border-line bg-surface px-4 py-3 text-muted">
+            No groups are running drives for your requests yet. Once a request is listed, school clubs and community groups can adopt part of it.
+          </p>
+        ) : (
+          <div className="rounded-xl border border-line bg-surface">
             <ul className="divide-y divide-line">
               {drives.map((d) => (
                 <li key={d.commitmentId} className="grid gap-2 px-4 py-3 md:grid-cols-[1.4fr_1fr_auto] md:items-center">
@@ -210,7 +283,7 @@ export default async function OrganizationPage({
 
       {finished.length > 0 ? (
         <Section title="Fulfilled and cancelled" id="finished">
-          <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+          <ul className="divide-y divide-line rounded-xl border border-line bg-surface">
             {finished.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                 <AppLink href={`/organization/${org.id}/requests/${r.id}`} className="font-semibold">

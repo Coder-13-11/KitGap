@@ -5,6 +5,7 @@ import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, PageHeader } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
+import { formatCalendarDate } from "@/domain/dates";
 import { PHASE_EXPLANATION, PHASE_LABEL } from "@/domain/phase";
 import { getRequestDetail } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
@@ -34,11 +35,11 @@ export default async function AdoptPage({
   const { request, totals, phase, viewer, org } = detail;
 
   return (
-    <Container narrow className="space-y-6">
+    <Container className="space-y-6">
       <nav aria-label="Breadcrumb" className="text-sm">
         <AppLink href={`/requests/${id}`}>← Back to the request</AppLink>
       </nav>
-      <PageHeader eyebrow={`Request from ${org.name}`} title="Start a drive" description={request.title} />
+      <PageHeader title="Start a drive" description={`${request.title}. Requested by ${org.name}.`} />
       {!viewer.canAdopt ? (
         <Notice tone="warning" title={`This request is ${PHASE_LABEL[phase].toLowerCase()}`}>
           <p>{PHASE_EXPLANATION[phase]}</p>
@@ -65,6 +66,7 @@ export default async function AdoptPage({
             components={detail.components.map((c) => ({ id: c.id, name: c.name, quantityPerUnit: c.quantityPerUnit, details: c.details }))}
             groups={viewer.adminGroups}
             initialQuantity={wanted}
+            neededBy={request.neededBy ? formatCalendarDate(request.neededBy) : null}
           />
         </>
       )}

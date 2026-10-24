@@ -7,18 +7,23 @@ import { AppLink } from "../ui/base";
 import { PhaseBadge } from "../ui/status";
 import { recipeSummary } from "./recipe-text";
 
+function pct(part: number, whole: number) {
+  return whole > 0 ? Math.min(100, Math.max(0, (part / whole) * 100)) : 0;
+}
+
 export function RequestCard({ summary, headingLevel = "h3" }: { summary: RequestSummary; headingLevel?: "h2" | "h3" }) {
   const { request, org, totals, phase, deadline, components } = summary;
   const Heading = headingLevel;
   const unitPlural = pluralize(request.unitName).toLowerCase();
+  const promised = Math.max(0, totals.promised - totals.accepted);
   return (
-    <article className="relative flex h-full flex-col gap-3 rounded-lg border border-line bg-surface p-5 transition-colors duration-150 hover:border-line-strong">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <PhaseBadge phase={phase} />
-        <span className="text-sm text-muted">{CATEGORY_LABEL[request.category]}</span>
-      </div>
+    <article className="lift tag-shape relative flex h-full flex-col gap-4 border border-line-strong bg-surface p-5 shadow-card hover:border-forest">
       <div className="space-y-1">
-        <Heading className="text-lg leading-snug font-semibold">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <PhaseBadge phase={phase} />
+          <span className="text-sm text-muted">{CATEGORY_LABEL[request.category]}</span>
+        </div>
+        <Heading className="font-serif text-2xl leading-tight font-semibold tracking-tight">
           <AppLink href={`/requests/${request.id}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
             {request.title}
           </AppLink>
@@ -33,41 +38,38 @@ export function RequestCard({ summary, headingLevel = "h3" }: { summary: Request
           ) : null}
         </p>
       </div>
-      <p className="text-[0.95rem] text-ink">{recipeSummary(request.requestType, request.unitName, components)}</p>
-      <dl aria-hidden className="grid grid-cols-3 gap-2 rounded-md bg-sunken px-3 py-2.5 text-center">
-        <div>
-          <dt className="text-xs font-semibold text-muted">Requested</dt>
-          <dd className="tabular text-lg leading-tight font-semibold">
-            {formatCount(totals.target)}
-            <span className="block text-xs font-normal text-muted">{totals.target === 1 ? request.unitName.toLowerCase() : unitPlural}</span>
-          </dd>
+
+      <div className="space-y-2">
+        <p className="leading-none">
+          <span className="tabular font-serif text-4xl font-semibold tracking-tight">{formatCount(totals.available)}</span>{" "}
+          <span className="font-semibold">{unitPlural} still open</span>
+        </p>
+        <div aria-hidden className="flex h-3 overflow-hidden rounded-[2px_10px_10px_2px] border border-line-strong bg-sunken">
+          <span className="h-3 bg-forest" style={{ width: `${pct(totals.accepted, totals.target)}%` }} />
+          <span className="h-3 bg-forest-500" style={{ width: `${pct(promised, totals.target)}%` }} />
+          <span className="h-3 min-w-0 flex-1 bg-sunken" />
         </div>
-        <div>
-          <dt className="text-xs font-semibold text-muted">Open to adopt</dt>
-          <dd className="tabular text-lg leading-tight font-semibold">
-            {formatCount(totals.available)}
-            <span className="block text-xs font-normal text-muted">{totals.available === 1 ? request.unitName.toLowerCase() : unitPlural}</span>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs font-semibold text-muted">Received</dt>
-          <dd className="tabular text-lg leading-tight font-semibold">
-            {formatCount(totals.accepted)}
-            <span className="block text-xs font-normal text-muted">{totals.accepted === 1 ? request.unitName.toLowerCase() : unitPlural}</span>
-          </dd>
-        </div>
-      </dl>
+        <p className="text-sm text-muted">
+          {formatCount(totals.accepted)} confirmed
+          {promised > 0 ? ` · ${formatCount(promised)} taken by groups, on the way` : ""}
+          {" · "}
+          {formatCount(totals.target)} requested
+        </p>
+      </div>
+
       <p className="sr-only">
         {countNoun(totals.target, request.unitName)} requested, {formatCount(totals.available)} still open for groups to adopt,{" "}
         {formatCount(totals.accepted)} confirmed received.
       </p>
+      <p className="text-[0.95rem]">{recipeSummary(request.requestType, request.unitName, components)}</p>
+
       <div className="mt-auto flex flex-col gap-1 text-sm text-muted">
         <span className="inline-flex items-center gap-1.5">
           <CalendarDays aria-hidden className="size-4 shrink-0" />
           <span>
             Needed by <span className="font-semibold text-ink">{formatCalendarDate(request.neededBy)}</span>
             {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
-              <span className={deadline.passed ? "text-amber" : undefined}> · {deadline.description}</span>
+              <span className={deadline.passed ? "font-semibold text-amber" : undefined}> · {deadline.description}</span>
             ) : null}
           </span>
         </span>

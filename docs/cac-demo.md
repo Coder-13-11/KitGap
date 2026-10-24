@@ -6,18 +6,18 @@ Rules were read only through House office web pages (the official PDF was blocke
 
 ## Video outline (about 2½ minutes)
 
-Record the demo at `/demo` on the deployed site or locally. Use a browser zoom around 125% so the text is readable, and close other tabs. Speak in your own words; the lines below are prompts, not a script.
+Record the demo at `/demo` on the deployed site or locally. Use a browser zoom around 125% so the text is readable, and close other tabs. Speak in your own words; the lines below are prompts, not a script. The sample people and organizations are fictional.
 
 | Time | Screen | What to say and do |
 | --- | --- | --- |
-| 0:00–0:15 | Home page | Who you are and your district. The problem: organizations know exactly what they need, school clubs want to help, but a drive is hard to split up and track. |
-| 0:15–0:35 | Maya: new request, steps 2 and 4 | Post 100 school-supply kits: 1 backpack, 2 notebooks, 1 pencil pack. Point at the preview: "100 kits require 100 backpacks, 200 notebooks and 100 pencil packs." Mention that a reviewer confirms the organization before it's public. |
-| 0:35–0:55 | Jordan: request page → start a drive | Adopt 20 of the 100. Show the supply list (20 / 40 / 20), then the request now showing 80 still open. |
-| 0:55–1:15 | Sam: drive page | Pledge 10 notebooks. Point out that collected stays at 0: a pledge is only a promise. |
-| 1:15–1:45 | Jordan: drive page | Record 20 backpacks, 30 notebooks (10 from Sam's pledge) and 20 pencil packs. Read the line "10 more notebooks complete the remaining 20 kits". Pack 15 and report the delivery. |
-| 1:45–2:10 | Maya: organization page → review | Accept 13, mark 2 as missing pencil packs. Show the request: 13 confirmed received, not 15. |
-| 2:10–2:30 | Your code | Show `src/domain/quantities.ts` or the concurrency test, and explain one rule in your own words, for example why withdrawing releases only what wasn't delivered. |
-| 2:30–2:45 | Close | What you learned, and who you tested it with. Mention the AI help honestly (see `docs/ai-usage.md`). |
+| 0:00–0:15 | Home | Who you are and your district. Organizations know the kit they need. Clubs want to help. People rarely learn what was actually confirmed. |
+| 0:15–0:35 | Request, as Jordan | School-supply kits. Point at “One kit still needs 1 backpack, 2 notebooks and 1 pencil pack,” then the line that a pledge is not collected. |
+| 0:35–0:55 | Sam's drive | Pledge 10 notebooks. Show “10 notebooks are enough for 5 kits” and “Where your items went,” still on “Pledged.” |
+| 0:55–1:20 | Jordan's drive | Record Sam's 10 notebooks against the pledge. Pack and report the delivery. The timeline says “Recorded as received,” then “Handed over.” Confirmed is not there yet. |
+| 1:20–1:45 | Maya's review | Accept 13, not 15. Message: “Thank you. The pencil packs were missing from 2 kits.” Say the message stays with the group and is not posted publicly. |
+| 1:45–2:05 | Sam, then the group record | Sam sees “Confirmed” and how many kits are still to be confirmed. Open Lakeside's confirmed record: 13 kits, “10 kits confirmed,” Riverbend listed, Sam's name absent. |
+| 2:05–2:20 | Public drive | “Share this drive” and the sentence “Help finish this drive.” One line on how this differs from a wish list: the group collects and packs, and the organization confirms. KitGap is not the only goods tool. |
+| 2:20–2:30 | Your code | Show `requestTotals` or the unit test that a pledge does not count as confirmed. Mention the AI help honestly (see `docs/ai-usage.md`). |
 
 Don't claim partnerships, real deliveries, users or impact that haven't happened. "I tested it with 4 people" is fine only if it's true.
 

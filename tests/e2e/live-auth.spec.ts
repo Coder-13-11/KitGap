@@ -18,7 +18,7 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   const title = `Hygiene kits for a family shelter ${Date.now()}`;
 
   // 1. A new organization manager signs up, confirms by email and registers.
-  await signUpAndConfirm(org, "Ana Manager", managerEmail, PASSWORD);
+  await signUpAndConfirm(org, "Ana Manager", managerEmail, PASSWORD, undefined, "An organization");
   await org.goto("/organization/new");
   await org.getByLabel("Organization name").fill("Test Family Shelter");
   await org.getByLabel("City or area").fill("Kissimmee, FL");

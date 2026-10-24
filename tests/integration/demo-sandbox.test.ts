@@ -8,6 +8,7 @@ import {
   signSandboxId,
   verifySandboxCookie,
 } from "@/server/demo/sandbox";
+import { getDriveWorkspace } from "@/server/queries/drives";
 import { getRequestDetail, listPublicRequests } from "@/server/queries/requests";
 import { adoptRequest } from "@/server/services/drives";
 
@@ -53,6 +54,19 @@ describe("demo sandboxes", () => {
       ["Pencil pack", 100],
     ]);
     expect(detail!.org.name).toContain("(sample)");
+  });
+
+  it("includes a club drive with one sample sign-up imported from Google Forms", async () => {
+    const a = await createSandbox(sql);
+    created.push(a);
+    const asJordan = await getDriveWorkspace({ sql, schema: schemaFor(a), userId: DEMO_IDS.jordan }, DEMO_IDS.hatDrive);
+    if (!asJordan || asJordan === "not_allowed") throw new Error("expected Jordan to see the drive");
+    expect(asJordan.pledges).toHaveLength(1);
+    expect(asJordan.pledges[0]).toMatchObject({ contributorName: "Priya N. (sample)", quantity: 4, imported: { source: "Google Forms" } });
+    expect(asJordan.progress.components[0]).toMatchObject({ needed: 15, collected: 0, openPledged: 4, uncovered: 11 });
+    const asSam = await getDriveWorkspace({ sql, schema: schemaFor(a), userId: DEMO_IDS.sam }, DEMO_IDS.hatDrive);
+    if (!asSam || asSam === "not_allowed") throw new Error("expected Sam to see the drive");
+    expect(asSam.pledges).toEqual([]);
   });
 
   it("changes in one sandbox don't reach real data or another visitor's sandbox", async () => {

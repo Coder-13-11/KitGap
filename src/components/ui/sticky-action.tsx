@@ -5,16 +5,40 @@
 // its errors, or the keyboard.
 
 import { useEffect, useState, type ReactNode } from "react";
+import { buttonClass } from "./button-class";
 
-export function StickyAction({ targetId, href, children }: { targetId: string; href: string; children: ReactNode }) {
+export function StickyAction({
+  targetId,
+  href,
+  hideWhenId,
+  children,
+}: {
+  targetId: string;
+  href: string;
+  hideWhenId?: string;
+  children: ReactNode;
+}) {
   const [targetVisible, setTargetVisible] = useState(false);
   const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    const target = document.getElementById(targetId);
-    if (!target) return;
-    const observer = new IntersectionObserver(([entry]) => setTargetVisible(entry.isIntersecting), { threshold: 0.15 });
-    observer.observe(target);
+    const nodes = [targetId, hideWhenId]
+      .filter((id): id is string => Boolean(id))
+      .map((id) => document.getElementById(id))
+      .filter((node): node is HTMLElement => Boolean(node));
+    if (nodes.length === 0) return;
+    const visible = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        }
+        setTargetVisible(visible.size > 0);
+      },
+      { threshold: 0.15 },
+    );
+    for (const node of nodes) observer.observe(node);
     const onFocus = (e: FocusEvent) => {
       const el = e.target as HTMLElement;
       setTyping(el.matches("input, textarea, select"));
@@ -24,11 +48,11 @@ export function StickyAction({ targetId, href, children }: { targetId: string; h
       observer.disconnect();
       document.removeEventListener("focusin", onFocus);
     };
-  }, [targetId]);
+  }, [targetId, hideWhenId]);
 
   if (targetVisible || typing) return null;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-4 py-3 backdrop-blur lg:hidden no-print">
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 py-3 lg:hidden no-print">
       <a
         href={href}
         onClick={(event) => {
@@ -39,7 +63,7 @@ export function StickyAction({ targetId, href, children }: { targetId: string; h
             target.querySelector<HTMLElement>("input, button, a")?.focus({ preventScroll: true });
           }
         }}
-        className="flex min-h-11 w-full items-center justify-center rounded-md bg-forest px-4 text-center font-semibold text-white no-underline"
+        className={buttonClass("primary", "md", true)}
       >
         {children}
       </a>

@@ -17,7 +17,7 @@ export function StageSummary({ stages, committed, requestType, unitName }: { sta
   const total = Math.max(committed, stages.accepted + stages.pendingReview + stages.ready + stages.needsFollowUp + stages.toBuild);
   return (
     <div className="space-y-3">
-      <div aria-hidden className="flex h-3 w-full overflow-hidden rounded-full bg-sunken ring-1 ring-line ring-inset">
+      <div aria-hidden className="flex h-4 w-full overflow-hidden rounded-full bg-sunken ring-1 ring-line ring-inset">
         {rows.slice(0, 4).map((r) => (
           <span key={r.key} className={cn("h-full", r.swatch)} style={{ width: `${total ? (r.value / total) * 100 : 0}%` }} />
         ))}
@@ -29,7 +29,7 @@ export function StageSummary({ stages, committed, requestType, unitName }: { sta
               <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full", r.swatch)} />
               {r.label}
             </dt>
-            <dd className="tabular ml-auto font-semibold">{formatCount(r.value)}</dd>
+            <dd className="tabular ml-auto text-lg font-semibold">{formatCount(r.value)}</dd>
           </div>
         ))}
       </dl>

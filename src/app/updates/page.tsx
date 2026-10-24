@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Bell } from "lucide-react";
 import { MarkUpdatesSeen } from "@/components/site/mark-seen";
 import { AppLink } from "@/components/ui/base";
 import { Container, EmptyState, PageHeader } from "@/components/ui/layout-bits";
@@ -18,7 +19,20 @@ export default async function UpdatesPage() {
       <MarkUpdatesSeen />
       <PageHeader title="Updates" description="What other people did in your groups and organizations." />
       {items.length === 0 ? (
-        <EmptyState title="No updates yet">When someone pledges, delivers or reviews in one of your workspaces, it shows up here.</EmptyState>
+        <EmptyState
+          title="You're all caught up"
+          icon={<Bell />}
+          action={
+            <AppLink
+              href="/requests"
+              className="press inline-flex min-h-11 items-center rounded-lg border border-line-strong px-4 font-semibold no-underline hover:bg-sunken"
+            >
+              Find a drive to join
+            </AppLink>
+          }
+        >
+          When someone pledges, delivers or confirms supplies in one of your groups or organizations, you&apos;ll see it here.
+        </EmptyState>
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
           {items.map((item) => (

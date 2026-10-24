@@ -43,7 +43,7 @@ export function FieldShell({ id, label, hint, error, optional, className, labelC
 export const inputClass = (error?: string, extra?: string) =>
   cn(
     "w-full rounded-md border bg-surface px-3 py-2.5 text-base text-ink",
-    "min-h-11 placeholder:text-[#7b827d]",
+    "min-h-11 placeholder:text-muted",
     error ? "border-danger border-2" : "border-line-strong",
     "disabled:bg-sunken disabled:text-muted",
     extra,

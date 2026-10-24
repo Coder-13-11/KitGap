@@ -19,9 +19,9 @@ export default function AboutPage() {
         <ul className="list-disc space-y-2 pl-5">
           <li>It coordinates donated goods: who is collecting what, how much is promised, and what the receiving organization confirmed.</li>
           <li>
-            It isn't the first goods-donation tool. Wish-list and kit platforms already let donors buy items for nonprofits. KitGap focuses on
-            something narrower: splitting an approved need across school and community drives, with accountable quantities and a confirmed
-            handover.
+            Wish lists and tools such as RightGift ship items a person buys. NeedsList matches emergency needs. Local critical-needs lists are
+            usually for cash. KitGap is for a group that adopts part of a request, collects and packs kits, and the receiving organization
+            confirms what arrived.
           </li>
           <li>It doesn't collect money. An organization may link to its own fundraising page; KitGap doesn't track it, and money never counts as kits.</li>
           <li>Beneficiaries don't have profiles. Requests describe the people they help only in general terms.</li>

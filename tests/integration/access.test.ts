@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getDriveWorkspace, getPublicDrive } from "@/server/queries/drives";
+import { getPublicRecord } from "@/server/queries/records";
 import { getDeliveryForReview, getOrgDashboard, getReviewQueue } from "@/server/queries/organization";
 import { getRequestDetail, listPublicRequests } from "@/server/queries/requests";
 import { adoptRequest, changeCommitmentQuantity, withdrawCommitment } from "@/server/services/drives";
@@ -197,6 +198,8 @@ describe("public pages", () => {
       await getRequestDetail(h.as(null), s.requestId),
       await getRequestDetail(h.as(s.outsider), s.requestId),
       await getPublicDrive(h.as(null), a.commitmentId),
+      await getPublicRecord(h.as(null), "group", s.groupA),
+      await getPublicRecord(h.as(null), "organization", s.orgId),
     ]);
     for (const secret of secrets) expect(publicData).not.toContain(secret);
     expect(publicData).not.toMatch(/inviteToken|contactEmail|handoverInstructions|coordinatorContact/);
@@ -207,6 +210,7 @@ describe("public pages", () => {
     const forContributor = await getDriveWorkspace(h.as(s.contributor), a.commitmentId);
     if (!forContributor || forContributor === "not_allowed") throw new Error("missing drive");
     expect(forContributor.pledges.every((p) => p.isMine && p.contributorName === null)).toBe(true);
+    expect(JSON.stringify(forContributor.journey)).not.toContain("Jordan Coordinator");
     expect(forContributor.collections).toHaveLength(0);
     expect(forContributor.group.inviteToken).toBeNull();
   });

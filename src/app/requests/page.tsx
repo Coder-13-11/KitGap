@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { ClipboardList, SearchX } from "lucide-react";
 import { DirectoryFilters } from "@/components/requests/directory-filters";
 import { RequestCard } from "@/components/requests/request-card";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, EmptyState, PageHeader } from "@/components/ui/layout-bits";
+import { Reveal } from "@/components/ui/motion";
 import { CATEGORY_LABEL } from "@/domain/phase";
 import { CATEGORIES } from "@/domain/request-input";
 import { listPublicRequests, type DirectorySort, type DirectoryStatus } from "@/server/queries/requests";
@@ -12,18 +14,21 @@ export const metadata: Metadata = { title: "Explore requests" };
 
 const STATUS_TEXT: Record<DirectoryStatus, string> = {
   open: "open for new drives",
-  in_progress: "fully committed, closed or past their needed-by date",
+  in_progress: "fully taken, closed or past their needed-by date",
   completed: "fulfilled",
+  close: "almost finished",
   all: "in any state",
 };
+
+const SORTS: DirectorySort[] = ["deadline", "newest", "progress", "almost"];
 
 export default async function RequestsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const one = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : "");
   const q = one("q").slice(0, 100);
   const category = CATEGORIES.includes(one("category") as never) ? one("category") : "all";
-  const status = (["open", "in_progress", "completed", "all"].includes(one("status")) ? one("status") : "open") as DirectoryStatus;
-  const sort = (one("sort") === "newest" ? "newest" : "deadline") as DirectorySort;
+  const status = (["open", "in_progress", "completed", "close", "all"].includes(one("status")) ? one("status") : "open") as DirectoryStatus;
+  const sort = (SORTS.includes(one("sort") as DirectorySort) ? one("sort") : "deadline") as DirectorySort;
 
   const ctx = await getAppContext();
   const results = await listPublicRequests(ctx, { q, category, status, sort });
@@ -41,7 +46,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
     <Container className="space-y-6">
       <PageHeader
         title="Explore requests"
-        description="Organizations post exactly what they need. Your group can take on all of a request or part of it."
+        description="Real needs from local organizations. Take on a whole request or just part of it."
       />
       <DirectoryFilters
         q={q}
@@ -51,34 +56,41 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
         categories={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABEL[c] }))}
       />
       <section aria-labelledby="results-title" className="space-y-4">
-        <h2 id="results-title" className="text-base font-semibold text-muted">
+        <h2 id="results-title" className="text-base font-semibold text-muted" aria-live="polite">
           {describe}
         </h2>
         {results.length === 0 ? (
           <EmptyState
-            title={filtered ? "No requests match these filters" : "No open requests right now"}
+            icon={filtered ? <SearchX /> : <ClipboardList />}
+            title={
+              status === "close" && !q && category === "all"
+                ? "Nothing is almost finished yet"
+                : filtered
+                  ? "Nothing matches that yet"
+                  : "No requests near you yet"
+            }
             action={
               filtered ? (
                 <ButtonLink href="/requests" variant="secondary">
-                  Clear filters
+                  See all open requests
                 </ButtonLink>
               ) : (
-                <ButtonLink href="/organization/new" variant="secondary">
-                  Post a request for your organization
+                <ButtonLink href="/organization/new" variant="primary">
+                  Post what your organization needs
                 </ButtonLink>
               )
             }
           >
             {filtered
-              ? `You're viewing requests ${STATUS_TEXT[status]}${category !== "all" ? ` in ${CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL]}` : ""}${q ? ` that mention “${q}”` : ""}. Try fewer words or a different filter.`
-              : "When an organization's request is approved, it appears here."}
+              ? `No requests ${STATUS_TEXT[status]}${category !== "all" ? ` in ${CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL]}` : ""}${q ? ` mention “${q}”` : ""}. Try a shorter search or another status.`
+              : "When a local organization posts a need and a person checks it, it shows up here."}
           </EmptyState>
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((summary) => (
-              <li key={summary.request.id}>
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((summary, i) => (
+              <Reveal as="li" key={summary.request.id} index={i % 3}>
                 <RequestCard summary={summary} />
-              </li>
+              </Reveal>
             ))}
           </ul>
         )}

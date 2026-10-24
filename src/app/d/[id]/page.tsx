@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { StageSummary } from "@/components/drives/stages";
+import { ShareDrive } from "@/components/drives/share-drive";
 import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Pill } from "@/components/ui/status";
 import { formatCalendarDate } from "@/domain/dates";
+import { kitsStillToConfirm, shareDriveSentence } from "@/domain/guidance";
 import { countNoun, formatCount } from "@/domain/text";
 import { getPublicDrive } from "@/server/queries/drives";
 import { getAppContext } from "@/server/next/context";
+import { siteUrl } from "@/server/next/supabase";
 
 export const metadata: Metadata = { title: "Drive progress" };
 
@@ -21,12 +24,18 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
   if (!drive) notFound();
   const unit = drive.request.unitName;
   const needs = drive.progress.components.filter((c) => c.uncovered > 0);
+  const still = kitsStillToConfirm(drive.quantity, drive.progress.stages.accepted);
+  const sentence = shareDriveSentence(still, unit, drive.org.name);
+  const publicUrl = `${siteUrl()}${ctx.base}/d/${drive.commitmentId}`;
 
   return (
     <Container narrow className="space-y-8">
       <header className="space-y-3">
         <p className="text-sm font-semibold text-muted">
-          A drive by {drive.group.name}
+          A drive by{" "}
+          <AppLink href={`/record/group/${drive.group.id}`} className="underline">
+            {drive.group.name}
+          </AppLink>
           {drive.group.city ? ` · ${drive.group.city}` : ""}
         </p>
         <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -38,12 +47,22 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
         {drive.status !== "active" ? <Pill tone="danger">This drive was withdrawn</Pill> : null}
       </header>
 
-      <Panel className="space-y-3">
+      <Panel className="space-y-4">
         <h2 className="text-lg font-semibold">Progress</h2>
+        <p className="font-serif text-5xl leading-none font-semibold tracking-tight text-forest tabular">
+          {formatCount(drive.progress.stages.accepted)}
+          <span className="text-2xl text-muted"> / {formatCount(drive.quantity)}</span>
+        </p>
         <p>
           {formatCount(drive.progress.stages.accepted)} of {countNoun(drive.quantity, unit)} confirmed received by {drive.org.name}.
         </p>
         <StageSummary stages={drive.progress.stages} committed={drive.quantity} requestType={drive.request.requestType} unitName={unit} />
+        <div className="rounded-lg bg-forest-tint px-4 py-4">
+          <p className="text-lg font-semibold">{sentence}</p>
+          <div className="mt-3">
+            <ShareDrive url={publicUrl} sentence={sentence} qrName="kitgap-drive-progress" />
+          </div>
+        </div>
       </Panel>
 
       {drive.status === "active" ? (

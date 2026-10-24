@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import type { RequestInput } from "@/domain/request-input";
 import type { KitMovementRecord } from "@/domain/types";
 import type { ActionResult } from "@/lib/action-result";
+import { safeNext } from "@/lib/safe-next";
 import { formText, runAction } from "@/server/next/action";
 import { adoptRequest, changeCommitmentQuantity, withdrawCommitment } from "@/server/services/drives";
 import {
@@ -344,6 +345,8 @@ export async function createWorkspaceAction(_prev: unknown, formData: FormData):
       contactPhone: formText(formData, "contactPhone"),
       idempotencyKey: formText(formData, "idempotencyKey"),
     });
+    const back = formText(formData, "next");
+    if (back) redirect(`${ctx.base}${safeNext(back)}`);
     redirect(kind === "organization" ? `${ctx.base}/organization/${workspaceId}?created=1` : `${ctx.base}/groups/${workspaceId}?created=1`);
   });
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describeDeadline, formatCalendarDate, isPastDate, todayIn } from "@/domain/dates";
-import { describeBottleneck, nextStepForCoordinator } from "@/domain/guidance";
+import { describeBottleneck, driveChecklist, nextStepForCoordinator } from "@/domain/guidance";
 import { requestPhase } from "@/domain/phase";
 import { driveProgress } from "@/domain/quantities";
 import { countNoun, normalizeItemKey, pluralize } from "@/domain/text";
@@ -65,5 +65,37 @@ describe("guidance", () => {
     });
     expect(describeBottleneck(progress, "kit").headline).toBe("10 more notebooks complete the remaining 20 kits.");
     expect(nextStepForCoordinator(progress, "kit", "Riverbend").action).toBe("pack");
+  });
+
+  it("turns a drive into a checklist where only the first unfinished step is current", () => {
+    const c = commitment(20);
+    const empty = driveProgress({ requestType: "kit", components: RECIPE, commitment: c, pledges: [], collections: [], movements: [], deliveries: [] });
+    const fresh = driveChecklist(empty, "kit", "Riverbend", 0);
+    expect(fresh.map((s) => s.key)).toEqual(["share", "pledge", "collect", "pack", "deliver", "confirm"]);
+    expect(fresh.map((s) => s.status)).toEqual(["current", "todo", "todo", "todo", "todo", "todo"]);
+    expect(fresh.find((s) => s.key === "pledge")?.detail).toBe("80 items nobody has promised yet.");
+
+    const stocked = driveProgress({
+      requestType: "kit",
+      components: RECIPE,
+      commitment: c,
+      pledges: [],
+      collections: [collected(c.id, "backpack", 20), collected(c.id, "notebook", 40), collected(c.id, "pencils", 20)],
+      movements: [],
+      deliveries: [],
+    });
+    const steps = driveChecklist(stocked, "kit", "Riverbend", 0);
+    expect(steps.map((s) => s.status)).toEqual(["done", "done", "done", "current", "todo", "todo"]);
+    expect(steps.find((s) => s.key === "pack")).toMatchObject({ title: "Pack the kits", detail: "0 of 20 kits packed." });
+
+    const withdrawn = driveChecklist({ ...empty, active: false }, "kit", "Riverbend", 0);
+    expect(withdrawn.some((s) => s.status === "current")).toBe(false);
+  });
+
+  it("leaves out packing for item drives", () => {
+    const c = commitment(20);
+    const progress = driveProgress({ requestType: "item", components: RECIPE.slice(0, 1), commitment: c, pledges: [], collections: [], movements: [], deliveries: [] });
+    expect(driveChecklist(progress, "coat", "Riverbend", 2).map((s) => s.key)).toEqual(["share", "pledge", "collect", "deliver", "confirm"]);
+    expect(driveChecklist(progress, "coat", "Riverbend", 2)[0].status).toBe("done");
   });
 });

@@ -15,13 +15,14 @@ const STEPS: { persona: string; path: string; title: string; detail: string; exp
     path: `/requests/${DEMO_IDS.kitRequest}`,
     title: "Start a drive for 20 kits",
     detail: "As Jordan, the club coordinator, open the school-supply request and adopt 20 of the 100 kits.",
-    expect: "The drive needs 20 backpacks, 40 notebooks and 20 pencil packs. The request shows 80 kits still open.",
+    expect:
+      "The drive needs 20 backpacks, 40 notebooks and 20 pencil packs. The request shows 80 kits still open. (The club's hat drive already has one sample sign-up imported from Google Forms.)",
   },
   {
     persona: "contributor",
     path: "/drives",
     title: "Pledge 10 notebooks",
-    detail: "As Sam, a club member, open the club's drive and pledge 10 notebooks.",
+    detail: "As Sam, a club member, open the club's school-supply drive and pledge 10 notebooks.",
     expect: "Notebooks show 10 pledged and 30 still needed. Collected stays at 0: a pledge is only a promise.",
   },
   {
@@ -51,6 +52,15 @@ const STEPS: { persona: string; path: string; title: string; detail: string; exp
     title: "Post a new request",
     detail: "As Maya, draft a new request and submit it. Then switch to Riley, the KitGap reviewer, to approve it.",
     expect: "The request isn't listed publicly until Riley approves it.",
+  },
+  {
+    persona: "coordinator",
+    path: "/drives",
+    title: "Optional: bring in sign-ups from Google Forms",
+    detail:
+      "Reset the demo and start a 20-kit drive as Jordan. On the drive page, choose “Try it with a sample Google Forms file”, check the preview, and import.",
+    expect:
+      "5 sample sign-ups become pledges (15 items). The preview flags a repeat, an item the kit doesn't need, a quantity it can't read, and a row asking for more than is still needed. Collected stays at 0.",
   },
 ];
 
@@ -104,8 +114,12 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
               {STEPS.map((step, i) => {
                 const persona = PERSONAS.find((p) => p.key === step.persona)!;
                 return (
-                  <li key={step.title} className="rounded-lg border border-line bg-surface p-4">
+                  <li key={step.title} className="rounded-xl border border-line/80 bg-surface p-4 shadow-card">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex gap-3">
+                        <span className="tabular flex size-9 shrink-0 items-center justify-center rounded-full bg-forest font-semibold text-white">
+                          {i + 1}
+                        </span>
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-muted">
                           Step {i + 1} · as {persona.name}
@@ -116,6 +130,7 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
                           <span className="font-semibold text-ink">Expect: </span>
                           {step.expect}
                         </p>
+                      </div>
                       </div>
                       <form action={switchPersonaAction} className="shrink-0">
                         <input type="hidden" name="persona" value={persona.key} />

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Public_Sans, Source_Serif_4 } from "next/font/google";
+import { Archivo_Narrow, Petrona } from "next/font/google";
 import { signOutAction } from "@/actions/auth";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { SiteFooter } from "@/components/site/footer";
@@ -8,24 +8,45 @@ import { BaseProvider } from "@/components/ui/base";
 import { ToastProvider } from "@/components/ui/toast";
 import { getMyWorkspaces } from "@/server/queries/organization";
 import { getAppContext } from "@/server/next/context";
+import { siteUrl } from "@/server/next/supabase";
 import "./globals.css";
 
-const sans = Public_Sans({ subsets: ["latin"], variable: "--font-public-sans", display: "swap" });
-const serif = Source_Serif_4({ subsets: ["latin"], variable: "--font-source-serif", display: "swap", weight: ["600"] });
+const sans = Archivo_Narrow({
+  subsets: ["latin"],
+  variable: "--font-archivo-narrow",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+const serif = Petrona({
+  subsets: ["latin"],
+  variable: "--font-petrona",
+  display: "swap",
+  weight: ["500", "600", "700"],
+});
+
+const DESCRIPTION =
+  "Organizations post precise needs for kits and goods. School clubs and community groups adopt part of a request, collect supplies, and deliver them. The organization confirms what arrived.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: { default: "KitGap: turn a community need into a drive", template: "%s · KitGap" },
-  description:
-    "Organizations post precise needs for kits and goods. School clubs and community groups adopt part of a request, collect supplies, and deliver them. The organization confirms what arrived.",
+  description: DESCRIPTION,
+  openGraph: { siteName: "KitGap", type: "website", description: DESCRIPTION },
+  twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { themeColor: "#f8f7f3", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#234d3b", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAppContext();
   const workspaces = await getMyWorkspaces(ctx);
 
-  const nav: NavItem[] = [{ href: "/requests", label: "Explore requests" }];
+  const nav: NavItem[] = [
+    { href: "/requests", label: "Requests" },
+    { href: "/discover", label: "Discover" },
+    { href: "/tools", label: "Count" },
+  ];
+  if (ctx.user) nav.unshift({ href: "/home", label: "Home" });
   if (ctx.user) nav.push({ href: "/drives", label: "My drives" });
   if (workspaces.organizations.length === 1) {
     nav.push({ href: `/organization/${workspaces.organizations[0].id}`, label: "My organization" });

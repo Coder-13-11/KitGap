@@ -9,20 +9,22 @@ export function KitEquation() {
     { icon: PencilLine, count: 1, label: "pencil pack" },
   ];
   return (
-    <figure className="rounded-lg border border-line bg-surface p-5">
-      <div className="text-ink" aria-hidden>
-        <ul className="space-y-2">
+    <figure className="rounded-xl bg-surface p-5 text-ink shadow-card sm:p-6">
+      <div aria-hidden>
+        <ul className="grid gap-2">
           {items.map((item) => (
-            <li key={item.label} className="flex items-center gap-3 rounded-md border border-line bg-paper px-3 py-2">
-              <item.icon className="size-5 shrink-0 text-forest" />
-              <span className="tabular w-6 text-right text-lg font-semibold">{item.count}</span>
-              <span>{item.label}</span>
+            <li key={item.label} className="flex items-center gap-3 rounded-lg bg-paper px-3 py-2.5">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-forest-tint text-forest">
+                <item.icon className="size-5 shrink-0" />
+              </span>
+              <span className="tabular w-6 text-right text-2xl font-semibold">{item.count}</span>
+              <span className="font-medium">{item.label}</span>
             </li>
           ))}
         </ul>
-        <div className="mt-2 flex items-center gap-3 border-t border-line pt-3">
-          <span className="text-lg text-muted">=</span>
-          <span className="rounded-md bg-forest px-3 py-1.5 font-semibold text-white">1 school-supply kit</span>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-2xl text-muted">=</span>
+          <span className="rounded-lg bg-forest px-4 py-2 text-lg font-semibold text-white">1 school-supply kit</span>
         </div>
       </div>
       <figcaption className="mt-4 text-[0.95rem] text-muted">

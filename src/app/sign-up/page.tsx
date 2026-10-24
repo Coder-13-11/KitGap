@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { SignUpForm } from "@/components/auth/auth-forms";
+import { SignUpFlow } from "@/components/auth/auth-forms";
 import { AppLink } from "@/components/ui/base";
-import { safeNext } from "@/lib/safe-next";
+import { safeNext, welcomeIntent } from "@/lib/safe-next";
 import { getAppContext } from "@/server/next/context";
 
 export const metadata: Metadata = { title: "Create an account" };
@@ -14,10 +14,12 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
   if (ctx.mode === "demo") redirect("/demo");
   const next = safeNext(params.next);
   if (ctx.user) redirect(next);
+  // Someone arriving from an invitation link already knows why they're here.
+  const intent = next.startsWith("/join/") ? "invited" : (welcomeIntent(params.as) ?? undefined);
   return (
     <AuthShell
       title="Create an account"
-      description="One account works for everything: running drives with your groups, pledging, and posting requests for an organization."
+      description="It takes about two minutes. One account works for everything: running drives, pledging, and posting requests."
       footer={
         <p>
           Already have an account?{" "}
@@ -27,7 +29,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
         </p>
       }
     >
-      <SignUpForm next={next} />
+      <SignUpFlow next={next} initialIntent={intent} />
     </AuthShell>
   );
 }

@@ -58,6 +58,10 @@ test("signed-in screens in the demo have no automatically detectable WCAG A/AA p
   await scan(page, "my drives");
   await page.goto(drive.replace("/drives/", "/d/"));
   await scan(page, "public drive");
+  await page.goto("/demo/record/group/00000000-0000-4000-8000-00000000b002");
+  await scan(page, "group record");
+  await page.goto(`/demo/record/organization/${ORG}`);
+  await scan(page, "organization record");
 
   await actAs(page, "organization", "Maya Ortiz");
   await page.goto(`/demo/organization/${ORG}`);

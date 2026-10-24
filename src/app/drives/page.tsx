@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { PackageOpen, Users } from "lucide-react";
 import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, EmptyState, PageHeader, Section } from "@/components/ui/layout-bits";
 import { Pill } from "@/components/ui/status";
 import { formatCalendarDate } from "@/domain/dates";
 import { countNoun, formatCount } from "@/domain/text";
+import { ElsewhereList } from "@/components/discover/elsewhere-list";
 import { getMyDrives } from "@/server/queries/drives";
+import { listExternalSignups } from "@/server/services/external";
 import { getAppContext } from "@/server/next/context";
 
 export const metadata: Metadata = { title: "My drives" };
@@ -14,7 +17,7 @@ export const metadata: Metadata = { title: "My drives" };
 export default async function MyDrivesPage() {
   const ctx = await getAppContext();
   if (!ctx.user) redirect(`/sign-in?next=/drives${ctx.sessionExpired ? "&expired=1" : ""}`);
-  const { drives, groups } = await getMyDrives(ctx);
+  const [{ drives, groups }, elsewhere] = await Promise.all([getMyDrives(ctx), listExternalSignups(ctx)]);
   const active = drives.filter((d) => d.status === "active");
   const past = drives.filter((d) => d.status !== "active");
 
@@ -29,22 +32,23 @@ export default async function MyDrivesPage() {
       {groups.length === 0 ? (
         <EmptyState
           title="You're not in a group yet"
+          icon={<Users />}
           action={
-            <div className="flex flex-wrap justify-center gap-2">
-              <ButtonLink href="/requests">Explore requests</ButtonLink>
+            <>
+              <ButtonLink href="/requests">Find a drive to start</ButtonLink>
               <ButtonLink href="/groups/new" variant="secondary">
                 Create a group
               </ButtonLink>
-            </div>
+            </>
           }
         >
-          To run a drive, pick a request and start one; KitGap creates your group in the same step. To help an existing group, open
-          the invitation link its coordinator sent you.
+          Pick a request and start a drive. KitGap sets up your group in the same step. Got an invite link from a coordinator? Open
+          it to join their group.
         </EmptyState>
       ) : null}
 
       {groups.length > 0 && active.length === 0 ? (
-        <EmptyState title="No active drives" action={<ButtonLink href="/requests">Explore requests</ButtonLink>}>
+        <EmptyState title="No active drives" icon={<PackageOpen />} action={<ButtonLink href="/requests">Find a drive to start</ButtonLink>}>
           Your groups aren't running a drive right now. Coordinators can start one from any open request.
         </EmptyState>
       ) : null}
@@ -53,7 +57,7 @@ export default async function MyDrivesPage() {
         <Section title="Active drives" id="active">
           <ul className="space-y-3">
             {active.map((d) => (
-              <li key={d.commitmentId} className="relative rounded-lg border border-line bg-surface p-5 hover:border-line-strong">
+              <li key={d.commitmentId} className="lift relative rounded-xl border border-line/80 bg-surface p-5 shadow-card hover:border-forest/40">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm text-muted">
@@ -114,6 +118,26 @@ export default async function MyDrivesPage() {
           </ul>
         </Section>
       ) : null}
+
+      <Section
+        title="Drives you joined elsewhere"
+        id="elsewhere"
+        description="Sign-ups you found through Discover, on SignUpGenius, Facebook and other sites."
+        actions={
+          <ButtonLink href="/discover" variant="secondary">
+            Find more drives
+          </ButtonLink>
+        }
+      >
+        {elsewhere.length === 0 ? (
+          <p className="rounded-xl bg-sunken px-5 py-4 text-muted">
+            Nothing yet. When you sign up for a drive from <AppLink href="/discover">Discover</AppLink>, it shows up here so you can track
+            what you give.
+          </p>
+        ) : (
+          <ElsewhereList items={elsewhere} />
+        )}
+      </Section>
 
       {groups.length > 0 ? (
         <Section title="Your groups" id="groups">

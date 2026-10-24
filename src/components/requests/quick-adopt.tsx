@@ -8,7 +8,7 @@ import { useState } from "react";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { useBase, withBase } from "../ui/base";
 import { buttonClass } from "../ui/button";
-import { inputClass } from "../ui/field";
+import { QuantityPicker } from "../ui/quantity-picker";
 
 export function QuickAdopt({
   requestId,
@@ -39,19 +39,18 @@ export function QuickAdopt({
         <p id="quick-quantity-hint" className="text-sm text-muted">
           Between 1 and {formatCount(available)}. You can start small and add more later if some are still available.
         </p>
-        <input
-          id="quick-quantity"
-          name="quantity"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="off"
-          value={value}
-          onChange={(e) => setValue(e.target.value.replace(/[^\d]/g, "").slice(0, 6))}
-          aria-describedby="quick-quantity-hint quick-quantity-preview"
-          className={inputClass(value && !valid ? "x" : undefined, "tabular max-w-[10rem] text-lg font-semibold")}
-        />
       </div>
-      <div id="quick-quantity-preview" className="rounded-md bg-sunken px-3 py-2.5 text-sm">
+      <QuantityPicker
+        id="quick-quantity"
+        name="quantity"
+        value={value}
+        onChange={setValue}
+        max={available}
+        unitName={unitName}
+        invalid={Boolean(value && !valid)}
+        describedBy="quick-quantity-hint quick-quantity-preview"
+      />
+      <div id="quick-quantity-preview" aria-live="polite" className="rounded-lg bg-sunken px-3 py-2.5 text-sm">
         {valid ? (
           requestType === "kit" ? (
             <>

@@ -4,7 +4,7 @@ import { MemberList } from "@/components/workspaces/members";
 import { RotateInviteButton, WorkspaceForm } from "@/components/workspaces/workspace-forms";
 import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
-import { CopyLink } from "@/components/ui/copy-link";
+import { ShareDrive } from "@/components/drives/share-drive";
 import { Container, PageHeader, Panel, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
 import { countNoun } from "@/domain/text";
@@ -46,6 +46,11 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
         </Notice>
       ) : null}
       <PageHeader eyebrow={group.city} title={group.name} actions={isAdmin ? <ButtonLink href="/requests">Find a request</ButtonLink> : undefined} />
+      <p>
+        <AppLink href={`/record/group/${group.id}`} className="font-semibold underline">
+          Confirmed record
+        </AppLink>
+      </p>
 
       <Section title="Drives" id="drives">
         {groupDrives.length === 0 ? (
@@ -73,7 +78,13 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
           <Panel className="space-y-2">
             <h3 className="font-semibold">Invite members</h3>
             <p className="text-sm text-muted">People who open this link and sign in join {group.name} and can pledge supplies. Share it only with your group.</p>
-            <CopyLink url={`${siteUrl()}${ctx.base}/join/${group.inviteToken}`} label="Copy invitation link" />
+            <ShareDrive
+              url={`${siteUrl()}${ctx.base}/join/${group.inviteToken}`}
+              subject={`Join ${group.name} on KitGap`}
+              sentence={`Join ${group.name} on KitGap. Open the link, sign in, and you can pledge supplies for our drives.`}
+              copyLabel="Copy invitation link"
+              qrName="kitgap-invite"
+            />
             <RotateInviteButton workspaceId={id} />
           </Panel>
         ) : null}

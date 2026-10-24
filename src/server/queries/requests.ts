@@ -5,6 +5,7 @@
 // Private fields (handover instructions, coordinator contact, organization
 // contact details, reviewer notes) are added only for people allowed to see them.
 
+import { isCloseToConfirmed } from "@/domain/guidance";
 import { describeDeadline, type DeadlineInfo } from "@/domain/dates";
 import { acceptsNewDrives, requestPhase, type RequestPhase } from "@/domain/phase";
 import { requestTotals, supplyList, type RequestTotals, type SupplyLine } from "@/domain/quantities";
@@ -122,8 +123,8 @@ export function summarize(
   };
 }
 
-export type DirectoryStatus = "open" | "in_progress" | "completed" | "all";
-export type DirectorySort = "deadline" | "newest";
+export type DirectoryStatus = "open" | "in_progress" | "completed" | "all" | "close";
+export type DirectorySort = "deadline" | "newest" | "progress" | "almost";
 
 export interface DirectoryFilters {
   q?: string;
@@ -132,7 +133,7 @@ export interface DirectoryFilters {
   sort?: DirectorySort;
 }
 
-const STATUS_PHASES: Record<DirectoryStatus, RequestPhase[]> = {
+const STATUS_PHASES: Record<Exclude<DirectoryStatus, "close">, RequestPhase[]> = {
   open: ["open"],
   in_progress: ["fully_committed", "past_due", "closed"],
   completed: ["fulfilled"],
@@ -161,12 +162,19 @@ export async function listPublicRequests(ctx: ServiceContext, filters: Directory
     `) as unknown as RequestRecord[];
     const orgs = await loadOrgs(tx, [...new Set(rows.map((r) => r.orgId))]);
     const numbers = await loadRequestNumbers(tx, rows.map((r) => r.id));
-    const wanted = new Set(STATUS_PHASES[filters.status ?? "open"] ?? STATUS_PHASES.open);
+    const status = filters.status ?? "open";
+    const wanted = status === "close" ? null : new Set(STATUS_PHASES[status] ?? STATUS_PHASES.open);
     const summaries = rows
       .map((r) => summarize(r, orgs.get(r.orgId)!, numbers, at))
-      .filter((s) => wanted.has(s.phase));
+      .filter((s) => (wanted ? wanted.has(s.phase) : isCloseToConfirmed(s.totals.accepted, s.totals.target)));
     if (filters.sort === "newest") {
       summaries.sort((a, b) => (b.request.publishedAt?.getTime() ?? 0) - (a.request.publishedAt?.getTime() ?? 0));
+    } else if (filters.sort === "progress") {
+      const share = (s: RequestSummary) => (s.totals.target > 0 ? s.totals.accepted / s.totals.target : 0);
+      summaries.sort((a, b) => share(b) - share(a));
+    } else if (filters.sort === "almost") {
+      const left = (s: RequestSummary) => (s.totals.target > 0 ? s.totals.available / s.totals.target : 1);
+      summaries.sort((a, b) => left(a) - left(b) || (a.request.neededBy ?? "").localeCompare(b.request.neededBy ?? ""));
     }
     return summaries;
   });
@@ -176,6 +184,7 @@ export async function listPublicRequests(ctx: ServiceContext, filters: Directory
 
 export interface PublicDriveListing {
   commitmentId: string;
+  groupId: string;
   groupName: string;
   groupCity: string;
   quantity: number;
@@ -242,6 +251,7 @@ export async function getRequestDetail(ctx: ServiceContext, requestId: string): 
       const totals = requestTotals(c.quantity, [c], deliveries);
       return {
         commitmentId: c.id,
+        groupId: c.groupId,
         groupName: groups.get(c.groupId)?.name ?? "A group",
         groupCity: groups.get(c.groupId)?.city ?? "",
         quantity: c.quantity,

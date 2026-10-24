@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Inbox } from "lucide-react";
 import { cn } from "./cn";
 
 export function PageHeader({
@@ -68,20 +69,38 @@ export function Panel({
   as?: "div" | "section" | "article" | "aside";
   tone?: "default" | "forest";
 }) {
-  const toneClass = tone === "forest" ? "border-forest/40 bg-forest-tint" : "border-line bg-surface";
-  return <As className={cn("rounded-lg border p-5", toneClass, className)}>{children}</As>;
+  const toneClass = tone === "forest" ? "border-forest/25 bg-forest-tint" : "border-line-strong bg-surface";
+  return <As className={cn("tag-shape border p-5 shadow-card sm:p-6", toneClass, className)}>{children}</As>;
 }
 
 export function Container({ children, className, narrow = false }: { children: ReactNode; className?: string; narrow?: boolean }) {
   return <div className={cn("mx-auto w-full px-4 sm:px-6", narrow ? "max-w-3xl" : "max-w-6xl", className)}>{children}</div>;
 }
 
-export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+export function EmptyState({
+  title,
+  children,
+  action,
+  icon,
+}: {
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+  icon?: ReactNode;
+}) {
   return (
-    <div className="rounded-lg border border-dashed border-line-strong bg-surface px-5 py-8 text-center">
-      <p className="text-lg font-semibold text-ink">{title}</p>
-      {children ? <div className="mx-auto mt-1 max-w-prose text-muted">{children}</div> : null}
-      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+    <div className="rise tag-shape relative overflow-hidden border border-line-strong bg-surface px-6 py-10 text-center shadow-card">
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="mx-auto grid size-14 place-items-center rounded-[3px_10px_10px_3px] bg-forest text-white shadow-card [&_svg]:size-6"
+        >
+          {icon ?? <Inbox />}
+        </div>
+        <p className="mt-4 font-serif text-xl font-semibold text-ink">{title}</p>
+        {children ? <div className="mx-auto mt-1 max-w-prose text-muted">{children}</div> : null}
+        {action ? <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div> : null}
+      </div>
     </div>
   );
 }

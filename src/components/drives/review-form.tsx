@@ -87,7 +87,7 @@ export function ReviewDeliveryForm({
               />
             </div>
           ) : (
-            <TextArea id={f("note")} name="note" label={`Message for ${groupName}`} optional rows={2} maxLength={1000} hint="For example, a thank-you" />
+            <TextArea id={f("note")} name="note" label={`Message for ${groupName}`} optional rows={2} maxLength={1000} hint="The group will see this with the delivery. It is not posted publicly." />
           )}
 
           <SubmitButton pendingLabel="Saving decision…">Save decision</SubmitButton>

@@ -15,6 +15,7 @@ import {
   voidCollectionAction,
   withdrawDriveAction,
 } from "@/actions/app";
+import { pledgeImpact } from "@/domain/guidance";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { ActionForm } from "../ui/action-form";
 import { Button, SubmitButton } from "../ui/button";
@@ -28,12 +29,24 @@ export interface ComponentOption {
   name: string;
   uncovered: number;
   stillNeeded: number;
+  quantityPerUnit: number;
 }
 
-export function PledgeForm({ commitmentId, components }: { commitmentId: string; components: ComponentOption[] }) {
+export function PledgeForm({
+  commitmentId,
+  components,
+  unitName,
+}: {
+  commitmentId: string;
+  components: ComponentOption[];
+  unitName: string;
+}) {
   const open = components.filter((c) => c.uncovered > 0);
   const [componentId, setComponentId] = useState(open[0]?.id ?? "");
+  const [quantity, setQuantity] = useState("");
   const selected = open.find((c) => c.id === componentId);
+  const pledged = /^\d+$/.test(quantity) ? Number(quantity) : 0;
+  const impact = selected && pledged > 0 ? pledgeImpact(pledged, selected.quantityPerUnit, selected.name, unitName) : null;
   if (open.length === 0) {
     return <p className="text-muted">Everything this drive still needs has been pledged or collected. Thank you!</p>;
   }
@@ -66,9 +79,16 @@ export function PledgeForm({ commitmentId, components }: { commitmentId: string;
               hint={selected ? `Up to ${formatCount(selected.uncovered)}` : undefined}
               error={errors.quantity}
               {...numberProps}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value.replace(/[^\d]/g, "").slice(0, 6))}
               className="sm:max-w-[12rem]"
             />
           </div>
+          {impact ? (
+            <p>
+              {impact.headline} <span className="text-muted">{impact.detail}</span>
+            </p>
+          ) : null}
           <TextField id={f("note")} name="note" label="Note for your coordinator" optional maxLength={300} hint="For example, when you'll drop them off" />
           <SubmitButton pendingLabel="Saving pledge…">Pledge these items</SubmitButton>
           <p className="text-sm text-muted">A pledge is a promise, not a delivery. It counts as collected once your coordinator records it.</p>

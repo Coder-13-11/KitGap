@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AppLink, useBase } from "../ui/base";
+import { buttonClass } from "../ui/button-class";
 import { cn } from "../ui/cn";
 import { LogoMark } from "./logo";
 
@@ -76,7 +77,7 @@ export function SiteHeader({
   };
 
   return (
-    <header className="border-b border-line bg-surface no-print">
+    <header className="sticky top-0 z-30 border-b border-line bg-surface shadow-[0_1px_0_rgb(28_41_33/0.08)] no-print">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-2.5 sm:px-6">
         <AppLink href="/" className="flex min-h-11 items-center gap-2 rounded-md text-ink no-underline">
           <LogoMark />
@@ -119,7 +120,7 @@ export function SiteHeader({
               <div
                 id="account-menu"
                 hidden={!accountOpen}
-                className="absolute right-0 z-30 mt-1 w-64 rounded-lg border border-line bg-surface p-1.5 shadow-lg"
+                className="absolute right-0 z-30 mt-1 w-64 rounded-md border border-line-strong/40 bg-surface p-1.5 shadow-card"
               >
                 <ul>
                   {accountLinks.map((link) => (
@@ -141,13 +142,10 @@ export function SiteHeader({
             </div>
           ) : isDemo ? null : (
             <>
-              <AppLink href="/sign-in" className="inline-flex min-h-11 items-center rounded-md px-3 font-semibold text-forest no-underline hover:bg-forest-tint">
+              <AppLink href="/sign-in" className={buttonClass("quiet")}>
                 Sign in
               </AppLink>
-              <AppLink
-                href="/sign-up"
-                className="inline-flex min-h-11 items-center rounded-md border border-forest bg-forest px-4 font-semibold text-white no-underline hover:bg-forest-dark"
-              >
+              <AppLink href="/sign-up" className={buttonClass("primary")}>
                 Create account
               </AppLink>
             </>
@@ -208,10 +206,10 @@ export function SiteHeader({
           </div>
         ) : isDemo ? null : (
           <div className="flex gap-2 border-t border-line pt-3">
-            <AppLink href="/sign-in" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md border border-line-strong font-semibold text-forest no-underline">
+            <AppLink href="/sign-in" className={cn(buttonClass("secondary"), "flex-1")}>
               Sign in
             </AppLink>
-            <AppLink href="/sign-up" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md bg-forest font-semibold text-white no-underline">
+            <AppLink href="/sign-up" className={cn(buttonClass("primary"), "flex-1")}>
               Create account
             </AppLink>
           </div>

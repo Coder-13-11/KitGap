@@ -7,7 +7,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/lib/action-result";
-import { safeNext } from "@/lib/safe-next";
+import { INTENT_COOKIE, safeNext, welcomeIntent } from "@/lib/safe-next";
 import { createSupabaseServerClient, siteUrl } from "@/server/next/supabase";
 
 const NEXT_COOKIE = "kg_next"; // read back by /auth/confirm
@@ -85,9 +85,12 @@ export async function signUpAction(_prev: unknown, formData: FormData): Promise<
   });
   if (error) return fail(friendlyAuthError(error), {}, "auth");
 
+  const intent = welcomeIntent(text(formData, "intent"));
   const cookieStore = await cookies();
-  cookieStore.set(NEXT_COOKIE, next, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24, path: "/" });
-  if (data.session) redirect(next);
+  const cookie = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24, path: "/" };
+  cookieStore.set(NEXT_COOKIE, next, cookie);
+  if (intent) cookieStore.set(INTENT_COOKIE, intent, cookie);
+  if (data.session) redirect(intent ? `/welcome?next=${encodeURIComponent(next)}&intent=${intent}` : next);
   redirect(`/check-email?email=${encodeURIComponent(email)}`);
 }
 

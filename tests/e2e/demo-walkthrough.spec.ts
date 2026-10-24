@@ -55,13 +55,19 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   const pledgeForm = page.getByRole("form", { name: "Pledge supplies" });
   await pledgeForm.getByLabel("Item").selectOption({ label: "Notebook (40 still needed)" });
   await fill(page, pledgeForm, "How many will you bring?", "10");
+  await expect(pledgeForm.getByText("10 notebooks are enough for 5 kits.")).toBeVisible();
+  await expect(pledgeForm.getByText("They count only after the coordinator records them and the organization confirms the kits.")).toBeVisible();
   await pledgeForm.getByRole("button", { name: "Pledge these items" }).click();
   await expect(page.getByRole("status").getByText("You pledged 10 notebooks.", { exact: false })).toBeVisible();
   const notebookRow = page.locator("table").first().getByRole("row", { name: /Notebook/ });
   await expect(notebookRow).toContainText("40"); // needed
-  await expect(notebookRow.getByRole("cell").nth(1)).toHaveText("0"); // collected
-  await expect(notebookRow.getByRole("cell").nth(2)).toHaveText("10"); // pledged
-  await expect(notebookRow.getByRole("cell").nth(3)).toHaveText("30"); // still needed
+  await expect(notebookRow.getByRole("cell").nth(1)).toHaveText("10"); // pledged
+  await expect(notebookRow.getByRole("cell").nth(2)).toHaveText("0"); // received
+  await expect(notebookRow.getByRole("cell").nth(3)).toHaveText("30"); // short
+  const journey = page.getByRole("region", { name: "Where your items went" });
+  await expect(journey.getByText("Pledged")).toBeVisible();
+  await expect(journey.getByText("A pledge is a promise. It is not collected yet.")).toBeVisible();
+  await expect(journey.getByText("Confirmed")).toHaveCount(0);
 
   // 3. Jordan records 20 backpacks, 30 notebooks (10 from the pledge), 20 pencil packs.
   await actAs(page, "coordinator", drivePath);
@@ -76,6 +82,10 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await fill(page, record2, "Usable", "10");
   await record2.getByRole("button", { name: "Record received supplies" }).click();
   await expect(page.getByRole("status").getByText("Recorded 10 usable notebooks.", { exact: false })).toBeVisible();
+  await actAs(page, "contributor", drivePath);
+  await expect(page.getByRole("region", { name: "Where your items went" }).getByText("Recorded as received")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Where your items went" }).getByText("Confirmed")).toHaveCount(0);
+  await actAs(page, "coordinator", drivePath);
 
   const record3 = page.getByRole("form", { name: "Record received supplies" });
   await record3.getByLabel("Item", { exact: true }).selectOption({ label: "Notebook" });
@@ -121,6 +131,14 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
 
   await page.goto(requestUrl);
   await expect(page.getByText("20 of 100 kits promised by groups; 13 confirmed received")).toBeVisible();
+  await page.goto("/demo/record/group/00000000-0000-4000-8000-00000000b002");
+  await expect(page.getByRole("heading", { name: "Confirmed record" })).toBeVisible();
+  await expect(page.getByText("13 kits confirmed by receiving organizations.")).toBeVisible();
+  await expect(page.getByText("10 kits confirmed")).toBeVisible();
+  const recordPage = page.locator("#main");
+  await expect(recordPage.getByText("Sam Patel")).toHaveCount(0);
+  await expect(recordPage.getByText("(407) 555-0142")).toHaveCount(0);
+  await expect(recordPage.getByText("Thank you")).toHaveCount(0);
 
   // 5. Jordan sees the decision in Updates, then follows up and finishes.
   await actAs(page, "coordinator", "/updates");

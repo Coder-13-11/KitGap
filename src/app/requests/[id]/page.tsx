@@ -1,7 +1,8 @@
-import { CalendarDays, ExternalLink, MapPin, Package } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactConfirmed } from "@/components/requests/contact-badge";
+import { WhatHappensNext } from "@/components/drives/what-happens-next";
 import { QuickAdopt } from "@/components/requests/quick-adopt";
 import { SupplyTable } from "@/components/requests/supply-table";
 import { StickyAction } from "@/components/ui/sticky-action";
@@ -11,6 +12,7 @@ import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
 import { RequestProgress } from "@/components/ui/progress";
 import { PhaseBadge, Pill } from "@/components/ui/status";
+import { kitsStillToConfirm, oneKitNeedsSentence, stillToConfirmSentence } from "@/domain/guidance";
 import { formatCalendarDate, formatTimestamp } from "@/domain/dates";
 import { CATEGORY_LABEL, PHASE_EXPLANATION } from "@/domain/phase";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
@@ -22,7 +24,10 @@ type Params = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const detail = await getRequestDetail(await getAppContext(), id);
-  return { title: detail ? detail.request.title : "Request not found" };
+  if (!detail) return { title: "Request not found" };
+  const { request, org, totals } = detail;
+  const description = `${org.name} needs ${countNoun(totals.target, request.unitName)} by ${formatCalendarDate(request.neededBy)}. ${formatCount(totals.available)} still open for groups to adopt.`;
+  return { title: request.title, description, openGraph: { siteName: "KitGap", type: "website", title: request.title, description } };
 }
 
 export default async function RequestPage({ params }: Params) {
@@ -38,6 +43,7 @@ export default async function RequestPage({ params }: Params) {
   const activeDrives = detail.drives.filter((d) => d.status === "active");
   const pastDrives = detail.drives.filter((d) => d.status !== "active");
   const isDraftView = !["published", "closed", "cancelled"].includes(request.status);
+  const still = kitsStillToConfirm(totals.target, totals.accepted);
 
   return (
     <Container className="space-y-8 pb-24 lg:pb-0">
@@ -60,58 +66,47 @@ export default async function RequestPage({ params }: Params) {
               <Pill>{request.requestType === "kit" ? "Complete kits" : "Single item"}</Pill>
             </div>
             <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">{request.title}</h1>
-            <div className="space-y-1">
-              <p className="text-lg">
-                Requested by <span className="font-semibold">{org.name}</span>
-                {org.city ? <span className="text-muted"> · {org.city}</span> : null}
-              </p>
-              <ContactConfirmed at={org.contactConfirmedAt} />
-            </div>
-            <dl className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <dt className="flex items-center gap-2 text-sm text-muted">
-                  <Package aria-hidden className="size-5 shrink-0 text-forest" />
-                  Requested
-                </dt>
-                <dd className="pl-7 font-semibold">{countNoun(totals.target, unit)}</dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-2 text-sm text-muted">
-                  <CalendarDays aria-hidden className="size-5 shrink-0 text-forest" />
-                  Needed by
-                </dt>
-                <dd className="pl-7 font-semibold">{formatCalendarDate(request.neededBy)}</dd>
-                {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
-                  <dd className={deadline.passed ? "pl-7 text-sm font-semibold text-amber" : "pl-7 text-sm text-muted"}>{deadline.description}</dd>
-                ) : null}
-              </div>
-              <div>
-                <dt className="flex items-center gap-2 text-sm text-muted">
-                  <MapPin aria-hidden className="size-5 shrink-0 text-forest" />
-                  Location
-                </dt>
-                <dd className="pl-7 font-semibold">{request.location}</dd>
-              </div>
-            </dl>
+            <p className="text-lg">
+              Requested by{" "}
+              <AppLink href={`/record/organization/${org.id}`} className="font-semibold">
+                {org.name}
+              </AppLink>
+              {org.city ? <span className="text-muted"> · {org.city}</span> : null}
+            </p>
+            <ContactConfirmed at={org.contactConfirmedAt} />
+            <p className="text-muted">
+              Needed by <span className="font-semibold text-ink">{formatCalendarDate(request.neededBy)}</span>
+              {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
+                <span className={deadline.passed ? "font-semibold text-amber" : undefined}> · {deadline.description}</span>
+              ) : null}
+              <span> · {request.location}</span>
+            </p>
           </header>
 
-          <Panel as="section" className="space-y-3">
-            <h2 className="text-lg font-semibold">Progress</h2>
-            <p className="text-ink">
-              {formatCount(totals.promised)} of {countNoun(totals.target, unit)} promised by groups;{" "}
-              {formatCount(totals.accepted)} confirmed received by {org.name}.
+          <section aria-labelledby="open-count" className="tag-shape border border-line-strong bg-surface px-5 py-5 shadow-card sm:px-6">
+            <h2 id="open-count" className="font-serif text-4xl leading-none font-semibold tracking-tight">
+              <span className="tabular">{formatCount(totals.available)}</span>{" "}
+              <span className="text-[0.6em]">{totals.available === 1 ? unit.toLowerCase() : units} still open</span>
+            </h2>
+            <div className="mt-4">
+              <RequestProgress totals={totals} unitName={unit} />
+            </div>
+            <p className="mt-3">
+              {formatCount(totals.promised)} of {countNoun(totals.target, unit)} promised by groups; {formatCount(totals.accepted)} confirmed
+              received by {org.name}.
             </p>
-            <RequestProgress totals={totals} unitName={unit} />
-            <p className="text-sm text-muted">{PHASE_EXPLANATION[phase]}</p>
+            <p className="mt-1 text-muted">{stillToConfirmSentence(still, unit, org.name)}</p>
+            {request.requestType === "kit" && detail.components.length > 0 ? <p className="mt-3">{oneKitNeedsSentence(detail.components)}</p> : null}
+            <p className="mt-3 text-sm text-muted">{PHASE_EXPLANATION[phase]}</p>
             {request.statusNote ? (
-              <p className="text-sm">
+              <p className="mt-2 text-sm">
                 <span className="font-semibold">Note from {org.name}:</span> “{request.statusNote}”
               </p>
             ) : null}
-          </Panel>
+          </section>
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-labelledby="adopt-title" id="adopt-panel">
+        <aside className="space-y-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-labelledby="adopt-title" id="adopt-panel">
           <Panel className="space-y-4">
             <h2 id="adopt-title" className="text-xl font-semibold">
               {myActiveDrive ? "Your group's drive" : "Start a drive for this request"}
@@ -155,15 +150,9 @@ export default async function RequestPage({ params }: Params) {
               </p>
             ) : null}
           </Panel>
-          <Panel className="space-y-2 text-sm">
-            <h2 className="font-semibold">What happens after you start a drive</h2>
-            <ol className="list-decimal space-y-1 pl-5 text-muted">
-              <li>Your group gets the exact supply list for its share.</li>
-              <li>Members pledge items; you record what actually arrives.</li>
-              {request.requestType === "kit" ? <li>You pack complete kits and hand them over.</li> : <li>You hand the items over.</li>}
-              <li>{org.name} confirms what it received. Only confirmed items count as fulfilled.</li>
-            </ol>
-          </Panel>
+          {viewer.canAdopt && !myActiveDrive ? (
+            <WhatHappensNext orgName={org.name} isKit={request.requestType === "kit"} neededBy={formatCalendarDate(request.neededBy)} share={null} />
+          ) : null}
         </aside>
 
         <div className="min-w-0 space-y-8 lg:col-start-1 lg:row-start-2">
@@ -231,11 +220,13 @@ export default async function RequestPage({ params }: Params) {
             {activeDrives.length === 0 ? (
               <p className="text-muted">No group has started a drive for this request yet.</p>
             ) : (
-              <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
+              <ul className="tag-shape divide-y divide-line border border-line-strong bg-surface">
                 {activeDrives.map((d) => (
                   <li key={d.commitmentId} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">
                     <span>
-                      <span className="font-semibold">{d.groupName}</span>
+                      <AppLink href={`/record/group/${d.groupId}`} className="font-semibold underline">
+                        {d.groupName}
+                      </AppLink>
                       {d.groupCity ? <span className="text-muted"> · {d.groupCity}</span> : null}
                     </span>
                     <span className="tabular text-sm">
@@ -258,7 +249,7 @@ export default async function RequestPage({ params }: Params) {
             <Section title={`Updates from ${org.name}`} id="updates">
               <ul className="space-y-3">
                 {detail.updates.map((u) => (
-                  <li key={u.id} className="rounded-lg border border-line bg-surface px-4 py-3">
+                  <li key={u.id} className="tag-shape border border-line-strong bg-surface px-4 py-3">
                     <p className="whitespace-pre-line">{u.body}</p>
                     <p className="mt-1 text-sm text-muted">{formatTimestamp(u.createdAt, request.timezone)}</p>
                   </li>

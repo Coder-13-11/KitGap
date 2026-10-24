@@ -25,8 +25,20 @@ export async function latestLink(to: string, pathPart: string): Promise<string> 
   throw new Error(`No email with a ${pathPart} link arrived for ${to}`);
 }
 
-export async function signUpAndConfirm(page: Page, name: string, email: string, password: string, nextPath?: string) {
+export async function signUpAndConfirm(
+  page: Page,
+  name: string,
+  email: string,
+  password: string,
+  nextPath?: string,
+  role: "A school club or group" | "An organization" | "I was invited" = "A school club or group",
+) {
   await page.goto(`/sign-up${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`);
+  // Invitation links skip the "What brings you here?" step.
+  if (!nextPath?.startsWith("/join/")) {
+    await page.getByRole("radio", { name: new RegExp(`^${role}`) }).check();
+    await page.getByRole("button", { name: "Continue" }).click();
+  }
   await page.getByLabel("Your name").fill(name);
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Create a password").fill(password);
