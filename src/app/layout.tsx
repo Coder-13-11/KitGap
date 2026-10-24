@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ViewTransition } from "react";
 import { Archivo_Narrow, Petrona } from "next/font/google";
 import { signOutAction } from "@/actions/auth";
 import { DemoBanner } from "@/components/site/demo-banner";
@@ -6,6 +7,8 @@ import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type AccountLink, type NavItem } from "@/components/site/header";
 import { BaseProvider } from "@/components/ui/base";
 import { ToastProvider } from "@/components/ui/toast";
+import { PERSONAS } from "@/server/demo/sandbox";
+import { getDemoGuide } from "@/server/queries/demo-guide";
 import { getMyWorkspaces } from "@/server/queries/organization";
 import { getAppContext } from "@/server/next/context";
 import { siteUrl } from "@/server/next/supabase";
@@ -39,12 +42,11 @@ export const viewport: Viewport = { themeColor: "#234d3b", width: "device-width"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAppContext();
-  const workspaces = await getMyWorkspaces(ctx);
+  const [workspaces, guide] = await Promise.all([getMyWorkspaces(ctx), getDemoGuide(ctx)]);
 
   const nav: NavItem[] = [
     { href: "/requests", label: "Requests" },
-    { href: "/discover", label: "Discover" },
-    { href: "/tools", label: "Count" },
+    { href: "/about", label: "How it works" },
   ];
   if (ctx.user) nav.unshift({ href: "/home", label: "Home" });
   if (ctx.user) nav.push({ href: "/drives", label: "My drives" });
@@ -78,7 +80,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </a>
         <BaseProvider base={ctx.base}>
           <ToastProvider>
-          {ctx.demo ? <DemoBanner persona={ctx.demo.persona} /> : null}
+          {ctx.demo ? <DemoBanner
+              persona={{ key: ctx.demo.persona.key, name: ctx.demo.persona.name, short: ctx.demo.persona.short }}
+              personas={PERSONAS.map((p) => ({ key: p.key, name: p.name, short: p.short }))}
+              guide={guide}
+            /> : null}
           <SiteHeader
             nav={nav}
             user={ctx.user ? { displayName: ctx.user.displayName } : null}
@@ -87,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             isDemo={ctx.mode === "demo"}
           />
           <main id="main" className="flex-1 pt-6 pb-10 sm:pt-10" tabIndex={-1}>
-            {children}
+            <ViewTransition default="page">{children}</ViewTransition>
           </main>
           <SiteFooter />
           </ToastProvider>

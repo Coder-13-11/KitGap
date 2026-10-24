@@ -145,6 +145,9 @@ export function SiteHeader({
               <AppLink href="/sign-in" className={buttonClass("quiet")}>
                 Sign in
               </AppLink>
+              <AppLink href="/demo" className={buttonClass("secondary")}>
+                Try the demo
+              </AppLink>
               <AppLink href="/sign-up" className={buttonClass("primary")}>
                 Create account
               </AppLink>
@@ -205,11 +208,14 @@ export function SiteHeader({
             ) : null}
           </div>
         ) : isDemo ? null : (
-          <div className="flex gap-2 border-t border-line pt-3">
+          <div className="flex flex-wrap gap-2 border-t border-line pt-3">
+            <AppLink href="/demo" className={cn(buttonClass("primary"), "w-full")}>
+              Try the demo
+            </AppLink>
             <AppLink href="/sign-in" className={cn(buttonClass("secondary"), "flex-1")}>
               Sign in
             </AppLink>
-            <AppLink href="/sign-up" className={cn(buttonClass("primary"), "flex-1")}>
+            <AppLink href="/sign-up" className={cn(buttonClass("secondary"), "flex-1")}>
               Create account
             </AppLink>
           </div>

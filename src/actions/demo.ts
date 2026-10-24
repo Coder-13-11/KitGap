@@ -18,6 +18,8 @@ import {
   verifySandboxCookie,
 } from "@/server/demo/sandbox";
 import { safeDemoPath } from "@/lib/safe-next";
+import { getAppContext } from "@/server/next/context";
+import { getDemoGuide, type DemoGuide } from "@/server/queries/demo-guide";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -65,4 +67,10 @@ export async function exitDemoAction(): Promise<void> {
   cookieStore.delete(DEMO_COOKIE);
   cookieStore.delete(DEMO_PERSONA_COOKIE);
   redirect("/");
+}
+
+// The guided tour's progress, read again after each page change.
+export async function demoGuideAction(): Promise<DemoGuide | null> {
+  const ctx = await getAppContext();
+  return getDemoGuide(ctx);
 }

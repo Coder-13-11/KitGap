@@ -86,7 +86,7 @@ export function describeBottleneck(progress: DriveProgress, unitName: string): B
     const limiting = progress.components
       .filter((c) => Math.floor(c.unallocated / c.quantityPerUnit) === progress.packableFromUnallocated)
       .map((c) => pluralize(c.name).toLowerCase());
-    detail = `No complete ${pluralize(unit).toLowerCase()} can be packed yet: ${listPhrase(limiting)} ${limiting.length === 1 ? "is" : "are"} the limit.`;
+    detail = `No complete ${pluralize(unit).toLowerCase()} can be packed yet. Waiting on ${listPhrase(limiting)}.`;
   }
   return { headline, detail, shortages };
 }

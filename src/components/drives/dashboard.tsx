@@ -67,7 +67,7 @@ export function DriveHero({
         <div className="border-t border-forest/20 bg-forest-tint px-5 py-4 sm:px-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 space-y-1">
-              <p className="text-sm font-semibold tracking-wide text-forest-dark uppercase">{action.eyebrow}</p>
+              <p className="text-sm font-semibold text-forest-dark">{action.eyebrow}</p>
               <h2 className="font-serif text-2xl font-semibold">{action.title}</h2>
               {action.detail ? <p>{action.detail}</p> : null}
             </div>

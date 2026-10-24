@@ -27,7 +27,7 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
           e.preventDefault();
           go();
         }}
-        className="flex flex-col gap-2 rounded-2xl bg-white p-2 shadow-[0_20px_60px_rgb(0_0_0/0.25)] sm:flex-row"
+        className="tag-shape flex flex-col gap-2 border border-line-strong bg-surface p-2 shadow-card sm:flex-row"
       >
         <label htmlFor="discover-place" className="sr-only">
           City or ZIP code
@@ -40,20 +40,20 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
             onChange={(e) => setWhere(e.target.value)}
             placeholder="Your city or ZIP, like Orlando, FL"
             autoComplete="address-level2"
-            className="h-13 w-full rounded-xl bg-transparent pr-3 pl-11 text-lg text-ink placeholder:text-muted focus-visible:outline-offset-0"
+            className="h-13 w-full rounded-md bg-transparent pr-3 pl-11 text-lg text-ink placeholder:text-muted focus-visible:outline-offset-0"
           />
         </div>
         <button
           type="submit"
           disabled={pending}
-          className="press inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-forest px-6 text-lg font-semibold text-white hover:bg-forest-dark disabled:bg-forest/80"
+          className="press inline-flex h-13 items-center justify-center gap-2 rounded-[2px_8px_8px_2px] bg-forest px-6 text-lg font-semibold text-white hover:bg-forest-dark disabled:bg-forest/80"
         >
           {pending ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <Search className="size-5" aria-hidden="true" />}
           {pending ? "Searching" : "Find drives"}
         </button>
       </form>
       <div>
-        <p id="topic-label" className="mb-2 text-sm font-semibold text-[#d7e6dc]">
+        <p id="topic-label" className="mb-2 text-sm font-semibold text-ink">
           What do you want to give?
         </p>
         <ul aria-labelledby="topic-label" className="flex flex-wrap gap-2">
@@ -70,8 +70,8 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
                     go(next);
                   }}
                   className={cn(
-                    "press min-h-10 rounded-full px-4 text-sm font-semibold ring-1 transition-colors",
-                    on ? "bg-white text-forest ring-white" : "bg-white/10 text-white ring-white/30 hover:bg-white/20",
+                    "press min-h-10 rounded-[2px_8px_8px_2px] border px-4 text-sm font-semibold transition-colors",
+                    on ? "border-forest bg-forest text-white" : "border-line-strong bg-surface text-forest hover:bg-forest-tint",
                   )}
                 >
                   {t}

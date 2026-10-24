@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Camera } from "lucide-react";
 import { PhotoCounter } from "@/components/tools/photo-counter";
 import { Container } from "@/components/ui/layout-bits";
 
@@ -26,18 +25,17 @@ export default async function ToolsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="-mt-6 space-y-10 sm:-mt-10">
-      <section className="bg-[linear-gradient(160deg,#f2f7f3_0%,#e7efe9_100%)]">
-        <Container className="flex flex-col gap-6 py-10 sm:flex-row sm:items-center sm:py-14">
-          <span aria-hidden="true" className="float grid size-16 shrink-0 place-items-center rounded-2xl bg-forest text-white shadow-card">
-            <Camera className="size-8" />
-          </span>
-          <div>
-            <h1 className="rise font-serif text-4xl font-semibold tracking-tight sm:text-5xl">Count with a photo</h1>
-            <p className="rise mt-3 max-w-2xl text-lg text-muted">
-              Snap a pile of bags, backpacks, boxes or pencils and get the number. Check that every kit is complete. Fix anything it gets
-              wrong with a tap.
-            </p>
-          </div>
+      <section className="border-b border-line bg-sunken">
+        <Container className="py-10 sm:py-14">
+          <h1 className="rise font-serif text-4xl font-semibold tracking-tight sm:text-5xl">Count with a photo</h1>
+          <p className="rise mt-3 max-w-2xl text-lg text-muted">
+            Snap a pile of bags, backpacks, boxes or pencils and get the number. Check that every kit is complete. Fix anything it gets
+            wrong with a tap.
+          </p>
+          <p className="rise mt-3 max-w-2xl text-sm text-muted">
+            <span className="font-semibold text-ink">Experiment.</span> A count is a suggestion. It never changes a drive&rsquo;s numbers;
+            coordinators still record what arrived.
+          </p>
         </Container>
       </section>
 
@@ -48,7 +46,7 @@ export default async function ToolsPage({ searchParams }: { searchParams: Promis
           signupId={signup && /^[0-9a-f-]{36}$/i.test(signup) ? signup : undefined}
         />
 
-        <section aria-labelledby="how-title" className="grid gap-6 rounded-2xl bg-sunken p-6 sm:p-8 md:grid-cols-2">
+        <section aria-labelledby="how-title" className="tag-shape grid gap-6 border border-line-strong bg-surface p-6 shadow-card sm:p-8 md:grid-cols-2">
           <div>
             <h2 id="how-title" className="font-serif text-2xl font-semibold">
               How well does it count?

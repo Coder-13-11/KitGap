@@ -19,19 +19,18 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="-mt-6 space-y-12 sm:-mt-10">
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#234d3b_0%,#183829_70%,#12291f_100%)] text-white">
-        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-16 size-96 rounded-full bg-[#2f6650] blur-3xl" />
-        <Container className="relative py-12 sm:py-16">
-          <p className="rise inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-[#d7e6dc] ring-1 ring-white/20">
-            <Globe2 className="size-4" aria-hidden="true" />
-            Drives from all over the web
-          </p>
-          <h1 className="rise mt-4 max-w-3xl font-serif text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl">
+      <section className="border-b border-line bg-sunken">
+        <Container className="py-12 sm:py-16">
+          <h1 className="rise max-w-3xl font-serif text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl">
             Find a drive to join, wherever it was posted.
           </h1>
-          <p className="rise mt-4 max-w-2xl text-lg text-[#d7e6dc]">
+          <p className="rise mt-4 max-w-2xl text-lg text-muted">
             We search SignUpGenius, JustServe, volunteer sites and public Facebook, Instagram and LinkedIn posts. Tap one to sign up
             on its own page.
+          </p>
+          <p className="rise mt-3 max-w-2xl text-sm text-muted">
+            <span className="font-semibold text-ink">Experiment.</span> These results come from web search and aren&rsquo;t checked by a
+            person, unlike requests on KitGap. Nothing here counts toward KitGap&rsquo;s numbers.
           </p>
           <div className="rise mt-7">
             <DiscoverSearch place={place} topic={topic} topics={DISCOVER_TOPICS} />
@@ -56,13 +55,13 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
                   href={p.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="lift group flex h-full flex-col rounded-2xl border border-line/80 bg-surface p-5 text-ink no-underline shadow-card hover:border-forest/50"
+                  className="tag-shape lift group flex h-full flex-col border border-line-strong bg-surface p-5 text-ink no-underline shadow-card hover:border-forest/50"
                 >
                   <span className="text-sm font-semibold text-clay">{p.organizer}</span>
                   <span className="mt-1 text-lg font-semibold group-hover:underline">{p.title}</span>
                   <span className="mt-2 flex-1 text-muted">{p.text}</span>
                   <span className="mt-4 flex items-center justify-between text-sm">
-                    <span className="rounded-full bg-sunken px-2.5 py-1 font-medium text-muted">{p.season}</span>
+                    <span className="rounded-[2px_8px_8px_2px] bg-sunken px-2.5 py-1 font-medium text-muted">{p.season}</span>
                     <span className="inline-flex items-center gap-1 font-semibold text-forest">
                       Open
                       <ExternalLink className="size-4" aria-hidden="true" />

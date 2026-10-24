@@ -81,7 +81,13 @@ export default function AboutPage() {
           </p>
           <p>
             <strong>Built with:</strong> Next.js, React, TypeScript, Tailwind CSS, Supabase (authentication and Postgres), postgres.js,
-            Lucide icons, and the Public Sans and Source Serif 4 typefaces (SIL Open Font License).
+            Lucide icons, and the Petrona and Archivo Narrow typefaces (SIL Open Font License).
+          </p>
+          <p>
+            <strong>Photographs</strong> (Unsplash License): backpack by{" "}
+            <a href="https://unsplash.com/photos/_H0fjILH5Vw">Sun Lingyan</a>, notebook by{" "}
+            <a href="https://unsplash.com/photos/vdaJJbls3xE">Marissa Grootes</a>, pencils by{" "}
+            <a href="https://unsplash.com/photos/l3N9Q27zULw">Jess Bailey</a>.
           </p>
           <p>
             <strong>Sample data:</strong> every organization, group and person in the demo is fictional.

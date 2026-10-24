@@ -17,7 +17,9 @@ async function scan(page: Page, label: string) {
 }
 
 async function actAs(page: Page, persona: string, name: string) {
-  await page.getByLabel("Acting as").selectOption(persona);
+  // The person switcher sits in the demo bar's "All steps" panel.
+  await page.getByText("All steps", { exact: true }).click();
+  await page.getByLabel("Act as").selectOption(persona);
   await page.getByRole("button", { name: "Switch" }).click();
   await expect(page.getByRole("button", { name }).first()).toBeVisible();
 }

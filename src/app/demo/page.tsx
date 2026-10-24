@@ -72,12 +72,12 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
 
   return (
     <Container narrow className="space-y-8">
-      <header className="space-y-3">
-        <p className="text-sm font-semibold text-clay">Demo with sample data</p>
-        <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Try KitGap with sample data</h1>
+      <header className="rise space-y-3">
+        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">See a whole drive in two minutes</h1>
         <p className="text-lg text-muted">
           You get a private copy of KitGap with a fictional family center, a fictional school club and a 100-kit school-supply request.
-          Switch between four sample people to see each side of a drive. Nothing you do here affects real requests or other visitors.
+          A guide in the bar at the top takes you through each side of the drive and switches people for you. Nothing you do here
+          affects real requests or other visitors.
         </p>
       </header>
 
@@ -93,16 +93,36 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
       ) : null}
 
       {!ready ? (
-        <Panel className="space-y-4">
-          <h2 className="text-xl font-semibold">Start the demo</h2>
-          <p>It takes a few seconds to set up your private copy. It stays available in this browser for a day.</p>
-          <form action={startDemoAction}>
-            <input type="hidden" name="persona" value="coordinator" />
-            <button type="submit" className={buttonClass("primary")}>
-              Start the demo
-            </button>
-          </form>
-        </Panel>
+        <>
+          <Panel className="rise space-y-4">
+            <h2 className="font-serif text-2xl font-semibold tracking-tight">Start the demo</h2>
+            <p>It takes a few seconds to set up your private copy. It stays available in this browser for a day.</p>
+            <form action={startDemoAction}>
+              <input type="hidden" name="persona" value="coordinator" />
+              <button type="submit" className={buttonClass("primary")}>
+                Start the demo
+              </button>
+            </form>
+          </Panel>
+          <section aria-labelledby="cast-title" className="space-y-4">
+            <h2 id="cast-title" className="font-serif text-2xl font-semibold tracking-tight">
+              Who you&rsquo;ll play
+            </h2>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {PERSONAS.map((p, i) => (
+                <li
+                  key={p.key}
+                  className="rise rounded-[2px_14px_14px_2px] border border-line-strong bg-surface p-4 shadow-card"
+                  style={{ ["--i" as string]: i + 1 }}
+                >
+                  <p className="font-serif text-lg font-semibold">{p.name}</p>
+                  <p className="text-sm text-muted">{p.role}</p>
+                  <p className="mt-1 text-sm">{p.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
       ) : (
         <>
           <section aria-labelledby="walkthrough-title" className="space-y-4">

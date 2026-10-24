@@ -6,7 +6,9 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function actAs(page: Page, persona: "organization" | "coordinator" | "contributor" | "reviewer", path: string) {
   const labels = { organization: "Maya Ortiz", coordinator: "Jordan Lee", contributor: "Sam Patel", reviewer: "Riley Chen" };
-  await page.getByLabel("Acting as").selectOption(persona);
+  // The person switcher sits in the demo bar's "All steps" panel.
+  await page.getByText("All steps", { exact: true }).click();
+  await page.getByLabel("Act as").selectOption(persona);
   await page.getByRole("button", { name: "Switch" }).click();
   await page.waitForLoadState("networkidle");
   await expect(page.getByRole("button", { name: labels[persona] })).toBeVisible();
@@ -26,7 +28,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
     await page.getByRole("button", { name: "Go as Jordan" }).first().click();
   }
   await page.waitForURL(/\/demo\/requests\//);
-  await expect(page.getByText("Demo with sample data.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Demo guide" })).toBeVisible();
   const requestUrl = page.url();
 
   // 1. Jordan adopts 20 of 100 kits.

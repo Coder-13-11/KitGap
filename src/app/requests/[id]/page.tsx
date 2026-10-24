@@ -12,7 +12,7 @@ import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
 import { RequestProgress } from "@/components/ui/progress";
 import { PhaseBadge, Pill } from "@/components/ui/status";
-import { kitsStillToConfirm, oneKitNeedsSentence, stillToConfirmSentence } from "@/domain/guidance";
+import { oneKitNeedsSentence } from "@/domain/guidance";
 import { formatCalendarDate, formatTimestamp } from "@/domain/dates";
 import { CATEGORY_LABEL, PHASE_EXPLANATION } from "@/domain/phase";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
@@ -43,7 +43,6 @@ export default async function RequestPage({ params }: Params) {
   const activeDrives = detail.drives.filter((d) => d.status === "active");
   const pastDrives = detail.drives.filter((d) => d.status !== "active");
   const isDraftView = !["published", "closed", "cancelled"].includes(request.status);
-  const still = kitsStillToConfirm(totals.target, totals.accepted);
 
   return (
     <Container className="space-y-8 pb-24 lg:pb-0">
@@ -95,7 +94,6 @@ export default async function RequestPage({ params }: Params) {
               {formatCount(totals.promised)} of {countNoun(totals.target, unit)} promised by groups; {formatCount(totals.accepted)} confirmed
               received by {org.name}.
             </p>
-            <p className="mt-1 text-muted">{stillToConfirmSentence(still, unit, org.name)}</p>
             {request.requestType === "kit" && detail.components.length > 0 ? <p className="mt-3">{oneKitNeedsSentence(detail.components)}</p> : null}
             <p className="mt-3 text-sm text-muted">{PHASE_EXPLANATION[phase]}</p>
             {request.statusNote ? (
