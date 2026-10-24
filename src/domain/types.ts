@@ -61,7 +61,14 @@ export interface PledgeRecord {
   id: string;
   commitmentId: string;
   componentId: string;
-  userId: string;
+  // null for a guest pledge imported from a sign-up sheet.
+  userId: string | null;
+  guestName: string | null;
+  // Seen only by the drive's coordinators.
+  guestEmail: string | null;
+  importSource: "google_forms_csv" | "signupgenius_csv" | "spreadsheet" | "google_forms_webhook" | null;
+  sourceRowId: string | null;
+  importBatchId: string | null;
   quantity: number;
   note: string;
   status: "open" | "closed";

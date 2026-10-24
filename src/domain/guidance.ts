@@ -156,6 +156,123 @@ export function nextStepForCoordinator(progress: DriveProgress, unitName: string
   return { action: "record", title: "Record supplies as they arrive", detail: "" };
 }
 
+export type ChecklistKey = "share" | "pledge" | "collect" | "pack" | "deliver" | "confirm";
+
+export interface ChecklistStep {
+  key: ChecklistKey;
+  title: string;
+  detail: string;
+  status: "done" | "current" | "todo";
+}
+
+// The whole drive as a short list anyone can follow. Each step is done by its
+// own numbers; the first one that isn't done is the current one.
+export function driveChecklist(progress: DriveProgress, unitName: string, orgName: string, pledgeCount: number): ChecklistStep[] {
+  const { stages, committed } = progress;
+  const sum = (pick: (c: DriveProgress["components"][number]) => number) => progress.components.reduce((n, c) => n + pick(c), 0);
+  const uncovered = sum((c) => c.uncovered);
+  const stillNeeded = sum((c) => c.stillNeeded);
+  const collected = sum((c) => c.collected);
+  const handedOver = stages.accepted + stages.pendingReview;
+  const packed = Math.max(0, committed - stages.toBuild);
+  const of = (n: number) => `${formatCount(Math.min(n, committed))} of ${countNoun(committed, unitName)}`;
+
+  const steps: Omit<ChecklistStep, "status">[] = [
+    {
+      key: "share",
+      title: "Tell your group what to bring",
+      detail: pledgeCount > 0 || collected > 0 ? "Your group has started." : "Share the invitation link so members can pledge.",
+    },
+    {
+      key: "pledge",
+      title: "Get every supply promised",
+      detail: uncovered === 0 ? "Nothing is missing a promise." : `${countNoun(uncovered, "item")} nobody has promised yet.`,
+    },
+    {
+      key: "collect",
+      title: "Collect the supplies",
+      detail: stillNeeded === 0 ? "Everything needed has arrived." : `${countNoun(stillNeeded, "item")} still to arrive.`,
+    },
+    ...(progress.requestType === "kit"
+      ? [{ key: "pack" as const, title: `Pack the ${pluralize(unitName).toLowerCase()}`, detail: `${of(packed)} packed.` }]
+      : []),
+    { key: "deliver", title: `Hand them to ${orgName}`, detail: `${of(handedOver)} handed over.` },
+    { key: "confirm", title: `${orgName} says they arrived`, detail: `${of(stages.accepted)} confirmed.` },
+  ];
+  const done: Record<ChecklistKey, boolean> = {
+    share: pledgeCount > 0 || collected > 0 || uncovered === 0,
+    pledge: uncovered === 0,
+    collect: stillNeeded === 0,
+    pack: stages.toBuild === 0,
+    deliver: handedOver >= committed,
+    confirm: stages.accepted >= committed,
+  };
+  let current = progress.active;
+  return steps.map((step) => {
+    if (done[step.key]) return { ...step, status: "done" };
+    const status = current ? "current" : "todo";
+    current = false;
+    return { ...step, status };
+  });
+}
+
+/** Kits a receiving organization has not confirmed yet. Pledges and pending deliveries do not reduce this. */
+export function kitsStillToConfirm(target: number, accepted: number): number {
+  return Math.max(0, target - accepted);
+}
+
+export function stillToConfirmSentence(remaining: number, unitName: string, orgName: string): string {
+  return `${countNoun(remaining, unitName)} still to be confirmed by ${orgName}.`;
+}
+
+export function shareDriveSentence(remaining: number, unitName: string, orgName: string): string {
+  if (remaining <= 0) return `This drive is complete: ${orgName} confirmed every ${unitName.toLowerCase()}.`;
+  return `Help finish this drive: ${countNoun(remaining, unitName)} still to be confirmed by ${orgName}.`;
+}
+
+/** What a single kit contains, from the recipe. Item requests have no kit sentence. */
+export function oneKitNeedsSentence(components: readonly { name: string; quantityPerUnit: number }[]): string | null {
+  if (components.length === 0) return null;
+  const parts = components.map((c) => countNoun(c.quantityPerUnit, c.name));
+  return `One kit still needs ${listPhrase(parts)}.`;
+}
+
+export function pledgeImpact(
+  quantity: number,
+  quantityPerUnit: number,
+  itemName: string,
+  unitName: string,
+): { headline: string; detail: string } {
+  const detail = "They count only after the coordinator records them and the organization confirms the kits.";
+  const per = Math.max(1, quantityPerUnit);
+  const units = Math.floor(quantity / per);
+  if (units < 1) {
+    const headline = unitName.trim().toLowerCase() === "kit" ? "Not enough for a kit yet." : `Not enough for a ${unitName.toLowerCase()} yet.`;
+    return { headline, detail };
+  }
+  const verb = quantity === 1 ? "is" : "are";
+  return { headline: `${countNoun(quantity, itemName)} ${verb} enough for ${countNoun(units, unitName)}.`, detail };
+}
+
+/** A published request is close to its goal when at least 75% is confirmed and it is not finished. */
+export function isCloseToConfirmed(accepted: number, target: number): boolean {
+  if (target <= 0 || accepted >= target) return false;
+  return accepted / target >= 0.75;
+}
+
+const MILESTONES = [100, 50, 10] as const;
+
+export function confirmedMilestone(acceptedKits: number): { count: number; title: string; detail: string } | null {
+  const count = MILESTONES.find((milestone) => acceptedKits >= milestone);
+  if (!count) return null;
+  const title = `${formatCount(count)} kits confirmed`;
+  const detail =
+    count === 10
+      ? "The first milestone is 10 kits a receiving organization has confirmed."
+      : `This milestone is ${formatCount(count)} kits a receiving organization has confirmed.`;
+  return { count, title, detail };
+}
+
 function nounFor(count: number, name: string): string {
   return (count === 1 ? name.trim() : pluralize(name)).toLowerCase();
 }

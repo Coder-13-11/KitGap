@@ -43,6 +43,9 @@ export const DEMO_IDS = {
   shelter: "00000000-0000-4000-8000-00000000b003",
   kitRequest: "00000000-0000-4000-8000-00000000c001",
   itemRequest: "00000000-0000-4000-8000-00000000c002",
+  hatComponent: "00000000-0000-4000-8000-00000000c102",
+  hatDrive: "00000000-0000-4000-8000-00000000d001",
+  hatImport: "00000000-0000-4000-8000-00000000e001",
 };
 
 export const PERSONAS: Persona[] = [
@@ -174,8 +177,9 @@ export async function cleanupSandboxes(sql: Sql): Promise<number> {
 }
 
 // The starting state of every sandbox: one 100-kit school-supply request
-// (1 backpack, 2 notebooks, 1 pencil pack per kit) and one single-item
-// request, published, with no drives yet. Every name is fictional.
+// (1 backpack, 2 notebooks, 1 pencil pack per kit) with no drives yet, and
+// one single-item request the club already has a small drive for. Every
+// name is fictional.
 export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
   const timezone = "America/New_York";
   const today = todayIn(timezone, now);
@@ -303,6 +307,7 @@ export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
   `;
   await tx`
     insert into request_components ${tx({
+      id: DEMO_IDS.hatComponent,
       requestId: DEMO_IDS.itemRequest,
       position: 0,
       name: "Child's knit hat",
@@ -311,4 +316,45 @@ export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
       details: "Ages 4 to 12, any color",
     })}
   `;
+
+  // The club already runs a small hat drive, with one sign-up brought in from
+  // a sample Google Forms export, so the import shows up without any setup.
+  await tx`
+    insert into commitments ${tx({ id: DEMO_IDS.hatDrive, requestId: DEMO_IDS.itemRequest, groupId: DEMO_IDS.group, quantity: 15, createdBy: DEMO_IDS.jordan })}
+  `;
+  await tx`
+    insert into import_batches ${tx({
+      id: DEMO_IDS.hatImport,
+      commitmentId: DEMO_IDS.hatDrive,
+      source: "google_forms_csv",
+      fileName: "hat-drive-sign-ups (sample).csv",
+      createdCount: 1,
+      skippedCount: 0,
+      createdBy: DEMO_IDS.jordan,
+    })}
+  `;
+  await tx`
+    insert into pledges ${tx({
+      commitmentId: DEMO_IDS.hatDrive,
+      componentId: DEMO_IDS.hatComponent,
+      userId: null,
+      guestName: "Priya N. (sample)",
+      guestEmail: "priya.sample@example.com",
+      importSource: "google_forms_csv",
+      sourceRowId: "sample-row-1",
+      importBatchId: DEMO_IDS.hatImport,
+      quantity: 4,
+      note: "Sample sign-up from a Google Form",
+    })}
+  `;
+  const activity = [
+    { kind: "drive.started", audience: "both", data: { quantity: 15 } },
+    { kind: "pledges.imported", audience: "group", data: { source: "google_forms_csv", count: 1, quantity: 4, overCap: 0, duplicates: 0 } },
+  ];
+  for (const a of activity) {
+    await tx`
+      insert into activity (kind, audience, actor_id, request_id, commitment_id, workspace_id, data)
+      values (${a.kind}, ${a.audience}, ${DEMO_IDS.jordan}, ${DEMO_IDS.itemRequest}, ${DEMO_IDS.hatDrive}, ${DEMO_IDS.group}, ${tx.json(a.data)})
+    `;
+  }
 }

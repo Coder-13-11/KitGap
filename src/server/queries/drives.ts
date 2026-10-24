@@ -3,7 +3,9 @@
 // contributors see their own pledges and the group's totals.
 
 import { describeDeadline, type DeadlineInfo } from "@/domain/dates";
-import { describeBottleneck, nextStepForCoordinator, type Bottleneck, type NextStep } from "@/domain/guidance";
+import { describeBottleneck, driveChecklist, nextStepForCoordinator, type Bottleneck, type ChecklistStep, type NextStep } from "@/domain/guidance";
+import { cleanWebhookQuestions, DEFAULT_WEBHOOK_QUESTIONS, IMPORT_SOURCE_LABEL, type WebhookQuestions } from "@/domain/import";
+import { donationJourney, type DonationJourney } from "@/domain/journey";
 import { requestPhase, type RequestPhase } from "@/domain/phase";
 import { driveProgress, requestTotals, type ComponentProgress, type UnitStages } from "@/domain/quantities";
 import type {
@@ -38,6 +40,8 @@ export interface PledgeView {
   outstanding: number;
   status: "waiting" | "partly_received" | "received" | "withdrawn" | "released";
   contributorName: string | null; // coordinators only
+  // Coordinators only: set for pledges imported from a sign-up sheet.
+  imported: { source: string; email: string | null } | null;
   isMine: boolean;
   note: string;
   createdAt: Date;
@@ -98,10 +102,13 @@ export interface DriveWorkspace {
   deadline: DeadlineInfo;
   bottleneck: Bottleneck;
   nextStep: NextStep;
+  checklist: ChecklistStep[];
   pledges: PledgeView[];
   collections: CollectionView[];
   deliveries: DeliveryView[];
   activity: ActivityItem[];
+  journey: DonationJourney;
+  formWebhook: { connected: boolean; disabled: boolean; lastUsedAt: Date | null; questions: WebhookQuestions } | null;
 }
 
 function pledgeStatus(p: PledgeRecord, received: number): PledgeView["status"] {
@@ -179,16 +186,17 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
 
     const names = new Map<string, string>();
     if (role === "coordinator") {
-      const ids = [...new Set([...data.pledges.map((p) => p.userId), ...data.collections.map((c) => c.recordedBy)])];
+      const ids = [...new Set([...data.pledges.flatMap((p) => (p.userId ? [p.userId] : [])), ...data.collections.map((c) => c.recordedBy)])];
       if (ids.length) {
         const rows = await tx`select id, display_name from profiles where id = any(${ids}::uuid[])`;
         for (const row of rows) names.set(row.id as string, row.displayName as string);
       }
     }
     const coordinatorRows = await tx`
-      select p.display_name from workspace_members m join profiles p on p.id = m.user_id
+      select m.user_id, p.display_name from workspace_members m join profiles p on p.id = m.user_id
       where m.workspace_id = ${data.commitment.groupId} and m.role = 'admin' order by m.created_at
     `;
+    const coordinatorNames = new Map(coordinatorRows.map((r) => [r.userId as string, r.displayName as string]));
 
     const visiblePledges =
       role === "coordinator" ? data.pledges : role === "contributor" ? data.pledges.filter((p) => p.userId === ctx.userId) : [];
@@ -202,8 +210,10 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         received,
         outstanding: p.status === "open" ? Math.max(0, p.quantity - received) : 0,
         status: pledgeStatus(p, received),
-        contributorName: role === "coordinator" ? names.get(p.userId) ?? "Member" : null,
-        isMine: p.userId === ctx.userId,
+        contributorName: role === "coordinator" ? (p.guestName ?? (p.userId ? names.get(p.userId) : undefined) ?? "Member") : null,
+        imported:
+          role === "coordinator" && p.importSource ? { source: IMPORT_SOURCE_LABEL[p.importSource], email: p.guestEmail } : null,
+        isMine: p.userId !== null && p.userId === ctx.userId,
         note: role === "coordinator" || p.userId === ctx.userId ? p.note : "",
         createdAt: p.createdAt,
       };
@@ -237,6 +247,65 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         reviewNote: d.reviewNote,
         reviewedAt: d.reviewedAt,
       }));
+
+    const visiblePledgeIds = new Set(visiblePledges.map((p) => p.id));
+    const journey = donationJourney({
+      unitName: unit,
+      orgName: data.org.name as string,
+      requestTarget: data.request.targetQuantity ?? 0,
+      requestAccepted: totals.accepted,
+      showPersonalNote: role === "contributor",
+      pledges: pledges.map((p) => ({
+        id: p.id,
+        componentName: p.componentName,
+        quantity: p.quantity,
+        createdAt: p.createdAt,
+        contributorName: p.contributorName,
+        withdrawn: p.status === "withdrawn" || p.status === "released",
+      })),
+      collections:
+        role === "organization"
+          ? []
+          : data.collections
+              .filter((c) => c.pledgeId && visiblePledgeIds.has(c.pledgeId))
+              .map((c) => ({
+                id: c.id,
+                pledgeId: c.pledgeId,
+                usableQuantity: c.usableQuantity,
+                createdAt: c.createdAt,
+                recordedByName:
+                  role === "coordinator"
+                    ? names.get(c.recordedBy) ?? coordinatorNames.get(c.recordedBy) ?? "A coordinator"
+                    : coordinatorNames.get(c.recordedBy) ?? "A coordinator",
+                voided: Boolean(c.voidedAt),
+              })),
+      movements: data.movements.map((m) => ({ id: m.id, kind: m.kind, quantity: m.quantity, createdAt: m.createdAt })),
+      deliveries: data.deliveries
+        .filter((d) => d.commitmentId === commitmentId)
+        .map((d) => ({
+          id: d.id,
+          quantity: d.quantity,
+          status: d.status,
+          submittedAt: d.submittedAt,
+          acceptedQuantity: d.acceptedQuantity,
+          reviewNote: role === "organization" ? "" : d.reviewNote,
+          reviewedAt: d.reviewedAt,
+        })),
+    });
+
+    const [hook] =
+      role === "coordinator"
+        ? await tx`select last_used_at, disabled_at, questions from form_webhooks where commitment_id = ${commitmentId}`
+        : [];
+    const formWebhook =
+      role === "coordinator"
+        ? {
+            connected: Boolean(hook),
+            disabled: Boolean(hook?.disabledAt),
+            lastUsedAt: (hook?.lastUsedAt as Date) ?? null,
+            questions: cleanWebhookQuestions(hook?.questions ?? DEFAULT_WEBHOOK_QUESTIONS),
+          }
+        : null;
 
     const activity = await activityFor(tx, {
       commitmentId,
@@ -290,10 +359,13 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         : { daysLeft: 0, passed: false, soon: false, description: "" },
       bottleneck: describeBottleneck(progress, unit),
       nextStep: nextStepForCoordinator(progress, unit, data.org.name),
+      checklist: driveChecklist(progress, unit, data.org.name, data.pledges.length),
       pledges,
       collections,
       deliveries,
       activity,
+      journey,
+      formWebhook,
     };
   });
 }
@@ -303,7 +375,7 @@ export interface PublicDrive {
   commitmentId: string;
   status: CommitmentRecord["status"];
   quantity: number;
-  group: { name: string; city: string };
+  group: { id: string; name: string; city: string };
   request: { id: string; title: string; requestType: RequestRecord["requestType"]; unitName: string; neededBy: string; timezone: string; status: RequestRecord["status"] };
   org: { name: string; city: string };
   progress: ProgressView;
@@ -324,7 +396,7 @@ export async function getPublicDrive(ctx: ServiceContext, commitmentId: string):
       commitmentId,
       status: data.commitment.status,
       quantity: data.commitment.quantity,
-      group: { name: data.group.name, city: data.group.city },
+      group: { id: data.group.id as string, name: data.group.name, city: data.group.city },
       request: {
         id: data.request.id,
         title: data.request.title,
@@ -366,6 +438,9 @@ export interface MyDriveItem {
   deadline: DeadlineInfo;
   nextStep: NextStep;
   myOpenPledges: number;
+  // Coordinators only (0 for members): how far the drive has got, for the getting-started card.
+  pledgeCount: number;
+  collectedItems: number;
 }
 
 export interface MyGroup {
@@ -420,6 +495,8 @@ export async function getMyDrives(ctx: ServiceContext): Promise<{ drives: MyDriv
         myOpenPledges: data.pledges
           .filter((p) => p.userId === userId && p.status === "open")
           .reduce((sum, p) => sum + (progress.pledgeOutstanding.get(p.id) ?? 0), 0),
+        pledgeCount: group.role === "admin" ? data.pledges.length : 0,
+        collectedItems: group.role === "admin" ? progress.components.reduce((sum, c) => sum + c.collected, 0) : 0,
       });
     }
     return { drives, groups };
