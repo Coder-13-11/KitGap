@@ -97,7 +97,7 @@ export default function AboutPage() {
 
       <p>
         <AppLink href="/requests" className="font-semibold">
-          Explore requests
+          Find a need
         </AppLink>{" "}
         or <a href="/demo" className="font-semibold text-forest">try the demo</a>.
       </p>

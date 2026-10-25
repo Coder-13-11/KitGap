@@ -142,9 +142,16 @@ export default async function HomePage() {
         {nearby.length === 0 ? (
           <Panel className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted">No needs posted on KitGap near you yet. People nearby may be collecting elsewhere.</p>
-            <ButtonLink href="/requests?tab=online" variant="secondary">
-              See drives found online
-            </ButtonLink>
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href="/requests?tab=online" variant="secondary">
+                See drives found online
+              </ButtonLink>
+              {ctx.mode === "live" ? (
+                <ButtonLink href="/demo" variant="secondary">
+                  See a sample board
+                </ButtonLink>
+              ) : null}
+            </div>
           </Panel>
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

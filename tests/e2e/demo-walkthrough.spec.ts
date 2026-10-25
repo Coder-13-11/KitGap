@@ -21,6 +21,8 @@ async function fill(page: Page, form: ReturnType<Page["locator"]>, label: string
 
 test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await page.goto("/demo");
+  // Wait for whichever first button this browser gets before choosing.
+  await expect(page.getByRole("button", { name: /^(Start|Reset) the demo$/ }).first()).toBeVisible();
   if (await page.getByRole("button", { name: "Start the demo" }).isVisible()) {
     await page.getByRole("button", { name: "Start the demo" }).click();
   } else {
@@ -50,7 +52,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await page.goto(requestUrl);
   await expect(page.getByText("20 of 100 kits promised by groups; 0 confirmed received")).toBeVisible();
   await expect(page.getByText("Of 100 kits, 0 confirmed received, 0 delivered and awaiting review, 20 promised by groups and not yet delivered, and 80 still available for new drives.")).toBeAttached();
-  await expect(page.getByRole("heading", { name: "Your group's drive" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "You're helping with this" })).toBeVisible();
 
   // 2. Sam pledges 10 notebooks; it does not count as collected.
   await actAs(page, "contributor", drivePath);
@@ -117,7 +119,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
 
   // 4. Maya accepts 13 and does not accept 2.
   await actAs(page, "organization", "/organization/00000000-0000-4000-8000-00000000b001");
-  await expect(page.getByText("Lakeside High Service Club (sample) reported 15 kits")).toBeVisible();
+  await expect(page.getByText("Lakeside High Service Club (sample) handed over 15 kits")).toBeVisible();
   await page.getByRole("link", { name: "Review delivery" }).click();
   await page.getByLabel("No, only some (or none) are acceptable").check();
   await page.getByLabel("How many kits are you accepting?").fill("13");

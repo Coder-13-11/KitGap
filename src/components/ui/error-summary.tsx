@@ -25,7 +25,10 @@ export function ErrorSummary({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    ref.current?.focus();
+    // Plain focus() scrolls the box only just into view, where the sticky
+    // header can cover it. Centre it instead.
+    ref.current?.focus({ preventScroll: true });
+    ref.current?.scrollIntoView({ block: "center" });
   }, [token]);
   const entries = Object.entries(fieldErrors);
   return (
@@ -48,12 +51,12 @@ export function ErrorSummary({
         </p>
       ) : null}
       {entries.length > 0 ? (
-        <ul className="mt-2 list-disc space-y-1 pl-5">
+        <ul className="mt-2 list-disc pl-5">
           {entries.map(([name, text]) => (
             <li key={name}>
               <a
                 href={`#${idFor(name)}`}
-                className="font-semibold text-danger underline"
+                className="inline-block py-1.5 font-semibold text-danger underline"
                 onClick={(event) => {
                   const target = document.getElementById(idFor(name));
                   if (target) {

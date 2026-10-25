@@ -23,6 +23,7 @@ import { ShareDrive } from "@/components/drives/share-drive";
 import { DonationJourneySection } from "@/components/drives/journey";
 import { StageSummary } from "@/components/drives/stages";
 import { SuppliesTable } from "@/components/drives/supplies";
+import { ShowMore } from "@/components/ui/show-more";
 import { ActivityList } from "@/components/site/activity-list";
 import { AppLink } from "@/components/ui/base";
 import { buttonClass } from "@/components/ui/button-class";
@@ -205,6 +206,27 @@ export default async function DrivePage({
       </Section>
     ) : null;
 
+  const collectionRow = (c: (typeof drive.collections)[number]) => (
+    <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <div className={c.voided ? "text-muted line-through" : undefined}>
+        <p>
+          <span className="font-semibold">{countNoun(c.usable, c.componentName)}</span>
+          {c.unusable > 0 ? `, plus ${formatCount(c.unusable)} not usable` : ""}
+          {c.fromPledge ? " · from a pledge" : ""}
+        </p>
+        <p className="text-sm text-muted">
+          Recorded by {c.recordedByName}, {formatTimestamp(c.createdAt, request.timezone)}
+          {c.note ? ` · “${c.note}”` : ""}
+        </p>
+      </div>
+      {c.voided ? (
+        <span className="text-sm text-muted">Removed</span>
+      ) : active ? (
+        <VoidEntryButton entryId={c.id} label={`${countNoun(c.usable, c.componentName)} recorded by ${c.recordedByName}`} />
+      ) : null}
+    </li>);
+  const logClass = "tag-shape divide-y divide-line border border-line-strong bg-surface shadow-card";
+
   const deliveriesSection = (
     <Section title="Deliveries" id="deliveries">
       {drive.deliveries.length === 0 ? (
@@ -253,7 +275,7 @@ export default async function DrivePage({
 
   const activitySection = (
     <Section title="Activity" id="activity">
-      <ActivityList items={drive.activity} timezone={request.timezone} />
+      <ActivityList items={drive.activity} timezone={request.timezone} limit={4} />
     </Section>
   );
 
@@ -416,28 +438,12 @@ export default async function DrivePage({
                 {drive.collections.length > 0 ? (
                   <div id="log" className="space-y-3">
                     <h3 className="text-lg font-semibold">Received supplies log</h3>
-                    <ul className="tag-shape divide-y divide-line border border-line-strong bg-surface shadow-card">
-                      {drive.collections.map((c) => (
-                        <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                          <div className={c.voided ? "text-muted line-through" : undefined}>
-                            <p>
-                              <span className="font-semibold">{countNoun(c.usable, c.componentName)}</span>
-                              {c.unusable > 0 ? `, plus ${formatCount(c.unusable)} not usable` : ""}
-                              {c.fromPledge ? " · from a pledge" : ""}
-                            </p>
-                            <p className="text-sm text-muted">
-                              Recorded by {c.recordedByName}, {formatTimestamp(c.createdAt, request.timezone)}
-                              {c.note ? ` · “${c.note}”` : ""}
-                            </p>
-                          </div>
-                          {c.voided ? (
-                            <span className="text-sm text-muted">Removed</span>
-                          ) : active ? (
-                            <VoidEntryButton entryId={c.id} label={`${countNoun(c.usable, c.componentName)} recorded by ${c.recordedByName}`} />
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
+                    <ul className={logClass}>{drive.collections.slice(0, 3).map(collectionRow)}</ul>
+                    {drive.collections.length > 3 ? (
+                      <ShowMore count={drive.collections.length - 3} noun="earlier entry">
+                        <ul className={logClass}>{drive.collections.slice(3).map(collectionRow)}</ul>
+                      </ShowMore>
+                    ) : null}
                   </div>
                 ) : null}
                 </div>
@@ -638,8 +644,12 @@ export default async function DrivePage({
           ) : null}
 
           {isCoordinator && canChange ? (
-            <Panel className="space-y-4">
-              <h2 className="text-lg font-semibold">Change this drive</h2>
+            <Panel>
+              <details className="group space-y-4">
+              <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2">
+                <h2 className="text-lg font-semibold">Change this drive</h2>
+                <span className="text-sm font-semibold text-forest group-open:hidden">Open</span>
+              </summary>
               <ChangeQuantityForm commitmentId={commitment.id} current={commitment.quantity} minimum={minimum} maximum={maximum} unitName={unit} />
               <div className="space-y-2 border-t border-line pt-4">
                 <p className="text-sm text-muted">If your group can't finish, withdrawing releases what you haven't delivered.</p>
@@ -652,6 +662,7 @@ export default async function DrivePage({
                   orgName={org.name}
                 />
               </div>
+              </details>
             </Panel>
           ) : null}
         </aside>

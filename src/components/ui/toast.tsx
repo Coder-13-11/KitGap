@@ -23,7 +23,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!message) return;
     if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setMessage(null), 7000);
+    // Clear only this message. A newer one may already be queued in a pending
+    // transition (a save finishing while the page refreshes); a plain
+    // setMessage(null) would be replayed after it and wipe it out.
+    const id = message.id;
+    timer.current = window.setTimeout(() => setMessage((m) => (m?.id === id ? null : m)), 7000);
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };

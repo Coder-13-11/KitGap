@@ -7,9 +7,9 @@ export const REPO_URL: string | null = null;
 
 /** Test counts as last run. Update them when the suite changes. */
 export const TEST_FACTS = {
-  asOf: "October 24, 2026",
+  asOf: "October 25, 2026",
   unit: 85,
-  integration: 54,
+  integration: 56,
   browser: 6,
 };
 

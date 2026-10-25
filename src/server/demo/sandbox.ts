@@ -46,6 +46,20 @@ export const DEMO_IDS = {
   hatComponent: "00000000-0000-4000-8000-00000000c102",
   hatDrive: "00000000-0000-4000-8000-00000000d001",
   hatImport: "00000000-0000-4000-8000-00000000e001",
+  // More of the community: a food pantry part-way through a need, a senior
+  // home and an animal rescue. Not selectable people; they fill the board.
+  ana: "00000000-0000-4000-8000-00000000a006",
+  grace: "00000000-0000-4000-8000-00000000a007",
+  tom: "00000000-0000-4000-8000-00000000a008",
+  leo: "00000000-0000-4000-8000-00000000a009",
+  pantry: "00000000-0000-4000-8000-00000000b004",
+  seniorHome: "00000000-0000-4000-8000-00000000b005",
+  rescue: "00000000-0000-4000-8000-00000000b006",
+  neighbors: "00000000-0000-4000-8000-00000000b007",
+  pantryRequest: "00000000-0000-4000-8000-00000000c003",
+  seniorRequest: "00000000-0000-4000-8000-00000000c004",
+  rescueRequest: "00000000-0000-4000-8000-00000000c005",
+  pantryDrive: "00000000-0000-4000-8000-00000000d002",
 };
 
 export const PERSONAS: Persona[] = [
@@ -357,4 +371,222 @@ export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
       values (${a.kind}, ${a.audience}, ${DEMO_IDS.jordan}, ${DEMO_IDS.itemRequest}, ${DEMO_IDS.hatDrive}, ${DEMO_IDS.group}, ${tx.json(a.data)})
     `;
   }
+
+  await seedCommunity(tx, now, today, timezone);
+}
+
+// The rest of the sample community, so Find shows what a lively board looks
+// like: food, seniors and pets. The pantry's need already has a neighborhood
+// group's delivery of 12 bags confirmed, so its progress bar is real.
+async function seedCommunity(tx: Tx, now: Date, today: string, timezone: string): Promise<void> {
+  await tx`
+    insert into profiles ${tx([
+      { id: DEMO_IDS.ana, displayName: "Ana Ruiz" },
+      { id: DEMO_IDS.grace, displayName: "Grace Holt" },
+      { id: DEMO_IDS.tom, displayName: "Tom Reyes" },
+      { id: DEMO_IDS.leo, displayName: "Leo Park" },
+    ])}
+  `;
+  const org = (id: string, name: string, city: string, about: string, contactName: string, contactEmail: string, createdBy: string) => ({
+    id,
+    kind: "organization",
+    name,
+    city,
+    about,
+    contactName,
+    contactEmail,
+    contactPhone: "",
+    contactConfirmedAt: now,
+    contactConfirmedBy: DEMO_IDS.riley,
+    inviteToken: newInviteToken(),
+    createdBy,
+  });
+  await tx`
+    insert into workspaces ${tx([
+      org(DEMO_IDS.pantry, "Westside Food Pantry (sample)", "Kissimmee, FL", "A fictional food pantry used in the demo.", "Ana Ruiz", "ana@westside.example", DEMO_IDS.ana),
+      org(DEMO_IDS.seniorHome, "Palm Grove Senior Living (sample)", "Kissimmee, FL", "A fictional senior home used in the demo.", "Grace Holt", "grace@palmgrove.example", DEMO_IDS.grace),
+      org(DEMO_IDS.rescue, "Osceola Paws Rescue (sample)", "St. Cloud, FL", "A fictional animal rescue used in the demo.", "Tom Reyes", "tom@osceolapaws.example", DEMO_IDS.tom),
+      {
+        id: DEMO_IDS.neighbors,
+        kind: "group",
+        name: "Westside Neighbors (sample)",
+        city: "Kissimmee, FL",
+        about: "A fictional group of neighbors.",
+        contactName: "",
+        contactEmail: "",
+        contactPhone: "",
+        contactConfirmedAt: null,
+        contactConfirmedBy: null,
+        inviteToken: newInviteToken(),
+        createdBy: DEMO_IDS.leo,
+      },
+    ])}
+  `;
+  await tx`
+    insert into workspace_members ${tx([
+      { workspaceId: DEMO_IDS.pantry, userId: DEMO_IDS.ana, role: "admin" },
+      { workspaceId: DEMO_IDS.seniorHome, userId: DEMO_IDS.grace, role: "admin" },
+      { workspaceId: DEMO_IDS.rescue, userId: DEMO_IDS.tom, role: "admin" },
+      { workspaceId: DEMO_IDS.neighbors, userId: DEMO_IDS.leo, role: "admin" },
+    ])}
+  `;
+
+  const request = (r: {
+    id: string;
+    orgId: string;
+    createdBy: string;
+    title: string;
+    need: string;
+    beneficiaries: string;
+    category: string;
+    requestType: "kit" | "item";
+    unitName: string;
+    targetQuantity: number;
+    days: number;
+    location: string;
+    handover: string;
+    contact: string;
+  }) => ({
+    id: r.id,
+    orgId: r.orgId,
+    title: r.title,
+    need: r.need,
+    beneficiaries: r.beneficiaries,
+    category: r.category,
+    requestType: r.requestType,
+    unitName: r.unitName,
+    targetQuantity: r.targetQuantity,
+    conditionNotes: "New or unopened only.",
+    substitutions: "",
+    neededBy: addDays(today, r.days),
+    timezone,
+    location: r.location,
+    handoverInstructions: r.handover,
+    coordinatorContact: r.contact,
+    fundraisingUrl: null,
+    status: "published",
+    submittedAt: now,
+    publishedAt: now,
+    reviewedBy: DEMO_IDS.riley,
+    createdBy: r.createdBy,
+  });
+  await tx`
+    insert into requests ${tx([
+      request({
+        id: DEMO_IDS.pantryRequest,
+        orgId: DEMO_IDS.pantry,
+        createdBy: DEMO_IDS.ana,
+        title: "Weekend food bags for families",
+        need: "Some children get free meals at school but little at home over the weekend. A bag of shelf-stable food covers two days for one family.",
+        beneficiaries: "Families with school-age children who use the pantry",
+        category: "food",
+        requestType: "kit",
+        unitName: "bag",
+        targetQuantity: 40,
+        days: 12,
+        location: "Kissimmee, FL",
+        handover: "Bring bags to the back door on Thursdays, 4 to 6 pm.",
+        contact: "Ana Ruiz, ana@westside.example",
+      }),
+      request({
+        id: DEMO_IDS.seniorRequest,
+        orgId: DEMO_IDS.seniorHome,
+        createdBy: DEMO_IDS.grace,
+        title: "Comfort kits for residents",
+        need: "Many of our residents have few visitors. A small kit of comfort items is something new and theirs to keep.",
+        beneficiaries: "Residents of our memory care and assisted living wings",
+        category: "seniors",
+        requestType: "kit",
+        unitName: "kit",
+        targetQuantity: 30,
+        days: 21,
+        location: "Kissimmee, FL",
+        handover: "Sign in at the front desk, any day 10 am to 4 pm.",
+        contact: "Grace Holt, grace@palmgrove.example",
+      }),
+      request({
+        id: DEMO_IDS.rescueRequest,
+        orgId: DEMO_IDS.rescue,
+        createdBy: DEMO_IDS.tom,
+        title: "Dry dog food for dogs waiting for homes",
+        need: "We care for about 25 dogs at a time while they wait to be adopted. Food is our biggest monthly cost.",
+        beneficiaries: "Dogs in our care until they are adopted",
+        category: "pets",
+        requestType: "item",
+        unitName: "15 lb bag of dry dog food",
+        targetQuantity: 25,
+        days: 30,
+        location: "St. Cloud, FL",
+        handover: "Drop off at the kennel office, Saturdays 9 am to noon.",
+        contact: "Tom Reyes, tom@osceolapaws.example",
+      }),
+    ])}
+  `;
+  const pantryItems = [
+    { name: "Can of soup", per: 2, details: "Ready to eat, with a pull-tab lid" },
+    { name: "Bag of rice", per: 1, details: "2 lb" },
+    { name: "Jar of peanut butter", per: 1, details: "Plastic jar" },
+    { name: "Box of cereal", per: 1, details: "Family size" },
+  ];
+  const pantryComponentIds: string[] = [];
+  for (const [position, item] of pantryItems.entries()) {
+    const [row] = await tx`
+      insert into request_components ${tx({
+        requestId: DEMO_IDS.pantryRequest,
+        position,
+        name: item.name,
+        normalizedKey: normalizeItemKey(item.name),
+        quantityPerUnit: item.per,
+        details: item.details,
+      })}
+      returning id
+    `;
+    pantryComponentIds.push(row.id as string);
+  }
+  await tx`
+    insert into request_components ${tx([
+      { requestId: DEMO_IDS.seniorRequest, position: 0, name: "Large-print word search book", normalizedKey: normalizeItemKey("Large-print word search book"), quantityPerUnit: 1, details: "" },
+      { requestId: DEMO_IDS.seniorRequest, position: 1, name: "Fleece throw blanket", normalizedKey: normalizeItemKey("Fleece throw blanket"), quantityPerUnit: 1, details: "About 50 by 60 inches" },
+      { requestId: DEMO_IDS.seniorRequest, position: 2, name: "Pair of non-slip socks", normalizedKey: normalizeItemKey("Pair of non-slip socks"), quantityPerUnit: 1, details: "Adult size" },
+      { requestId: DEMO_IDS.seniorRequest, position: 3, name: "Unscented hand lotion", normalizedKey: normalizeItemKey("Unscented hand lotion"), quantityPerUnit: 1, details: "Travel size" },
+      { requestId: DEMO_IDS.rescueRequest, position: 0, name: "15 lb bag of dry dog food", normalizedKey: normalizeItemKey("15 lb bag of dry dog food"), quantityPerUnit: 1, details: "Any adult formula" },
+    ])}
+  `;
+
+  // Westside Neighbors took 20 bags, brought the items for 12, packed them,
+  // and the pantry confirmed all 12.
+  const confirmedBags = 12;
+  await tx`
+    insert into commitments ${tx({ id: DEMO_IDS.pantryDrive, requestId: DEMO_IDS.pantryRequest, groupId: DEMO_IDS.neighbors, quantity: 20, createdBy: DEMO_IDS.leo })}
+  `;
+  for (const [i, componentId] of pantryComponentIds.entries()) {
+    await tx`
+      insert into collection_entries ${tx({
+        commitmentId: DEMO_IDS.pantryDrive,
+        componentId,
+        pledgeId: null,
+        usableQuantity: pantryItems[i].per * confirmedBags,
+        unusableQuantity: 0,
+        note: "",
+        recordedBy: DEMO_IDS.leo,
+      })}
+    `;
+  }
+  await tx`
+    insert into kit_movements ${tx({ commitmentId: DEMO_IDS.pantryDrive, kind: "packed", quantity: confirmedBags, note: "", createdBy: DEMO_IDS.leo })}
+  `;
+  await tx`
+    insert into deliveries ${tx({
+      commitmentId: DEMO_IDS.pantryDrive,
+      quantity: confirmedBags,
+      note: "Dropped off Thursday at the back door.",
+      status: "reviewed",
+      submittedBy: DEMO_IDS.leo,
+      acceptedQuantity: confirmedBags,
+      notAcceptedQuantity: 0,
+      reviewNote: "Thank you, these go out Friday.",
+      reviewedBy: DEMO_IDS.ana,
+      reviewedAt: now,
+    })}
+  `;
 }

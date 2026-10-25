@@ -8,6 +8,9 @@ import { expect, test, type Page } from "@playwright/test";
 const ORG = "00000000-0000-4000-8000-00000000b001";
 const REQUEST = "00000000-0000-4000-8000-00000000c001";
 
+// Scan settled pages: an element caught mid-animation can measure too small.
+test.use({ reducedMotion: "reduce" });
+
 async function scan(page: Page, label: string) {
   // Next.js streams the <title> after the first bytes of the page.
   await expect(page).toHaveTitle(/\S/);

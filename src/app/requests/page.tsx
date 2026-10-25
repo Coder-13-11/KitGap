@@ -114,6 +114,11 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
                     <ButtonLink href="/requests?tab=online" variant="primary">
                       See drives found online
                     </ButtonLink>
+                    {!filtered && ctx.mode === "live" ? (
+                      <ButtonLink href="/demo" variant="secondary">
+                        See a full sample board
+                      </ButtonLink>
+                    ) : null}
                     <ButtonLink href="/organization/new" variant="secondary">
                       Post a need
                     </ButtonLink>
@@ -122,7 +127,9 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
               >
                 {filtered
                   ? "Try another kind of need, or look at drives other people posted online."
-                  : "KitGap is new here. Look at drives other people posted online, or post your organization's needs."}
+                  : ctx.mode === "live"
+                    ? "KitGap is new here. Look at drives other people posted online, or open the sample board: a food pantry, a senior home, an animal rescue and a school, all made up."
+                    : "Look at drives other people posted online, or post your organization's needs."}
               </EmptyState>
             ) : (
               <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
