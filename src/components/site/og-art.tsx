@@ -59,3 +59,54 @@ export function OgBar({ confirmed, promised, max }: { confirmed: number; promise
     </div>
   );
 }
+
+// A square post for Instagram, Facebook or a group chat: who needs what, how
+// far along it is, and a QR code to the page. Plain words, big type, so it
+// reads at phone size.
+export function PostCard({
+  orgName,
+  title,
+  headline,
+  detail,
+  confirmed,
+  promised,
+  target,
+  qr,
+}: {
+  orgName: string;
+  title: string;
+  headline: string;
+  detail: string;
+  confirmed: number;
+  promised: number;
+  target: number;
+  qr: string;
+}) {
+  return (
+    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: KRAFT, padding: 72, color: INK }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <OgMark size={64} />
+        <div style={{ fontSize: 40, fontWeight: 700, color: FOREST }}>KitGap</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "center" }}>
+        <div style={{ display: "flex", fontSize: 34, color: "#4a534e" }}>{orgName} needs</div>
+        <div style={{ display: "flex", fontSize: headline.length > 28 ? 76 : 92, fontWeight: 700, lineHeight: 1.05, marginTop: 8 }}>
+          {headline}
+        </div>
+        <div style={{ display: "flex", fontSize: 34, marginTop: 16, color: INK }}>{title}</div>
+        <div style={{ display: "flex", marginTop: 40 }}>
+          <OgBar confirmed={confirmed} promised={promised} max={target} />
+        </div>
+        <div style={{ display: "flex", fontSize: 30, marginTop: 14, color: "#4a534e" }}>{detail}</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 32 }}>
+        <div style={{ display: "flex", flexDirection: "column", fontSize: 32, maxWidth: 640 }}>
+          <div style={{ display: "flex", fontWeight: 700, color: FOREST }}>Scan to help</div>
+          <div style={{ display: "flex", color: "#4a534e" }}>Bring only what&apos;s on the list.</div>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- rendered into a PNG by next/og */}
+        <img src={qr} width={220} height={220} alt="" style={{ borderRadius: 12, background: MANILA, padding: 10 }} />
+      </div>
+    </div>
+  );
+}

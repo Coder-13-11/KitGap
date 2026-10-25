@@ -29,6 +29,7 @@ function NavCount({ count }: { count?: number }) {
 export interface AccountLink {
   href: string;
   label: string;
+  count?: number;
 }
 
 // Desktop (768px and up): logo, nav links and account controls in one row.
@@ -139,6 +140,7 @@ export function SiteHeader({
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 font-semibold text-ink hover:bg-sunken"
               >
                 <span className="max-w-[12rem] truncate">{user.displayName}</span>
+                <NavCount count={accountLinks.reduce((n, l) => n + (l.count ?? 0), 0)} />
                 <ChevronDown aria-hidden className="size-4" />
               </button>
               <div
@@ -149,8 +151,9 @@ export function SiteHeader({
                 <ul>
                   {accountLinks.map((link) => (
                     <li key={link.href + link.label}>
-                      <AppLink href={link.href} className="block rounded-md px-3 py-2.5 text-ink no-underline hover:bg-sunken">
+                      <AppLink href={link.href} className="flex items-center rounded-md px-3 py-2.5 text-ink no-underline hover:bg-sunken">
                         {link.label}
+                        <NavCount count={link.count} />
                       </AppLink>
                     </li>
                   ))}
@@ -234,6 +237,7 @@ export function SiteHeader({
                   <li key={link.href + link.label}>
                     <AppLink href={link.href} onClick={closeMenu} className="flex min-h-12 items-center rounded-md px-3 text-ink no-underline">
                       {link.label}
+                      <NavCount count={link.count} />
                     </AppLink>
                   </li>
                 ))}

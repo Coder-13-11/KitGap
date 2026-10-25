@@ -147,7 +147,7 @@ export function AdoptForm({
 
           <section id="adopt-group" className="scroll-mt-28">
           <Fieldset
-            legend={<span className="font-serif text-2xl font-semibold tracking-tight">Which group is running this drive?</span>}
+            legend={<span className="font-serif text-2xl font-semibold tracking-tight">Who&apos;s helping?</span>}
             id={fieldId("groupId")}
             error={errors.groupId}
           >
@@ -190,8 +190,8 @@ export function AdoptForm({
                   className="mt-1 size-5 accent-forest"
                 />
                 <span>
-                  <span className="font-semibold">{groups.length ? "A new group" : "Create your group"}</span>
-                  <span className="block text-sm text-muted">Just a name and city for now. You'll coordinate it, and can invite members after.</span>
+                  <span className="font-semibold">{groups.length ? "Someone new" : "You, your family or your group"}</span>
+                  <span className="block text-sm text-muted">Just a name and city. You can invite friends or members after.</span>
                 </span>
               </label>
             </div>
@@ -200,8 +200,8 @@ export function AdoptForm({
                 <TextField
                   id={fieldId("group.name")}
                   name="groupName"
-                  label="Group name"
-                  hint="Shown publicly, for example “Lakeside High Key Club”"
+                  label="Name to show"
+                  hint="Shown publicly, for example “The Garcia family” or “Lakeside High Key Club”"
                   error={errors["group.name"]}
                   autoComplete="organization"
                   maxLength={120}
@@ -222,11 +222,11 @@ export function AdoptForm({
           <section id="adopt-confirm" className="scroll-mt-28 space-y-3">
             <h2 className="font-serif text-2xl font-semibold tracking-tight">Confirm</h2>
             <SubmitButton pendingLabel="Starting the drive…" disabled={!valid} className="min-h-12 w-full px-6 sm:w-auto">
-              Confirm and start the drive
+              Confirm and start helping
             </SubmitButton>
             <p className="max-w-prose text-sm text-muted">
-              {orgName} sees your group&apos;s name and progress. Your members&apos; names stay within your group. You can lower the number
-              or withdraw later, and anything already delivered still counts.
+              {orgName} sees the name you choose and your progress. Anyone you invite stays private. You can lower the number or stop
+              later, and anything already delivered still counts.
             </p>
           </section>
         </form>

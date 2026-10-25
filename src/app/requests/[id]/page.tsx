@@ -18,6 +18,10 @@ import { CATEGORY_LABEL, PHASE_EXPLANATION } from "@/domain/phase";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { getRequestDetail } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
+import { siteUrl } from "@/server/next/supabase";
+import { recordView, viewCount } from "@/server/queries/reach";
+import { ShareKit } from "@/components/requests/share-kit";
+import { shareCaption } from "@/domain/share";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -26,7 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const detail = await getRequestDetail(await getAppContext(), id);
   if (!detail) return { title: "Request not found" };
   const { request, org, totals } = detail;
-  const description = `${org.name} needs ${countNoun(totals.target, request.unitName)} by ${formatCalendarDate(request.neededBy)}. ${formatCount(totals.available)} still open for groups to adopt.`;
+  const description = `${org.name} needs ${countNoun(totals.target, request.unitName)} by ${formatCalendarDate(request.neededBy)}. ${formatCount(totals.available)} still need someone.`;
   return { title: request.title, description, openGraph: { siteName: "KitGap", type: "website", title: request.title, description } };
 }
 
@@ -43,11 +47,24 @@ export default async function RequestPage({ params }: Params) {
   const activeDrives = detail.drives.filter((d) => d.status === "active");
   const pastDrives = detail.drives.filter((d) => d.status !== "active");
   const isDraftView = !["published", "closed", "cancelled"].includes(request.status);
+  const shareable = request.status === "published";
+  // Count visits from the public, not from the organization checking its own page.
+  if (shareable && !viewer.isOrgMember) await recordView(ctx, "request", request.id);
+  const views = shareable ? await viewCount(ctx, "request", request.id) : null;
+  const pageUrl = `${siteUrl()}${ctx.base}/requests/${request.id}`;
+  const caption = shareCaption({
+    orgName: org.name,
+    still: totals.target - totals.accepted,
+    unitName: unit,
+    items: request.requestType === "kit" ? detail.components.map((c) => countNoun(c.quantityPerUnit, c.name).toLowerCase()) : [],
+    neededBy: request.neededBy,
+    url: pageUrl,
+  });
 
   return (
     <Container className="space-y-8 pb-24 lg:pb-0">
       <nav aria-label="Breadcrumb" className="text-sm">
-        <AppLink href="/requests">← All requests</AppLink>
+        <AppLink href="/requests">← Find</AppLink>
       </nav>
 
       {isDraftView ? (
@@ -84,7 +101,7 @@ export default async function RequestPage({ params }: Params) {
           <section aria-labelledby="open-count" className="tag-shape border border-line-strong bg-surface px-5 py-5 shadow-card sm:px-6">
             <h2 id="open-count" className="font-serif text-4xl leading-none font-semibold tracking-tight">
               <span className="tabular">{formatCount(totals.available)}</span>{" "}
-              <span className="text-[0.6em]">{totals.available === 1 ? unit.toLowerCase() : units} still open</span>
+              <span className="text-[0.6em]">{totals.available === 1 ? unit.toLowerCase() : units} still needed</span>
             </h2>
             <div className="mt-4">
               <RequestProgress totals={totals} unitName={unit} />
@@ -106,7 +123,7 @@ export default async function RequestPage({ params }: Params) {
         <aside className="space-y-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-labelledby="adopt-title" id="adopt-panel">
           <Panel className="space-y-4">
             <h2 id="adopt-title" className="text-xl font-semibold">
-              {myActiveDrive ? "Your group's drive" : "Start a drive for this request"}
+              {myActiveDrive ? "You're helping with this" : "Help with this need"}
             </h2>
             {myActiveDrive ? (
               <>
@@ -119,7 +136,7 @@ export default async function RequestPage({ params }: Params) {
               <>
                 <p className="text-ink">
                   <span className="tabular text-2xl font-semibold">{formatCount(totals.available)}</span>{" "}
-                  <span className="text-muted">of {countNoun(totals.target, unit)} still open for groups to adopt.</span>
+                  <span className="text-muted">of {countNoun(totals.target, unit)} still need someone.</span>
                 </p>
                 <QuickAdopt
                   requestId={request.id}
@@ -147,6 +164,13 @@ export default async function RequestPage({ params }: Params) {
               </p>
             ) : null}
           </Panel>
+          {shareable ? (
+            <Panel className="space-y-3">
+              <h2 className="text-xl font-semibold">Share this need</h2>
+              <p className="text-sm text-muted">Post it where your neighbors already look: Instagram, Facebook, a group chat or a school announcement.</p>
+              <ShareKit url={pageUrl} caption={caption} imagePath={`${ctx.base}/requests/${request.id}/post-image`} fileName="kitgap-need" views={views} />
+            </Panel>
+          ) : null}
           {viewer.canAdopt && !myActiveDrive ? (
             <WhatHappensNext orgName={org.name} isKit={request.requestType === "kit"} neededBy={formatCalendarDate(request.neededBy)} share={null} />
           ) : null}
@@ -213,9 +237,9 @@ export default async function RequestPage({ params }: Params) {
             </Section>
           ) : null}
 
-          <Section title="Groups running drives" id="drives">
+          <Section title="People helping" id="drives">
             {activeDrives.length === 0 ? (
-              <p className="text-muted">No group has started a drive for this request yet.</p>
+              <p className="text-muted">Nobody has started helping with this yet. You could be first.</p>
             ) : (
               <ul className="tag-shape divide-y divide-line border border-line-strong bg-surface">
                 {activeDrives.map((d) => (
@@ -276,7 +300,7 @@ export default async function RequestPage({ params }: Params) {
 
       {viewer.canAdopt && !myActiveDrive ? (
         <StickyAction targetId="adopt-panel" href="#adopt-title">
-          Start a drive · {formatCount(totals.available)} {totals.available === 1 ? unit.toLowerCase() : units} open
+          Help with this · {formatCount(totals.available)} {totals.available === 1 ? unit.toLowerCase() : units} needed
         </StickyAction>
       ) : null}
     </Container>

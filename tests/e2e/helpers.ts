@@ -31,10 +31,10 @@ export async function signUpAndConfirm(
   email: string,
   password: string,
   nextPath?: string,
-  role: "A school club or group" | "An organization" | "I was invited" = "A school club or group",
+  role: "I lead a school club" | "I run a community organization" | "I want to help, or I was invited" = "I lead a school club",
 ) {
   await page.goto(`/sign-up${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`);
-  // Invitation links skip the "What brings you here?" step.
+  // Invitation links skip the "Which one is you?" step.
   if (!nextPath?.startsWith("/join/")) {
     await page.getByRole("radio", { name: new RegExp(`^${role}`) }).check();
     await page.getByRole("button", { name: "Continue" }).click();

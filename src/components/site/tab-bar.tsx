@@ -4,14 +4,14 @@
 // in the installed or native app. Tablets get it too when installed, since
 // there's no browser bar there. From 768px up the header nav takes over.
 
-import { Bell, ClipboardList, FlaskConical, Home, LogIn, Package, ScanLine } from "lucide-react";
+import { Bell, CircleUserRound, FlaskConical, HandHeart, Home, LogIn, ScanLine, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { isNativeApp } from "@/lib/native";
 import { AppLink, useBase } from "../ui/base";
 import { cn } from "../ui/cn";
 
-const ICONS = { home: Home, requests: ClipboardList, drives: Package, updates: Bell, demo: FlaskConical, signin: LogIn, scan: ScanLine };
+const ICONS = { home: Home, requests: Search, drives: HandHeart, updates: Bell, demo: FlaskConical, signin: LogIn, scan: ScanLine, profile: CircleUserRound };
 const noop = () => () => {};
 
 export interface Tab {

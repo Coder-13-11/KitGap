@@ -71,17 +71,24 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
         <ButtonLink href={next} full>
           {next.startsWith("/join/") ? "Continue to join the group" : adopting ? "Continue to start your drive" : "Continue"}
         </ButtonLink>
-        {intent === "invited" || adopting ? (
-          <p className="text-sm text-muted">
-            {adopting ? "You'll name your group on the next page." : "If you lost the invitation link, ask the person who invited you to send it again."}
-          </p>
+        {adopting ? (
+          <p className="text-sm text-muted">You&apos;ll name your group on the next page.</p>
+        ) : intent === "invited" ? (
+          <>
+            {next.startsWith("/join/") ? null : (
+              <ButtonLink href="/requests" variant="secondary" full>
+                Find a need near you
+              </ButtonLink>
+            )}
+            <p className="text-sm text-muted">Sent a link by someone? Open it again and you&apos;ll join their group.</p>
+          </>
         ) : (
           <>
-            <ButtonLink href="/groups/new" variant="secondary" full>
-              Start a group
-            </ButtonLink>
             <ButtonLink href="/organization/new" variant="secondary" full>
-              Register an organization
+              Add your organization
+            </ButtonLink>
+            <ButtonLink href="/requests" variant="secondary" full>
+              Find a need near you
             </ButtonLink>
           </>
         )}

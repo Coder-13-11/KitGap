@@ -43,11 +43,11 @@ export const PHASE_LABEL: Record<RequestPhase, string> = {
   draft: "Draft",
   returned: "Returned for changes",
   in_review: "Waiting for KitGap review",
-  open: "Open for new drives",
-  fully_committed: "Fully committed",
-  past_due: "Past needed-by date",
-  closed: "Closed to new drives",
-  fulfilled: "Fulfilled",
+  open: "Needs help",
+  fully_committed: "Everything is promised",
+  past_due: "Past its date",
+  closed: "Closed",
+  fulfilled: "Complete",
   cancelled: "Cancelled",
 };
 
@@ -55,7 +55,7 @@ export const PHASE_EXPLANATION: Record<RequestPhase, string> = {
   draft: "Only your organization can see this draft.",
   returned: "A KitGap reviewer asked for changes before this can be listed.",
   in_review: "A KitGap reviewer checks new requests before they are listed publicly.",
-  open: "Groups can start a drive for any of the remaining quantity.",
+  open: "Anyone can offer to help with what's still needed.",
   fully_committed:
     "Groups have promised the full quantity. It is not fulfilled until the organization confirms what it received.",
   past_due:
@@ -85,5 +85,7 @@ export const CATEGORY_LABEL: Record<RequestRecord["category"], string> = {
   winter: "Winter clothing",
   baby: "Baby and toddler",
   food: "Food (non-perishable)",
+  seniors: "Senior care",
+  pets: "Pets and animals",
   other: "Other",
 };

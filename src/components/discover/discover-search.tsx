@@ -14,9 +14,9 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
   const [pending, startTransition] = useTransition();
 
   const go = (nextWhat = what, nextWhere = where) => {
-    const sp = new URLSearchParams({ place: nextWhere.trim() });
+    const sp = new URLSearchParams({ tab: "online", place: nextWhere.trim() });
     if (nextWhat.trim()) sp.set("topic", nextWhat.trim());
-    startTransition(() => router.push(withBase(base, `/discover?${sp.toString()}`), { scroll: false }));
+    startTransition(() => router.push(withBase(base, `/requests?${sp.toString()}`), { scroll: false }));
   };
 
   return (

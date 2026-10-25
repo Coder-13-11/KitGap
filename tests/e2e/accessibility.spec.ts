@@ -42,10 +42,10 @@ test("signed-in screens in the demo have no automatically detectable WCAG A/AA p
   await page.waitForURL(/\/demo\/requests\//);
   await scan(page, "request detail");
 
-  await page.getByRole("button", { name: /Start a drive for 20 kits/ }).click();
+  await page.getByRole("button", { name: /I'll help with 20 kits/ }).click();
   await page.waitForURL(/adopt/);
   await scan(page, "adopt");
-  await page.getByRole("button", { name: "Confirm and start the drive" }).click();
+  await page.getByRole("button", { name: "Confirm and start helping" }).click();
   await page.waitForURL(/\/demo\/drives\//);
   await scan(page, "drive (coordinator)");
   const drive = new URL(page.url()).pathname;

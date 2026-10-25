@@ -57,43 +57,41 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const ctx = await getAppContext();
   const [workspaces, guide] = await Promise.all([getMyWorkspaces(ctx), getDemoGuide(ctx)]);
 
-  const nav: NavItem[] = [
-    { href: "/requests", label: "Requests" },
-    { href: "/about", label: "How it works" },
-  ];
-  if (ctx.user) nav.unshift({ href: "/home", label: "Home" });
-  if (ctx.user) nav.push({ href: "/drives", label: "My drives" });
-  if (workspaces.organizations.length === 1) {
-    nav.push({ href: `/organization/${workspaces.organizations[0].id}`, label: "My organization" });
-  } else if (workspaces.organizations.length > 1) {
-    nav.push({ href: "/organization", label: "My organizations" });
-  }
-  if (workspaces.isReviewer) nav.push({ href: "/admin", label: "Review queue" });
-  if (ctx.user) nav.push({ href: "/updates", label: "Updates", count: workspaces.unreadUpdates });
+  // Four places, everywhere: Home, Find, My giving and Profile. Everything
+  // else (updates, organization dashboards, settings) lives under Profile.
+  const nav: NavItem[] = ctx.user
+    ? [
+        { href: "/home", label: "Home" },
+        { href: "/requests", label: "Find" },
+        { href: "/drives", label: "My giving" },
+      ]
+    : [
+        { href: "/requests", label: "Find" },
+        { href: "/about", label: "How it works" },
+      ];
 
   const tabs: Tab[] = ctx.user
     ? [
         { href: "/home", label: "Home", icon: "home" },
-        { href: "/requests", label: "Requests", icon: "requests" },
-        { href: "/drives", label: "My drives", icon: "drives" },
-        { href: "/updates", label: "Updates", icon: "updates", count: workspaces.unreadUpdates },
+        { href: "/requests", label: "Find", icon: "requests" },
+        { href: "/drives", label: "My giving", icon: "drives" },
+        { href: "/me", label: "Profile", icon: "profile", count: workspaces.unreadUpdates },
       ]
     : [
         { href: "/", label: "Home", icon: "home" },
-        { href: "/requests", label: "Requests", icon: "requests" },
+        { href: "/requests", label: "Find", icon: "requests" },
         { href: "/demo", label: "Demo", icon: "demo" },
         { href: "/sign-in", label: "Sign in", icon: "signin" },
       ];
 
+  // The account menu (desktop) and Profile page (phones) share these.
   const accountLinks: AccountLink[] = [];
   if (ctx.user) {
+    accountLinks.push({ href: "/updates", label: "Updates", count: workspaces.unreadUpdates });
+    for (const org of workspaces.organizations) accountLinks.push({ href: `/organization/${org.id}`, label: org.name });
+    for (const group of workspaces.groups) accountLinks.push({ href: `/groups/${group.id}`, label: group.name });
+    if (workspaces.isReviewer) accountLinks.push({ href: "/admin", label: "Review queue" });
     if (ctx.mode === "live") accountLinks.push({ href: "/account", label: "Account settings" });
-    for (const group of workspaces.groups) accountLinks.push({ href: `/groups/${group.id}`, label: `${group.name}` });
-    for (const org of workspaces.organizations) accountLinks.push({ href: `/organization/${org.id}/settings`, label: `${org.name} settings` });
-    if (ctx.mode === "live") {
-      accountLinks.push({ href: "/organization/new", label: "Register an organization" });
-      accountLinks.push({ href: "/groups/new", label: "Create a group" });
-    }
   }
 
   return (

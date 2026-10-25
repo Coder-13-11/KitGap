@@ -22,6 +22,11 @@ An honest list of what KitGap does not do, or has not been checked to do.
 - KitGap installs as an app from the browser (iPhone and Android) and has native iOS and Android projects (Capacitor). It isn't in the App Store or Google Play yet. See `docs/mobile.md` for what's built, what the stores still require, and why it can't be listed before the CAC deadline.
 - There's no account deletion page, which both stores require before an app that lets people create accounts can be listed.
 
+## Reach counts
+
+- "Views" on a need or drive page count page loads, not people. A person who opens the page twice counts twice, and link-preview bots may count too. Visits by the organization's own members aren't counted. Nothing about visitors is stored, only a number per page per day.
+- Instagram can't receive a caption from a website. On phones the post image goes through the share sheet and the caption is copied for pasting. On a computer, save the image and paste the caption.
+
 ## Experimental features
 
 These two features work, but they sit outside KitGap's main loop (request, drive, delivery, confirmation). Nothing they produce counts toward any total.

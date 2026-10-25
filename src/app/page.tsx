@@ -1,11 +1,13 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck, PackageCheck, Search } from "lucide-react";
 import { listPublicRequests } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
 import { DriveSnapshot } from "@/components/site/drive-snapshot";
 import { RequestCard } from "@/components/requests/request-card";
 import { AppLink } from "@/components/ui/base";
 import { buttonClass } from "@/components/ui/button-class";
+import { CategoryTile } from "@/components/ui/category";
 import { Container } from "@/components/ui/layout-bits";
+import type { Category } from "@/domain/types";
 import { Reveal } from "@/components/ui/motion";
 import { Notice } from "@/components/ui/notice";
 import { FIELD_NOTES, TEST_FACTS } from "@/content/credibility";
@@ -21,31 +23,33 @@ const GRID = "mt-5 grid gap-3 sm:mt-8 sm:gap-5 md:grid-cols-3";
 const CARD = "tag-shape flex flex-col border border-line-strong bg-surface p-4 shadow-card sm:p-6";
 
 const STEPS = [
-  { title: "Get the list", text: "Take a share of a shelter's posted request, or add the list from one you already know." },
-  { title: "Collect it together", text: "Members say what they'll bring. You check in what arrives and pack complete kits." },
-  { title: "They confirm it", text: "The shelter confirms what arrived. Only that counts as done." },
+  { title: "Find a need", text: "See what food pantries, shelters, schools and senior homes near you are asking for.", Icon: Search },
+  { title: "Bring what's on the list", text: "Say what you'll bring, then drop it off. Only what they asked for, nothing extra.", Icon: PackageCheck },
+  { title: "See it confirmed", text: "The organization confirms what arrived, so you know your gift got there.", Icon: BadgeCheck },
 ];
 
 const ROLES = [
   {
-    title: "Clubs and groups",
-    text: "Run a kit drive with a shared checklist, member pledges and a packing sheet.",
-    href: "/drives/new",
-    cta: "Start a drive",
-  },
-  {
-    title: "Shelters, pantries and schools",
-    text: "Post exactly what you need, so you get that and nothing else.",
+    title: "Community organizations",
+    text: "Food pantries, shelters, schools, senior homes and animal shelters. Post exactly what you need and share it in one tap.",
     href: "/organization/new",
     cta: "Post what you need",
   },
   {
-    title: "Members and parents",
-    text: "Open your club's link, pick an item that's still short, and say how many you'll bring.",
-    href: "/demo",
-    cta: "See how it works",
+    title: "Neighbors and families",
+    text: "Find a need near you, say what you'll bring, and see it confirmed when it arrives.",
+    href: "/requests",
+    cta: "Find a need",
+  },
+  {
+    title: "School clubs",
+    text: "Run a drive with your club: one shared list, member pledges and a packing sheet.",
+    href: "/drives/new",
+    cta: "Start a drive",
   },
 ];
+
+const HOME_CATEGORIES: Category[] = ["food", "school_supplies", "seniors", "pets", "hygiene", "winter"];
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
@@ -73,15 +77,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <section aria-labelledby="hero-title">
         <Container className="grid items-center gap-8 py-8 sm:py-12 md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] md:gap-10 md:py-20 lg:gap-16">
           <div className="rise">
-            <h1 id="hero-title" className="max-w-[16ch] font-serif text-4xl leading-[1.08] font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">
-              Donation drives for exactly what a shelter needs.
+            <h1 id="hero-title" className="max-w-[17ch] font-serif text-4xl leading-[1.08] font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">
+              Help your community get exactly what it needs.
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted sm:mt-5 sm:text-xl">
-              Your club gets a shelter&rsquo;s list, collects it together, and drops it off. The shelter confirms what arrived.
+              Local food pantries, shelters, schools and senior homes post what they need. You bring it. They confirm it arrived.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
-              <AppLink href="/drives/new" className={buttonClass("primary")}>
-                Start a drive
+              <AppLink href="/requests" className={buttonClass("primary")}>
+                Find a need
               </AppLink>
               <AppLink href="/demo" className={buttonClass("secondary")}>
                 Try the demo
@@ -97,6 +101,20 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </Container>
       </section>
 
+      <nav aria-label="Kinds of need" className="border-t border-line">
+        <Container className="py-6 sm:py-8">
+          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {HOME_CATEGORIES.map((c) => (
+              <li key={c}>
+                <AppLink href={`/requests?category=${c}`} className="block rounded-xl py-2 no-underline hover:bg-sunken">
+                  <CategoryTile category={c} />
+                </AppLink>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </nav>
+
       <section aria-labelledby="how-title" className={SECTION}>
         <Container>
           <h2 id="how-title" className={H2}>
@@ -110,8 +128,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 index={i}
                 className={`${CARD} grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 sm:flex`}
               >
-                <span className="tabular row-span-2 grid size-9 place-items-center rounded-full bg-forest font-serif text-base font-semibold text-white sm:size-10 sm:text-lg">
-                  {i + 1}
+                <span aria-hidden className="row-span-2 grid size-9 place-items-center rounded-full bg-forest text-white sm:size-11">
+                  <step.Icon className="size-5" />
                 </span>
                 <h3 className="font-serif text-xl font-semibold tracking-tight sm:mt-4 sm:text-2xl">{step.title}</h3>
                 <p className="mt-1 text-muted sm:mt-2">{step.text}</p>
@@ -148,8 +166,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               Why a list
             </h2>
             <p className="mt-4 max-w-2xl text-lg">
-              Donations nobody asked for pile up and cost shelters time and storage. FEMA and National VOAD both ask people to check what&rsquo;s
-              needed before giving. KitGap starts every drive from that list.
+              Donations nobody asked for pile up and cost pantries and shelters time and storage. FEMA and National VOAD both ask people to
+              check what&rsquo;s needed before giving. Every need on KitGap starts from the organization&rsquo;s own list.
             </p>
             <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               <a href={FEMA}>FEMA guidance</a>
@@ -222,8 +240,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <AppLink href="/demo" className={buttonClass("primary")}>
               Try the demo
             </AppLink>
-            <AppLink href="/drives/new" className={buttonClass("secondary")}>
-              Start a drive
+            <AppLink href="/requests" className={buttonClass("secondary")}>
+              Find a need
             </AppLink>
           </div>
         </Container>

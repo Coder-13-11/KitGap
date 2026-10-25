@@ -1,14 +1,14 @@
-import { Backpack, BookOpen, Check, Pencil } from "lucide-react";
+import { Check, Milk, Soup, Wheat } from "lucide-react";
 import { VerifiedStamp } from "../ui/confirmation";
 
-// What KitGap is, as one picture: a club's drive for a shelter's list, what
-// has been collected, and how many kits the shelter confirmed. An example,
+// What KitGap is, as one picture: a food pantry's list, what neighbors have
+// brought so far, and how many bags the pantry confirmed. An example,
 // labelled as one.
 
 const ITEMS = [
-  { name: "Backpacks", have: 20, need: 20, Icon: Backpack },
-  { name: "Notebooks", have: 40, need: 40, Icon: BookOpen },
-  { name: "Pencil packs", have: 16, need: 20, Icon: Pencil },
+  { name: "Canned soup", have: 40, need: 40, Icon: Soup },
+  { name: "Bags of rice", have: 20, need: 20, Icon: Wheat },
+  { name: "Shelf-stable milk", have: 16, need: 20, Icon: Milk },
 ];
 
 const CONFIRMED = 14;
@@ -19,8 +19,8 @@ export function DriveSnapshot() {
     <figure className="tag-shape border border-line-strong bg-surface p-4 shadow-card sm:p-6" aria-labelledby="snapshot-caption">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-serif text-lg font-semibold tracking-tight sm:text-xl">School-supply kits</p>
-          <p className="text-sm text-muted">Lakeside High Service Club → Riverbend Family Center</p>
+          <p className="font-serif text-lg font-semibold tracking-tight sm:text-xl">Weekend food bags</p>
+          <p className="text-sm text-muted">Westside Food Pantry · Kissimmee, FL</p>
         </div>
         <span className="shrink-0 rounded-[2px_8px_8px_2px] border border-clay/30 bg-clay-tint px-2 py-0.5 text-xs font-semibold text-clay">
           Example
@@ -52,7 +52,7 @@ export function DriveSnapshot() {
             <span className="tabular font-serif text-3xl leading-none font-semibold sm:text-4xl">
               {CONFIRMED} of {KITS}
             </span>
-            <span className="mt-1 block text-sm font-semibold">kits confirmed by the shelter</span>
+            <span className="mt-1 block text-sm font-semibold">bags confirmed by the pantry</span>
           </p>
           <VerifiedStamp className="shrink-0" />
         </div>
@@ -61,8 +61,8 @@ export function DriveSnapshot() {
         </span>
       </div>
       <figcaption id="snapshot-caption" className="sr-only">
-        Example drive: a club collecting 20 school-supply kits for a family center. Backpacks and notebooks are all collected, 16 of
-        20 pencil packs are in, and the family center has confirmed receiving 14 of the 20 kits.
+        Example need: a food pantry asking for 20 weekend food bags. All the soup and rice has been brought, 16 of 20 cartons of milk
+        are in, and the pantry has confirmed receiving 14 of the 20 bags.
       </figcaption>
     </figure>
   );

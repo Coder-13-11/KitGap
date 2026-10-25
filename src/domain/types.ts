@@ -3,7 +3,7 @@
 
 export type RequestType = "kit" | "item";
 export type RequestStatus = "draft" | "in_review" | "published" | "closed" | "cancelled";
-export type Category = "school_supplies" | "hygiene" | "winter" | "baby" | "food" | "other";
+export type Category = "school_supplies" | "hygiene" | "winter" | "baby" | "food" | "seniors" | "pets" | "other";
 
 export interface RequestRecord {
   id: string;

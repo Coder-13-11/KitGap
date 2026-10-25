@@ -1,9 +1,9 @@
 import { BadgeCheck, CalendarDays, MapPin } from "lucide-react";
 import { formatCalendarDate } from "@/domain/dates";
-import { CATEGORY_LABEL } from "@/domain/phase";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import type { RequestSummary } from "@/server/queries/requests";
 import { AppLink } from "../ui/base";
+import { CategoryBadge } from "../ui/category";
 import { PhaseBadge } from "../ui/status";
 import { recipeSummary } from "./recipe-text";
 
@@ -21,7 +21,7 @@ export function RequestCard({ summary, headingLevel = "h3" }: { summary: Request
       <div className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <PhaseBadge phase={phase} />
-          <span className="text-sm text-muted">{CATEGORY_LABEL[request.category]}</span>
+          <CategoryBadge category={request.category} />
         </div>
         <Heading className="font-serif text-2xl leading-tight font-semibold tracking-tight">
           <AppLink href={`/requests/${request.id}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
@@ -42,7 +42,7 @@ export function RequestCard({ summary, headingLevel = "h3" }: { summary: Request
       <div className="space-y-2">
         <p className="leading-none">
           <span className="tabular font-serif text-4xl font-semibold tracking-tight">{formatCount(totals.available)}</span>{" "}
-          <span className="font-semibold">{unitPlural} still open</span>
+          <span className="font-semibold">{unitPlural} still needed</span>
         </p>
         <div aria-hidden className="flex h-3 overflow-hidden rounded-[2px_10px_10px_2px] border border-line-strong bg-sunken">
           <span className="h-3 bg-forest" style={{ width: `${pct(totals.accepted, totals.target)}%` }} />
@@ -51,9 +51,9 @@ export function RequestCard({ summary, headingLevel = "h3" }: { summary: Request
         </div>
         <p className="text-sm text-muted">
           {formatCount(totals.accepted)} confirmed
-          {promised > 0 ? ` · ${formatCount(promised)} taken by groups, on the way` : ""}
+          {promised > 0 ? ` · ${formatCount(promised)} promised` : ""}
           {" · "}
-          {formatCount(totals.target)} requested
+          {formatCount(totals.target)} needed in all
         </p>
       </div>
 

@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Pill } from "@/components/ui/status";
 import { RecipientStamp } from "@/components/ui/confirmation";
+import { recordView, viewCount } from "@/server/queries/reach";
 import { formatCalendarDate } from "@/domain/dates";
 import { kitsStillToConfirm, shareDriveSentence } from "@/domain/guidance";
 import { countNoun, formatCount } from "@/domain/text";
@@ -23,6 +24,8 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
   const ctx = await getAppContext();
   const drive = await getPublicDrive(ctx, id);
   if (!drive) notFound();
+  if (!drive.viewerIsMember) await recordView(ctx, "drive", drive.commitmentId);
+  const views = await viewCount(ctx, "drive", drive.commitmentId);
   const unit = drive.request.unitName;
   const needs = drive.progress.components.filter((c) => c.uncovered > 0);
   const still = kitsStillToConfirm(drive.quantity, drive.progress.stages.accepted);
@@ -70,6 +73,12 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
           <div className="mt-3">
             <ShareDrive url={publicUrl} sentence={sentence} qrName="kitgap-drive-progress" />
           </div>
+          {views !== null ? (
+            <p className="mt-3 text-sm text-muted">
+              <span className="tabular font-semibold text-ink">{views.toLocaleString("en-US")}</span> {views === 1 ? "view" : "views"} of this page so
+              far.
+            </p>
+          ) : null}
         </div>
       </Panel>
 

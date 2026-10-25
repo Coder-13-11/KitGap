@@ -5,7 +5,7 @@ import { addDays, isValidDateString, isValidTimezone, todayIn } from "./dates";
 import { normalizeItemKey } from "./text";
 import type { Category, RequestType } from "./types";
 
-export const CATEGORIES: Category[] = ["school_supplies", "hygiene", "winter", "baby", "food", "other"];
+export const CATEGORIES: Category[] = ["food", "school_supplies", "seniors", "pets", "hygiene", "winter", "baby", "other"];
 export const MAX_COMPONENTS = 20;
 export const MAX_TARGET = 100_000;
 

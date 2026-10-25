@@ -33,15 +33,15 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
 
   // 1. Jordan adopts 20 of 100 kits.
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("School-supply kits for students starting mid-year");
-  await page.getByLabel("How many kits can your group take on?").fill("20");
+  await page.getByLabel("How many kits can you help with?").fill("20");
   await expect(page.locator("#quick-quantity-preview")).toContainText("40 notebooks");
-  await page.getByRole("button", { name: "Start a drive for 20 kits" }).click();
+  await page.getByRole("button", { name: "I'll help with 20 kits" }).click();
   await page.waitForURL(/\/adopt/);
   await expect(page.getByRole("heading", { name: "Your supply list for 20 kits" })).toBeVisible();
   const supply = page.locator("#supply-preview");
   await expect(supply).toContainText("Backpack");
   await expect(supply).toContainText("40");
-  await page.getByRole("button", { name: "Confirm and start the drive" }).click();
+  await page.getByRole("button", { name: "Confirm and start helping" }).click();
   await page.waitForURL(/\/demo\/drives\/[0-9a-f-]+\?started=1/);
   await expect(page.getByText("Your drive has started")).toBeVisible();
   const driveUrl = page.url().split("?")[0];

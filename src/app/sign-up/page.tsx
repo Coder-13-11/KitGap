@@ -19,7 +19,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
   return (
     <AuthShell
       title="Create an account"
-      description="It takes about two minutes. One account works for everything: running drives, pledging, and posting requests."
+      description="It takes about two minutes. One account works for everything: finding needs, helping, and posting what your organization needs."
       footer={
         <p>
           Already have an account?{" "}

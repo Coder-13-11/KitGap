@@ -118,11 +118,11 @@ export const FEATURED_PROGRAMS: FeaturedProgram[] = [
 ];
 
 export const DISCOVER_TOPICS = [
-  "School supplies",
   "Food",
+  "School supplies",
+  "Senior care",
+  "Pet supplies",
   "Hygiene kits",
   "Winter coats",
-  "Toys",
   "Baby supplies",
-  "Volunteering",
 ];

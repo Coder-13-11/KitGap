@@ -34,7 +34,7 @@ export function QuickAdopt({
     <form action={withBase(base, `/requests/${requestId}/adopt`)} method="get" className="space-y-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="quick-quantity" className="font-semibold">
-          How many {units} can your group take on?
+          How many {units} can you help with?
         </label>
         <p id="quick-quantity-hint" className="text-sm text-muted">
           Between 1 and {formatCount(available)}. You can start small and add more later if some are still available.
@@ -54,7 +54,7 @@ export function QuickAdopt({
         {valid ? (
           requestType === "kit" ? (
             <>
-              <p className="font-semibold">Your group would collect:</p>
+              <p className="font-semibold">You would bring:</p>
               <ul className="mt-1 space-y-0.5">
                 {components.map((c) => (
                   <li key={c.id} className="tabular">
@@ -65,7 +65,7 @@ export function QuickAdopt({
             </>
           ) : (
             <p>
-              Your group would collect <strong className="tabular">{countNoun(n, unitName)}</strong>.
+              You would bring <strong className="tabular">{countNoun(n, unitName)}</strong>.
             </p>
           )
         ) : (
@@ -73,7 +73,7 @@ export function QuickAdopt({
         )}
       </div>
       <button type="submit" className={buttonClass("primary", "md", true)} disabled={!valid}>
-        Start a drive for {valid ? countNoun(n, unitName) : units}
+        I'll help with {valid ? countNoun(n, unitName) : units}
       </button>
     </form>
   );

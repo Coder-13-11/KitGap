@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Mail, Users } from "lucide-react";
+import { Building2, HeartHandshake, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import {
   requestPasswordResetAction,
@@ -60,10 +60,30 @@ export function SignInForm({ next, defaultEmail }: { next: string; defaultEmail?
 
 export type SignUpIntent = "organization" | "group" | "invited";
 
+// Community first: the places that need help, then the people who help, then
+// school clubs.
 const INTENTS: { id: SignUpIntent; title: string; short: string; text: string; icon: ReactNode }[] = [
-  { id: "group", title: "A school club or group", short: "a club or group", text: "Run a drive: pick a request, invite members, collect and deliver.", icon: <Users /> },
-  { id: "organization", title: "An organization", short: "an organization", text: "Post what the people you serve need, then confirm what arrives.", icon: <Building2 /> },
-  { id: "invited", title: "I was invited", short: "someone who was invited", text: "Someone sent you a link to join their group and pledge supplies.", icon: <Mail /> },
+  {
+    id: "organization",
+    title: "I run a community organization",
+    short: "a community organization",
+    text: "A shelter, food pantry, school, senior home or animal shelter. Post what you need and confirm what arrives.",
+    icon: <Building2 />,
+  },
+  {
+    id: "invited",
+    title: "I want to help, or I was invited",
+    short: "someone who wants to help",
+    text: "Find needs near you and say what you'll bring. Got a link from someone? It works here too.",
+    icon: <HeartHandshake />,
+  },
+  {
+    id: "group",
+    title: "I lead a school club",
+    short: "a school club",
+    text: "Run a drive with your club: share a list, collect it together and drop it off.",
+    icon: <Users />,
+  },
 ];
 
 export function SignUpFlow({ next, initialIntent }: { next: string; initialIntent?: SignUpIntent }) {
@@ -75,7 +95,7 @@ export function SignUpFlow({ next, initialIntent }: { next: string; initialInten
       <Steps labels={["Who you are", "Your account", intent === "invited" ? "Join" : "Set up"]} current={step} />
       {step === 1 ? (
         <fieldset className="space-y-3">
-          <legend className="mb-3 text-lg font-semibold">What brings you here?</legend>
+          <legend className="mb-3 text-lg font-semibold">Which one is you?</legend>
           {INTENTS.map((option) => (
             <label
               key={option.id}

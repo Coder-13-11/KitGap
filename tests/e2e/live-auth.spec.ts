@@ -18,7 +18,7 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   const title = `Hygiene kits for a family shelter ${Date.now()}`;
 
   // 1. A new organization manager signs up, confirms by email and registers.
-  await signUpAndConfirm(org, "Ana Manager", managerEmail, PASSWORD, undefined, "An organization");
+  await signUpAndConfirm(org, "Ana Manager", managerEmail, PASSWORD, undefined, "I run a community organization");
   await org.goto("/organization/new");
   await org.getByLabel("Organization name").fill("Test Family Shelter");
   await org.getByLabel("City or area").fill("Kissimmee, FL");
@@ -92,8 +92,8 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   await visitor.goto(`/requests/${requestId}`);
   await expect(visitor.getByRole("heading", { name: title })).toBeVisible();
   await expect(visitor.getByText("Front desk, Suite 4")).toHaveCount(0); // private handover details
-  await visitor.getByLabel("How many hygiene kits can your group take on?").fill("20");
-  await visitor.getByRole("button", { name: "Start a drive for 20 hygiene kits" }).click();
+  await visitor.getByLabel("How many hygiene kits can you help with?").fill("20");
+  await visitor.getByRole("button", { name: "I'll help with 20 hygiene kits" }).click();
   await visitor.waitForURL(/\/sign-in\?next=/);
   await expect(visitor.getByText("Sign in to start a drive.")).toBeVisible();
   const next = new URL(visitor.url()).searchParams.get("next")!;
@@ -104,9 +104,9 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   await visitor.getByRole("link", { name: "Continue" }).click();
   await visitor.waitForURL(new RegExp(`/requests/${requestId}/adopt\\?quantity=20`));
   await expect(visitor.getByLabel("How many hygiene kits will your group provide?")).toHaveValue("20");
-  await visitor.getByLabel("Group name").fill("Osceola Robotics Club");
+  await visitor.getByLabel("Name to show").fill("Osceola Robotics Club");
   await visitor.getByLabel("City or area").fill("St. Cloud, FL");
-  await visitor.getByRole("button", { name: "Confirm and start the drive" }).click();
+  await visitor.getByRole("button", { name: "Confirm and start helping" }).click();
   await visitor.waitForURL(/\/drives\/[0-9a-f-]+\?started=1/);
   await expect(visitor.getByText("20 hygiene kits are reserved for Osceola Robotics Club")).toBeVisible();
   await expect(visitor.getByText("Front desk, Suite 4")).toBeVisible(); // now visible to the coordinator
