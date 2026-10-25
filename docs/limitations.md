@@ -67,6 +67,14 @@ These two features work, but they sit outside KitGap's main loop (request, drive
 - Email delivery was tested only with the local mail catcher. Production needs an SMTP provider.
 - The demo uses fixed sample people instead of real sign-in. It shows the rules and the interface, not real authentication; the real sign-in path is covered separately by `tests/e2e/live-auth.spec.ts`.
 
+## Kit, the AI helper
+
+- Kit's AI answers come from a language model on an outside endpoint (set with `KIT_AI_*`; during development, the University of Florida's NaviGator service). Each question sends that endpoint the facts Kit uses: names of the organization, need and groups, the asker's display name, totals, page views and deadlines. Not emails, drop-off details or private notes. Voice questions send the recording for transcription; KitGap doesn't store it.
+- The guardrail checks numbers only. A model could still word something oddly or suggest a weak idea, so drafts say "read before you post" and nothing is sent without the person tapping it.
+- Kit can't take actions on its own. It links to the page where the person acts.
+- Rate limits for Kit and its voice routes are kept in server memory, so they reset on restart and aren't shared across servers.
+- Voice needs microphone permission. In the iOS app it uses the web view's microphone access, which hasn't been tested on a device yet.
+
 ## Security notes
 
 - Authorization is enforced in server code (`src/server/services`), not in database row-level security policies. The database denies all direct access from the browser API roles, but a bug in a service's permission check would not be caught by the database. The integration tests check the important permissions with direct calls.

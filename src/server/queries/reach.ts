@@ -37,3 +37,22 @@ export async function viewCount(ctx: ServiceContext, subject: ReachSubject, id: 
     return null;
   }
 }
+
+/** Views for each of the last `days` days, oldest first, for a small chart. */
+export async function viewsByDay(ctx: ServiceContext, subject: ReachSubject, id: string, days = 7): Promise<number[]> {
+  const empty = Array.from({ length: days }, () => 0);
+  if (!isUuid(id)) return empty;
+  try {
+    return await inSchema(ctx.sql, ctx.schema, async (tx) => {
+      const rows = await tx`
+        select (current_date - day)::int as ago, views from page_views
+        where subject_type = ${subject} and subject_id = ${id} and day > current_date - ${days}::int
+      `;
+      const out = [...empty];
+      for (const r of rows) out[days - 1 - Number(r.ago)] = Number(r.views);
+      return out;
+    });
+  } catch {
+    return empty;
+  }
+}

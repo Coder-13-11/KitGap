@@ -23,6 +23,7 @@ import { ShareDrive } from "@/components/drives/share-drive";
 import { DonationJourneySection } from "@/components/drives/journey";
 import { StageSummary } from "@/components/drives/stages";
 import { SuppliesTable } from "@/components/drives/supplies";
+import { AskKitCard } from "@/components/kit/ask-kit-card";
 import { ShowMore } from "@/components/ui/show-more";
 import { ActivityList } from "@/components/site/activity-list";
 import { AppLink } from "@/components/ui/base";
@@ -588,6 +589,10 @@ export default async function DrivePage({
               </ul>
             </nav>
           )}
+
+          {isCoordinator && drive.tier === "verified" && request.status === "published" ? (
+            <AskKitCard requestId={request.id} line="Ideas and ready posts to collect what's still short." />
+          ) : null}
 
           <Panel className="space-y-3">
             <h2 className="text-lg font-semibold">About this drive</h2>

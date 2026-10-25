@@ -68,5 +68,7 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>KitGap uses the camera to scan receipt and invitation QR codes. Nothing is recorded or uploaded.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>KitGap uses the microphone only while you hold a conversation with Kit, the helper. What you say is turned into text and not kept.</string>
 </dict>
 </plist>

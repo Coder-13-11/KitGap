@@ -373,6 +373,30 @@ export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
   }
 
   await seedCommunity(tx, now, today, timezone);
+  await seedViews(tx);
+}
+
+// Sample page views for the last two weeks, so the reach numbers and Kit's
+// advice have something to work with. Made up, like everything in the demo.
+// The school kits get plenty of views but few groups: Kit's "people look,
+// but nobody offers" case. The dog food has barely been seen.
+const SAMPLE_VIEWS: [string, number[]][] = [
+  [DEMO_IDS.kitRequest, [4, 6, 3, 9, 12, 8, 5, 14, 11, 7, 16, 21, 13, 18]],
+  [DEMO_IDS.pantryRequest, [2, 5, 8, 4, 6, 11, 9, 7, 12, 10, 15, 9, 14, 17]],
+  [DEMO_IDS.seniorRequest, [1, 0, 2, 3, 1, 4, 2, 3, 5, 2, 4, 6, 3, 5]],
+  [DEMO_IDS.rescueRequest, [0, 1, 0, 0, 2, 1, 0, 1, 0, 2, 1, 0, 1, 3]],
+];
+
+async function seedViews(tx: Tx): Promise<void> {
+  for (const [id, days] of SAMPLE_VIEWS) {
+    for (const [i, views] of days.entries()) {
+      if (views === 0) continue;
+      await tx`
+        insert into page_views (subject_type, subject_id, day, views)
+        values ('request', ${id}, current_date - ${days.length - 1 - i}::int, ${views})
+      `;
+    }
+  }
 }
 
 // The rest of the sample community, so Find shows what a lively board looks

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { ConfirmWithNote, EditDetailsForm, PostUpdateForm, SimpleActionButton } from "@/components/requests/manage-forms";
+import { AskKitCard } from "@/components/kit/ask-kit-card";
 import { ActivityList } from "@/components/site/activity-list";
 import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
@@ -112,6 +113,8 @@ export default async function ManageRequestPage({
           </p>
         </Panel>
       ) : null}
+
+      {request.status === "published" ? <AskKitCard requestId={rid} /> : null}
 
       {data.pendingDeliveries.length > 0 ? (
         <Section title="Deliveries awaiting your review" id="pending">

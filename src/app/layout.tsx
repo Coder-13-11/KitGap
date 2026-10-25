@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { ViewTransition } from "react";
 import { Archivo_Narrow, Petrona } from "next/font/google";
 import { signOutAction } from "@/actions/auth";
+import { KitLauncher } from "@/components/kit/kit-launcher";
+import { kitAiEnabled } from "@/server/kit/ai";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type AccountLink, type NavItem } from "@/components/site/header";
@@ -122,6 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           <SiteFooter />
           <TabBar tabs={tabs} />
+          <KitLauncher ai={kitAiEnabled()} />
           <ServiceWorker />
           <NativeShell />
           </ToastProvider>

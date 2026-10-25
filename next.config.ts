@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/((?!tools).*)",
-        headers: [...base, { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }],
+        headers: [...base, { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" }],
       },
       {
         // The photo counter uses the camera, and runs its model with several
@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
         source: "/tools/:path*",
         headers: [
           ...base,
-          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=()" },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
         ],
@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
         source: "/tools",
         headers: [
           ...base,
-          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=()" },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
         ],

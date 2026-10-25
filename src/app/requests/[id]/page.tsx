@@ -20,6 +20,7 @@ import { getRequestDetail } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
 import { siteUrl } from "@/server/next/supabase";
 import { recordView, viewCount } from "@/server/queries/reach";
+import { AskKitCard } from "@/components/kit/ask-kit-card";
 import { ShareKit } from "@/components/requests/share-kit";
 import { shareCaption } from "@/domain/share";
 
@@ -164,6 +165,7 @@ export default async function RequestPage({ params }: Params) {
               </p>
             ) : null}
           </Panel>
+          {shareable && (viewer.isOrgMember || myActiveDrive || memberDrive) ? <AskKitCard requestId={request.id} /> : null}
           {shareable ? (
             <Panel className="space-y-3">
               <h2 className="text-xl font-semibold">Share this need</h2>
