@@ -95,9 +95,9 @@ Rules:
 - "actions": up to 3 buttons, each copied exactly from the allowed links list (href and label).
 - Reply with one JSON object only: {"text": "...", "speak": "...", "actions": [{"href": "...", "label": "..."}]}`;
 
-export async function askAssistant(s: AssistantSnapshot, question: string, history: KitTurn[]): Promise<AssistantReply> {
+export async function askAssistant(s: AssistantSnapshot, question: string, history: KitTurn[], useAi = true): Promise<AssistantReply> {
   const fallback = assistantRules(s, question);
-  if (!kitAiEnabled()) return fallback;
+  if (!useAi || !kitAiEnabled()) return fallback;
 
   const facts = { ...s.facts, thingsNeedingAttention: s.nudges.map((n) => n.text) };
   const allowed = allowedNumbers(facts);

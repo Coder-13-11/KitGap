@@ -5,7 +5,8 @@
 
 import type { KitTurn } from "@/server/kit/ai";
 import { loadAssistant, type AssistantSnapshot } from "@/server/kit/assistant";
-import { askAssistant, type AssistantReply } from "@/server/kit/assistant-ai";
+import { askAssistant, assistantRules, type AssistantReply } from "@/server/kit/assistant-ai";
+import { allowKitUse } from "@/server/kit/usage";
 import { getAppContext } from "@/server/next/context";
 
 const PER_MINUTE = 20;
@@ -35,10 +36,14 @@ export async function askKitAssistantAction(input: { question: string; path: str
   const ctx = await getAppContext();
   const question = String(input.question ?? "").trim().slice(0, 500);
   if (!question) return { error: "Ask me anything about KitGap." };
-  if (!allowed(ctx.user?.id ?? `anon-${ctx.demo?.sandboxId ?? "live"}`)) return { error: "That's a lot of questions at once. Give me a minute." };
   const snapshot = await loadAssistant(ctx, String(input.path ?? "/").slice(0, 300));
+  // Signed-out visitors get Kit's written answers only: the AI key is for
+  // signed-in people and demo visitors (who act as a sample person).
+  if (!ctx.user) return assistantRules(snapshot, question);
+  if (!allowed(ctx.demo ? `demo:${ctx.demo.sandboxId}` : `user:${ctx.user.id}`)) return { error: "That's a lot of questions at once. Give me a minute." };
   const history = (Array.isArray(input.history) ? input.history : [])
     .filter((t) => t && (t.from === "me" || t.from === "kit") && typeof t.text === "string")
     .slice(-6);
-  return askAssistant(snapshot, question, history);
+  // Over the daily cap, Kit answers from its written rules.
+  return askAssistant(snapshot, question, history, await allowKitUse(ctx.demo ? `demo:${ctx.demo.sandboxId}` : `user:${ctx.user.id}`, "ai"));
 }

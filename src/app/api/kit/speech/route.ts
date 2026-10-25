@@ -1,13 +1,16 @@
 // Kit's voice: turns a short answer into speech with the kokoro model on the
-// AI endpoint. Returns 204 when voice isn't available, and the browser's own
-// speech takes over.
+// AI endpoint. Only for signed-in people and demo visitors. Returns 204 when
+// voice isn't available, and the browser's own speech takes over.
 
-import { voiceAllowed } from "@/server/kit/voice-limit";
+import { allowKitUse } from "@/server/kit/usage";
+import { kitCaller, voiceAllowed } from "@/server/kit/voice-limit";
 
 export async function POST(request: Request): Promise<Response> {
   const base = process.env.KIT_AI_BASE_URL?.replace(/\/$/, "");
   const key = process.env.KIT_AI_API_KEY;
-  if (!base || !key || !voiceAllowed(request, 30)) return new Response(null, { status: 204 });
+  const caller = await kitCaller();
+  if (!caller) return new Response(null, { status: 401 });
+  if (!base || !key || !voiceAllowed(caller, 30) || !(await allowKitUse(caller, "voice"))) return new Response(null, { status: 204 });
   const { text } = (await request.json().catch(() => ({}))) as { text?: unknown };
   const input = typeof text === "string" ? text.trim().slice(0, 400) : "";
   if (!input) return new Response(null, { status: 204 });

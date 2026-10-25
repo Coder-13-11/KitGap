@@ -1,15 +1,20 @@
 // Kit's ears: turns a short recording into text with whisper on the AI
-// endpoint. The audio is passed straight through and never stored.
+// endpoint. Only for signed-in people and demo visitors. The audio is passed
+// straight through and never stored.
 
-import { voiceAllowed } from "@/server/kit/voice-limit";
+import { allowKitUse } from "@/server/kit/usage";
+import { kitCaller, voiceAllowed } from "@/server/kit/voice-limit";
 
 const MAX_BYTES = 3_000_000; // about a minute of compressed speech
 
 export async function POST(request: Request): Promise<Response> {
   const base = process.env.KIT_AI_BASE_URL?.replace(/\/$/, "");
   const key = process.env.KIT_AI_API_KEY;
+  const caller = await kitCaller();
+  if (!caller) return Response.json({ error: "Sign in, or try the demo, to talk to Kit." }, { status: 401 });
   if (!base || !key) return Response.json({ error: "Voice isn't set up here." }, { status: 503 });
-  if (!voiceAllowed(request)) return Response.json({ error: "Too many voice questions. Wait a minute." }, { status: 429 });
+  if (!voiceAllowed(caller)) return Response.json({ error: "Too many voice questions. Wait a minute." }, { status: 429 });
+  if (!(await allowKitUse(caller, "voice"))) return Response.json({ error: "Voice is resting for today. Type your question instead." }, { status: 429 });
   const form = await request.formData().catch(() => null);
   const audio = form?.get("audio");
   if (!(audio instanceof Blob) || audio.size === 0) return Response.json({ error: "I didn't catch any audio." }, { status: 400 });

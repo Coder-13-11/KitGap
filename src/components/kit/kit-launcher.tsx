@@ -171,10 +171,10 @@ export function KitLauncher({ ai }: { ai: boolean }) {
             <div className="min-w-0 flex-1">
               <h2 className="font-serif text-lg leading-tight font-semibold">Kit</h2>
               <p className="truncate text-xs text-eyebrow">
-                {voice.state === "listening" ? "Listening…" : voice.state === "transcribing" ? "Got it, one second…" : voice.state === "speaking" ? "Speaking…" : ai ? "Your KitGap helper · AI-assisted" : "Your KitGap helper"}
+                {voice.state === "listening" ? "Listening…" : voice.state === "transcribing" ? "Got it, one second…" : voice.state === "speaking" ? "Speaking…" : ai && snapshot?.signedIn ? "Your KitGap helper · AI-assisted" : "Your KitGap helper"}
               </p>
             </div>
-            {canVoice ? (
+            {canVoice && snapshot?.signedIn ? (
               <button
                 type="button"
                 onClick={() => {
@@ -264,7 +264,7 @@ export function KitLauncher({ ai }: { ai: boolean }) {
               void ask(q);
             }}
           >
-            {canVoice ? (
+            {canVoice && snapshot?.signedIn ? (
               <button
                 type="button"
                 onClick={() => void voice.listen()}

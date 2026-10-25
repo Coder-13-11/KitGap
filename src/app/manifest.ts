@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "KitGap",
     short_name: "KitGap",
-    description: "Give what's actually needed. Run a kit drive, collect only what's on the list, and get it confirmed.",
+    description: "Help your community get exactly what it needs. Find a local need, bring what's on the list, and see it confirmed.",
     start_url: "/?source=app",
     scope: "/",
     display: "standalone",
@@ -21,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "My drives", url: "/drives", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "My giving", url: "/drives", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
       { name: "Run your own drive", url: "/drives/new", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
       { name: "Try the demo", url: "/demo", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
     ],

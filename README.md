@@ -36,7 +36,7 @@ Full instructions, including deployment to Supabase and Vercel, are in [docs/set
 ## Checks
 
 ```bash
-npm run typecheck && npm run lint && npm test   # 85 unit and 56 integration tests
+npm run typecheck && npm run lint && npm test   # 104 unit and 58 integration tests (6 need TEST_DATABASE_URL; see docs/testing.md)
 npm run test:e2e                                # browser and accessibility tests
 ```
 

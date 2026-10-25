@@ -33,11 +33,11 @@ const serif = Petrona({
 });
 
 const DESCRIPTION =
-  "Organizations post precise needs for kits and goods. School clubs and community groups adopt part of a request, collect supplies, and deliver them. The organization confirms what arrived.";
+  "Local food pantries, shelters, schools, senior homes and animal rescues post exactly what they need. Neighbors, families and school clubs bring it, and the organization confirms what arrived.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: { default: "KitGap: turn a community need into a drive", template: "%s · KitGap" },
+  title: { default: "KitGap: help your community get exactly what it needs", template: "%s · KitGap" },
   description: DESCRIPTION,
   openGraph: { siteName: "KitGap", type: "website", description: DESCRIPTION },
   twitter: { card: "summary_large_image" },

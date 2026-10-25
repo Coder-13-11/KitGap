@@ -181,9 +181,16 @@ export function parseJson(text: string): Record<string, unknown> | null {
 
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
-export async function askKit(k: KitInput, nearbyOrgs: string[], question: string, intent: KitIntent | null, history: KitTurn[]): Promise<KitReply> {
+export async function askKit(
+  k: KitInput,
+  nearbyOrgs: string[],
+  question: string,
+  intent: KitIntent | null,
+  history: KitTurn[],
+  useAi = true,
+): Promise<KitReply> {
   const fallback = rulesReply(k, nearbyOrgs, intent);
-  if (!kitAiEnabled()) return fallback;
+  if (!useAi || !kitAiEnabled()) return fallback;
 
   const facts = kitFacts(k, nearbyOrgs);
   const tips = diagnose(k).map((t) => `${t.title}: ${t.detail}`);

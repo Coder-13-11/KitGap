@@ -15,13 +15,21 @@ import { adoptRequest } from "@/server/services/drives";
 let sql: Sql;
 const created: string[] = [];
 
+// These tests migrate and read the real "kitgap" schema to prove the demo
+// can't reach it. Run them only against a database meant for testing
+// (TEST_DATABASE_URL), or on purpose with KITGAP_TEST_LIVE_SCHEMA=1, never by
+// accident against the production database in .env.local.
+const enabled = Boolean(process.env.TEST_DATABASE_URL) || process.env.KITGAP_TEST_LIVE_SCHEMA === "1";
+
 beforeAll(async () => {
+  if (!enabled) return;
   process.env.DEMO_COOKIE_SECRET ??= "test-secret-test-secret-test-secret-1234";
   sql = createSql(process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL!, { max: 4 });
   await migrateSchema(sql, LIVE_SCHEMA);
 });
 
 afterAll(async () => {
+  if (!enabled) return;
   for (const id of created) {
     await dropSchema(sql, schemaFor(id));
     await sql`delete from kitgap_meta.demo_sandboxes where schema_name = ${schemaFor(id)}`;
@@ -41,7 +49,7 @@ async function liveCounts() {
   });
 }
 
-describe("demo sandboxes", () => {
+describe.skipIf(!enabled)("demo sandboxes", () => {
   it("start from the same clean sample state", async () => {
     const a = await createSandbox(sql);
     created.push(a);

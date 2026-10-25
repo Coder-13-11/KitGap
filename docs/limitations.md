@@ -62,7 +62,7 @@ These two features work, but they sit outside KitGap's main loop (request, drive
 
 - No real users have tested it yet. Use `docs/user-testing.md`.
 - Not tested with screen readers, real phones, browsers other than Chromium, or under load (see `docs/accessibility.md` and `docs/testing.md`).
-- Not deployed. The deployment steps in `docs/setup.md` haven't been run against a real Supabase project or Vercel.
+- Deployed at https://kitgap.vercel.app (Vercel, `iad1`) with a hosted Supabase database in `us-east-1`. Email delivery and the full sign-up flow haven't been checked on the deployed site.
 - Saving is slow when the app runs far from the database. Running locally against the hosted Supabase database, a save takes about 4 to 7 seconds, because each save makes many small checked queries and each one crosses the internet (about 40 ms). Hosted in the same region as the database, each query takes about 1 ms, so this should drop well under a second. That hasn't been measured yet.
 - Email delivery was tested only with the local mail catcher. Production needs an SMTP provider.
 - The demo uses fixed sample people instead of real sign-in. It shows the rules and the interface, not real authentication; the real sign-in path is covered separately by `tests/e2e/live-auth.spec.ts`.
@@ -72,7 +72,7 @@ These two features work, but they sit outside KitGap's main loop (request, drive
 - Kit's AI answers come from a language model on an outside endpoint (set with `KIT_AI_*`; during development, the University of Florida's NaviGator service). Each question sends that endpoint the facts Kit uses: names of the organization, need and groups, the asker's display name, totals, page views and deadlines. Not emails, drop-off details or private notes. Voice questions send the recording for transcription; KitGap doesn't store it.
 - The guardrail checks numbers only. A model could still word something oddly or suggest a weak idea, so drafts say "read before you post" and nothing is sent without the person tapping it.
 - Kit can't take actions on its own. It links to the page where the person acts.
-- Rate limits for Kit and its voice routes are kept in server memory, so they reset on restart and aren't shared across servers.
+- Kit's AI and voice are only for signed-in people and demo visitors; signed-out visitors get written answers. Daily caps (150 AI answers and 120 voice clips per person or demo, 5,000 a day for the whole site) are kept in the database once migration 0007 is applied; until then, only per-minute limits held in server memory apply, and those reset on restart and aren't shared across servers. Anyone can start the public demo, so the demo's voice can still be used by strangers within those caps.
 - Voice needs microphone permission. In the iOS app it uses the web view's microphone access, which hasn't been tested on a device yet.
 
 ## Security notes

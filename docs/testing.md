@@ -2,16 +2,18 @@
 
 ## What runs, and the latest results
 
-| Suite | Command | What it covers | Result (Oct 23, 2026) |
-| --- | --- | --- | --- |
-| Unit | `npm test` (part) | Quantity math, form validation, dates, wording, migrations bundle | 36 passed |
-| Integration | `npm test` (part) | Services against a real Postgres 17 (local Supabase): permissions, concurrency, retries, privacy, demo isolation | 35 passed |
-| End-to-end | `npm run test:e2e` | Chromium driving the production build with real Supabase Auth and the local mail catcher | 6 passed |
-| Accessibility (automated) | part of `test:e2e` | axe-core WCAG 2.0/2.1/2.2 A and AA rules on 17 screens and states | 0 violations |
-| Types and lint | `npm run typecheck`, `npm run lint` | | clean |
-| Production build | `npm run build` | | succeeds with no warnings |
+Latest full run: **October 25, 2026**, against the hosted Supabase database (each integration test file makes its own throwaway schema and drops it; none touches the live `kitgap` schema).
 
-`npm test` totals: 71 tests in 8 files, all passing, about 9 seconds. Integration tests each create a fresh schema and drop it afterwards.
+| Suite | Command | What it covers | Result (Oct 25, 2026) |
+| --- | --- | --- | --- |
+| Unit | `npx vitest run tests/unit` | Quantity math, validation, dates, wording, migrations bundle, onboarding, Kit's advice, drafts and number guardrail | **104 passed** |
+| Integration | `npx vitest run tests/integration` | Services against real Postgres: permissions, concurrency, retries, privacy, club drives, imports, webhooks, the demo board, Kit's daily AI caps | **52 passed**, 6 skipped (below) |
+| Accessibility (browser) | `npx playwright test tests/e2e/accessibility.spec.ts` | axe-core WCAG A and AA on public and demo screens, on the production build | **2 passed** |
+| Demo walkthrough (browser) | `npx playwright test tests/e2e/demo-walkthrough.spec.ts` | The whole drive, as four people | **Not passing from a laptop**: saves to the hosted database took over 20 seconds; two runs between them reached every step but the last |
+| Sign-up and invites (browser) | `live-auth.spec.ts`, `invite.spec.ts` | Real accounts and email | **Not run**: they create real accounts |
+| Types, lint, build | `npm run typecheck`, `npm run lint`, `npm run build` | | clean, build succeeds |
+
+**The 6 skipped tests** (`tests/integration/demo-sandbox.test.ts`) migrate and read the real `kitgap` schema to prove the demo can't reach it. They run only with a separate test database (`TEST_DATABASE_URL`) or with `KITGAP_TEST_LIVE_SCHEMA=1`, so `npm test` can never change production by accident.
 
 A few checks prove a test can actually fail:
 

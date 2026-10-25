@@ -6,6 +6,7 @@
 import { routeQuestion, type KitIntent } from "@/domain/kit-helper";
 import { askKit, type KitReply, type KitTurn } from "@/server/kit/ai";
 import { loadKitContext } from "@/server/kit/input";
+import { allowKitUse } from "@/server/kit/usage";
 import { getAppContext } from "@/server/next/context";
 
 const INTENTS: KitIntent[] = ["why", "instagram", "partners", "email", "stats"];
@@ -38,5 +39,7 @@ export async function askKitAction(input: {
   const history = (Array.isArray(input.history) ? input.history : [])
     .filter((t) => t && (t.from === "me" || t.from === "kit") && typeof t.text === "string")
     .slice(-6);
-  return askKit(kit.input, kit.nearbyOrgs, question, intent, history);
+  // Over the daily cap, Kit answers from its written rules.
+  const useAi = await allowKitUse(ctx.demo ? `demo:${ctx.demo.sandboxId}` : `user:${ctx.user.id}`, "ai");
+  return askKit(kit.input, kit.nearbyOrgs, question, intent, history, useAi);
 }

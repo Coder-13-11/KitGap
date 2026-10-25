@@ -5,12 +5,16 @@
 /** Public link to the source code. Leave null until the repository is public, so the page never shows a broken link. */
 export const REPO_URL: string | null = null;
 
-/** Test counts as last run. Update them when the suite changes. */
+/**
+ * Automated tests seen passing in the last full run (see KITGAP_FINAL_READINESS.md).
+ * Count only what passed: the repository has more (6 integration tests that
+ * need a separate test database, and 4 browser tests not run that day).
+ */
 export const TEST_FACTS = {
   asOf: "October 25, 2026",
-  unit: 85,
-  integration: 56,
-  browser: 6,
+  unit: 104,
+  integration: 52,
+  browser: 2,
 };
 
 /**

@@ -80,6 +80,12 @@ export default function AboutPage() {
             details.
           </p>
           <p>
+            <strong>AI inside KitGap:</strong> Kit, the helper, writes its answers and drafts with the Gemma 4 model and listens and speaks
+            with Whisper and Kokoro, through the University of Florida&apos;s NaviGator AI service. Kit only states numbers from KitGap&apos;s own
+            data, and only for signed-in people and demo visitors. The photo counter runs a model in your browser, and &ldquo;Found
+            online&rdquo; searches the web with Exa.
+          </p>
+          <p>
             <strong>Built with:</strong> Next.js, React, TypeScript, Tailwind CSS, Supabase (authentication and Postgres), postgres.js,
             Lucide icons, and the Petrona and Archivo Narrow typefaces (SIL Open Font License).
           </p>
