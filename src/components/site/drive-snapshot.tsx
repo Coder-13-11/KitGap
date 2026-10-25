@@ -16,10 +16,10 @@ const KITS = 20;
 
 export function DriveSnapshot() {
   return (
-    <figure className="tag-shape border border-line-strong bg-surface p-5 shadow-card sm:p-6" aria-labelledby="snapshot-caption">
+    <figure className="tag-shape border border-line-strong bg-surface p-4 shadow-card sm:p-6" aria-labelledby="snapshot-caption">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-serif text-xl font-semibold tracking-tight">School-supply kits</p>
+          <p className="font-serif text-lg font-semibold tracking-tight sm:text-xl">School-supply kits</p>
           <p className="text-sm text-muted">Lakeside High Service Club → Riverbend Family Center</p>
         </div>
         <span className="shrink-0 rounded-[2px_8px_8px_2px] border border-clay/30 bg-clay-tint px-2 py-0.5 text-xs font-semibold text-clay">
@@ -27,7 +27,7 @@ export function DriveSnapshot() {
         </span>
       </div>
 
-      <ul className="mt-5 space-y-3">
+      <ul className="mt-4 space-y-2.5 sm:mt-5 sm:space-y-3">
         {ITEMS.map(({ name, have, need, Icon }) => {
           const done = have >= need;
           return (
@@ -46,10 +46,10 @@ export function DriveSnapshot() {
         })}
       </ul>
 
-      <div className="mt-6 border-t border-line pt-5">
+      <div className="mt-4 border-t border-line pt-4 sm:mt-6 sm:pt-5">
         <div className="flex items-end justify-between gap-3">
           <p>
-            <span className="tabular font-serif text-4xl leading-none font-semibold">
+            <span className="tabular font-serif text-3xl leading-none font-semibold sm:text-4xl">
               {CONFIRMED} of {KITS}
             </span>
             <span className="mt-1 block text-sm font-semibold">kits confirmed by the shelter</span>

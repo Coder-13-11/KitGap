@@ -1,8 +1,8 @@
 "use client";
 
-// The bottom tab bar of the installed app. It only appears when KitGap runs
-// from the home screen (or the native shell) on a phone or tablet, where
-// there's no browser bar to navigate with. In a browser tab nothing changes.
+// The bottom tab bar: how KitGap is navigated on a phone, in the browser and
+// in the installed or native app. Tablets get it too when installed, since
+// there's no browser bar there. From 768px up the header nav takes over.
 
 import { Bell, ClipboardList, FlaskConical, Home, LogIn, Package, ScanLine } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -36,7 +36,7 @@ export function TabBar({ tabs: given }: { tabs: Tab[] }) {
   return (
     <nav
       aria-label="App"
-      className="fixed inset-x-0 bottom-0 z-30 hidden border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_rgb(28_41_33/0.06)] standalone:max-lg:block in-data-[native=true]:max-lg:block no-print"
+      className="fixed inset-x-0 bottom-0 z-30 hidden border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-1px_0_rgb(28_41_33/0.06)] max-md:block standalone:max-lg:block in-data-[native=true]:max-lg:block no-print"
     >
       <ul className="mx-auto grid max-w-xl" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
         {tabs.map((tab) => {
@@ -48,11 +48,11 @@ export function TabBar({ tabs: given }: { tabs: Tab[] }) {
                 href={tab.href}
                 aria-current={on ? "page" : undefined}
                 className={cn(
-                  "press relative flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold no-underline",
+                  "press relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[0.7rem] font-semibold no-underline",
                   on ? "text-forest-dark" : "text-muted",
                 )}
               >
-                <span className={cn("grid h-8 w-14 place-items-center rounded-full transition-colors", on && "bg-forest-tint")}>
+                <span className={cn("grid h-7 w-12 place-items-center rounded-full transition-colors", on && "bg-forest-tint")}>
                   <Icon aria-hidden className="size-5" />
                 </span>
                 {tab.label}

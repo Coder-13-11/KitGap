@@ -5,7 +5,8 @@ export type ButtonVariant = "primary" | "secondary" | "quiet" | "danger" | "inve
 
 // The punched hole of a shipping tag, on buttons that commit. It's dropped
 // when the button already starts with an icon, so a label never opens with
-// two marks.
+// two marks, and on phones, where buttons often span the screen and a dot at
+// the far edge reads as a radio button.
 const TAG_HOLE =
   "relative before:absolute before:top-1/2 before:-translate-y-1/2 before:rounded-full before:content-[''] has-[svg]:before:hidden";
 
@@ -40,8 +41,8 @@ export function buttonClass(variant: ButtonVariant = "primary", size: "md" | "sm
   const holePad = !holed
     ? ""
     : size === "md"
-      ? "pl-[1.65rem] before:left-2.5 before:size-2 has-[svg]:pl-4"
-      : "pl-6 before:left-2 before:size-1.5 has-[svg]:pl-3";
+      ? "pl-[1.65rem] before:left-2.5 before:size-2 has-[svg]:pl-4 max-sm:pl-4 max-sm:before:hidden"
+      : "pl-6 before:left-2 before:size-1.5 has-[svg]:pl-3 max-sm:pl-3 max-sm:before:hidden";
   return cn(
     "inline-flex items-center justify-center gap-2 font-sans font-semibold no-underline transition-colors duration-150",
     "disabled:cursor-not-allowed",

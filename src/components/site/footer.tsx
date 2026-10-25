@@ -3,9 +3,9 @@ import { AppLink } from "../ui/base";
 export function SiteFooter() {
   return (
     <footer className="border-t border-line bg-surface no-print">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 text-sm text-muted sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-12 sm:px-6">
-        <div className="max-w-sm space-y-2">
-          <p className="font-serif text-2xl font-semibold tracking-tight text-ink">KitGap</p>
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-6 px-4 py-8 text-sm text-muted sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-12 sm:px-6 sm:py-10">
+        <div className="col-span-2 max-w-sm space-y-2 sm:col-span-1">
+          <p className="font-serif text-xl font-semibold tracking-tight text-ink sm:text-2xl">KitGap</p>
           <p>Donation drives for exactly what a shelter needs. KitGap handles donated goods only, never money.</p>
         </div>
         <nav aria-labelledby="footer-kitgap">

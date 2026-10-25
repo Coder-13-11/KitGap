@@ -98,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body className="flex min-h-dvh flex-col standalone:max-lg:pb-[calc(4rem+env(safe-area-inset-bottom))] standalone:pt-[env(safe-area-inset-top)] in-data-[native=true]:max-lg:pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      <body className="flex min-h-dvh flex-col max-md:pb-[calc(3.5rem+env(safe-area-inset-bottom))] standalone:max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))] standalone:pt-[env(safe-area-inset-top)] in-data-[native=true]:max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"

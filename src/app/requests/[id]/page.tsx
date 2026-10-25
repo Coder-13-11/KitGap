@@ -78,7 +78,6 @@ export default async function RequestPage({ params }: Params) {
               {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
                 <span className={deadline.passed ? "font-semibold text-amber" : undefined}> · {deadline.description}</span>
               ) : null}
-              <span> · {request.location}</span>
             </p>
           </header>
 

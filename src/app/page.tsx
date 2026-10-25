@@ -15,10 +15,10 @@ const NVOAD = "https://www.nvoad.org/all_resources/donations-management/";
 
 // Every section shares one container, one heading size and one 3-column
 // grid, so left edges and columns line up all the way down the page.
-const SECTION = "border-t border-line py-16 sm:py-20";
+const SECTION = "border-t border-line py-10 sm:py-16 md:py-20";
 const H2 = "font-serif text-3xl font-semibold tracking-tight sm:text-4xl";
-const GRID = "mt-8 grid gap-5 md:grid-cols-3";
-const CARD = "tag-shape flex flex-col border border-line-strong bg-surface p-6 shadow-card";
+const GRID = "mt-5 grid gap-3 sm:mt-8 sm:gap-5 md:grid-cols-3";
+const CARD = "tag-shape flex flex-col border border-line-strong bg-surface p-4 shadow-card sm:p-6";
 
 const STEPS = [
   { title: "Get the list", text: "Take a share of a shelter's posted request, or add the list from one you already know." },
@@ -71,15 +71,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       ) : null}
 
       <section aria-labelledby="hero-title">
-        <Container className="grid items-center gap-10 py-12 md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] md:py-20 lg:gap-16">
+        <Container className="grid items-center gap-8 py-8 sm:py-12 md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] md:gap-10 md:py-20 lg:gap-16">
           <div className="rise">
             <h1 id="hero-title" className="max-w-[16ch] font-serif text-4xl leading-[1.08] font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">
               Donation drives for exactly what a shelter needs.
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-muted sm:text-xl">
+            <p className="mt-4 max-w-xl text-lg text-muted sm:mt-5 sm:text-xl">
               Your club gets a shelter&rsquo;s list, collects it together, and drops it off. The shelter confirms what arrived.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
               <AppLink href="/drives/new" className={buttonClass("primary")}>
                 Start a drive
               </AppLink>
@@ -104,12 +104,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </h2>
           <ol className={GRID}>
             {STEPS.map((step, i) => (
-              <Reveal as="li" key={step.title} index={i} className={CARD}>
-                <span className="tabular grid size-10 place-items-center rounded-full bg-forest font-serif text-lg font-semibold text-white">
+              <Reveal
+                as="li"
+                key={step.title}
+                index={i}
+                className={`${CARD} grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 sm:flex`}
+              >
+                <span className="tabular row-span-2 grid size-9 place-items-center rounded-full bg-forest font-serif text-base font-semibold text-white sm:size-10 sm:text-lg">
                   {i + 1}
                 </span>
-                <h3 className="mt-4 font-serif text-2xl font-semibold tracking-tight">{step.title}</h3>
-                <p className="mt-2 text-muted">{step.text}</p>
+                <h3 className="font-serif text-xl font-semibold tracking-tight sm:mt-4 sm:text-2xl">{step.title}</h3>
+                <p className="mt-1 text-muted sm:mt-2">{step.text}</p>
               </Reveal>
             ))}
           </ol>
@@ -124,9 +129,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className={GRID}>
             {ROLES.map((role, i) => (
               <Reveal key={role.title} index={i} className={CARD}>
-                <h3 className="font-serif text-2xl font-semibold tracking-tight">{role.title}</h3>
-                <p className="mt-2 flex-1 text-muted">{role.text}</p>
-                <AppLink href={role.href} className="mt-5 inline-flex min-h-11 items-center gap-2 self-start font-semibold">
+                <h3 className="font-serif text-xl font-semibold tracking-tight sm:text-2xl">{role.title}</h3>
+                <p className="mt-1 flex-1 text-muted sm:mt-2">{role.text}</p>
+                <AppLink href={role.href} className="mt-2 inline-flex min-h-11 items-center gap-2 self-start font-semibold sm:mt-5">
                   {role.cta}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </AppLink>
@@ -213,7 +218,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </h2>
             <p className="mt-2 text-lg text-muted">The demo uses fictional sample people. Nothing in it is real.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <AppLink href="/demo" className={buttonClass("primary")}>
               Try the demo
             </AppLink>

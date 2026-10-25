@@ -113,7 +113,7 @@ export function DemoBanner({
             All steps
             <ChevronDown aria-hidden className="size-4 transition-transform group-open:rotate-180" />
           </summary>
-          <div className="kg-slide absolute right-0 z-40 mt-2 w-[min(24rem,calc(100vw-2rem))] rounded-[2px_14px_14px_2px] border border-line-strong bg-surface p-4 shadow-card">
+          <div className="kg-slide absolute right-0 z-50 mt-2 max-h-[calc(100dvh-5rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-[2px_14px_14px_2px] border border-line-strong bg-surface p-4 shadow-card">
             <p className="text-sm text-muted">
               You&rsquo;re acting as <strong className="font-semibold text-ink">{persona.name}</strong> ({persona.short}). Each step switches to
               the right person for you.

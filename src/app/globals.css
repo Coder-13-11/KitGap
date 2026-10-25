@@ -75,10 +75,16 @@
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 1.0625rem;
+    /* Phones read at 16px; larger screens at 17px (DESIGN.md body). */
+    font-size: 1rem;
     line-height: 1.55;
     letter-spacing: 0.012em;
     text-rendering: optimizeLegibility;
+  }
+  @media (min-width: 48rem) {
+    body {
+      font-size: 1.0625rem;
+    }
   }
 
   h1,
@@ -224,6 +230,11 @@
     animation: kg-slide 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 
+  /* The phone menu sliding down from under the header. */
+  .kg-sheet {
+    animation: kg-sheet 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
   /* The received stamp coming down onto the tag: a short press, then rest. */
   .kg-stamp {
     animation: kg-stamp 520ms cubic-bezier(0.3, 1.5, 0.4, 1) both;
@@ -238,6 +249,36 @@
   .fill {
     transform-origin: left;
     animation: kg-fill 10s cubic-bezier(0.25, 0.6, 0.35, 1) both;
+  }
+}
+
+/*
+  Phone type scale. Below 640px every text size steps down, so headings and
+  paragraphs fit a phone on every page without per-page tweaks. Only phones:
+  the sm: sizes (640px and up) are untouched, so tablets and desktop keep
+  the full scale.
+*/
+@media (max-width: 39.99rem) {
+  .text-lg {
+    font-size: 1.0625rem;
+  }
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  .text-2xl {
+    font-size: 1.3125rem;
+  }
+  .text-3xl {
+    font-size: 1.5625rem;
+  }
+  .text-4xl {
+    font-size: 1.8125rem;
+  }
+  .text-5xl {
+    font-size: 2.125rem;
+  }
+  .text-6xl {
+    font-size: 2.5rem;
   }
 }
 
@@ -283,6 +324,15 @@
   }
   to {
     transform: scale(1);
+  }
+}
+
+@keyframes kg-sheet {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: none;
   }
 }
 

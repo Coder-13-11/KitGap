@@ -60,13 +60,21 @@ export function ShareDrive({
 
   return (
     <div className="space-y-3">
-      <div className={cn("flex flex-wrap gap-2", small ? "flex-col items-stretch" : "flex-col sm:flex-row sm:items-center")}>
+      {/* Phones: Share and Copy across, then Email and QR side by side. Wider screens: one row. */}
+      <div
+        className={cn(
+          "grid grid-cols-2 gap-2 [&>*]:min-w-0",
+          small ? "sm:flex sm:flex-col sm:items-stretch" : "sm:flex sm:flex-wrap sm:items-center",
+        )}
+      >
         {canShare ? (
-          <button type="button" onClick={share} className={cn(buttonClass("primary", small ? "sm" : "md"), "gap-2")}>
+          <button type="button" onClick={share} className={cn(buttonClass("primary", small ? "sm" : "md"), "col-span-2 gap-2")}>
             <Share2 aria-hidden className="size-4" /> Share
           </button>
         ) : null}
-        <CopyLink url={url} label={copyLabel} />
+        <div className="col-span-2 max-sm:[&_button]:w-full">
+          <CopyLink url={url} label={copyLabel} />
+        </div>
         <a href={mailto} className={cn(buttonClass("secondary", small ? "sm" : "md"), "gap-2")}>
           <Mail aria-hidden className="size-4" /> Email it
         </a>
@@ -76,7 +84,7 @@ export function ShareDrive({
           onClick={() => setShowQr((v) => !v)}
           className={cn(buttonClass("secondary", small ? "sm" : "md"), "gap-2")}
         >
-          <QrCode aria-hidden className="size-4" /> {showQr ? "Hide QR code" : "QR code"}
+          <QrCode aria-hidden className="size-4" /> {showQr ? "Hide QR" : "QR code"}
         </button>
       </div>
       {showQr ? (
