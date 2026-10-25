@@ -5,30 +5,6 @@
 /** Public link to the source code. Leave null until the repository is public, so the page never shows a broken link. */
 export const REPO_URL: string | null = null;
 
-/** Checkable facts about how KitGap is built. Each names where to verify it. */
-export const PROOF_POINTS: { title: string; text: string; where: string }[] = [
-  {
-    title: "Every number is computed, never typed in",
-    text: "Totals come from the records of what was pledged, received, packed and confirmed. Nobody can edit a total by hand.",
-    where: "docs/quantity-model.md",
-  },
-  {
-    title: "Two groups can't claim the same last kit",
-    text: "Taking a share locks the request while it's checked, so the last kits go to one group.",
-    where: "tests/integration/drives.test.ts",
-  },
-  {
-    title: "A double-click never counts twice",
-    text: "Every form carries a one-time key. A retry returns the first result instead of acting again.",
-    where: "src/server/services/core.ts",
-  },
-  {
-    title: "Public pages never show people",
-    text: "Visitors see totals. Contributor names, emails and drop-off details stay with the drive's coordinators.",
-    where: "tests/integration/access.test.ts",
-  },
-];
-
 /** Test counts as last run. Update them when the suite changes. */
 export const TEST_FACTS = {
   asOf: "October 24, 2026",

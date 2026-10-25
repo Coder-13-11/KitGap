@@ -6,7 +6,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 text-sm text-muted sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-12 sm:px-6">
         <div className="max-w-sm space-y-2">
           <p className="font-serif text-2xl font-semibold tracking-tight text-ink">KitGap</p>
-          <p>Give what's actually needed. KitGap coordinates donated goods. It does not collect or track money.</p>
+          <p>Donation drives for exactly what a shelter needs. KitGap handles donated goods only, never money.</p>
         </div>
         <nav aria-labelledby="footer-kitgap">
           <p id="footer-kitgap" className="font-semibold text-ink">KitGap</p>
