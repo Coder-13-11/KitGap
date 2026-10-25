@@ -9,6 +9,14 @@ An honest list of what KitGap does not do, or has not been checked to do.
 - No maps, route planning, shopping links, AI chat, matching between groups and requests, or inventory management.
 - No live SignUpGenius sync. SignUpGenius sign-ups come in through CSV import only.
 
+## A club's own drive and receipt links
+
+- A club can run a drive for a recipient that isn't on KitGap (**Run your own drive**). It's never listed, has no public request page, and other groups can't join it. The recipient is stored as a workspace with no members.
+- The recipient confirms a delivery through a **receipt link** (or its QR code) with no account, signing with a typed name. A signed-in member of the club is refused, but **KitGap can't prove who opened the link**: a coordinator who kept it could confirm their own delivery while signed out. That is why these confirmations are labelled **"Confirmed by recipient"** (an outlined stamp) and kept apart from **"Confirmed"** by a KitGap-verified organization. A club's public record shows them separately, and they don't count toward its milestones.
+- A receipt link is shown once. Making a new one switches the old one off. The links are long random secrets, stored only as a hash, but there is no rate limit on the receipt page.
+- The number of kits in a club's own drive can be lowered, not raised. To make more, start another drive.
+- If the recipient later joins KitGap, there's no way yet to move the drive to its account or upgrade earlier receipt confirmations to "Confirmed". That needs a reviewer tool.
+
 ## Experimental features
 
 These two features work, but they sit outside KitGap's main loop (request, drive, delivery, confirmation). Nothing they produce counts toward any total.

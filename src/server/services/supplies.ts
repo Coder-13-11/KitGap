@@ -420,6 +420,28 @@ export async function cancelDelivery(ctx: ServiceContext, input: { deliveryId: s
   });
 }
 
+// The rules every review follows, whoever confirms: each unit is accepted or
+// not accepted, and anything not accepted comes with an explanation.
+export function parseReviewDecision(
+  quantity: number,
+  input: { accepted: unknown; notAccepted?: unknown; note?: string },
+): { accepted: number; notAccepted: number; note: string } {
+  const accepted = parseCount(input.accepted, "accepted", { allowZero: true });
+  const notAccepted =
+    input.notAccepted === undefined || input.notAccepted === ""
+      ? quantity - accepted
+      : parseCount(input.notAccepted, "notAccepted", { allowZero: true });
+  if (accepted > quantity) invalid("accepted", `This delivery reported ${quantity}. Enter ${quantity} or fewer.`);
+  if (accepted + notAccepted !== quantity) {
+    invalid("notAccepted", `Accepted and not accepted must add up to the ${quantity} delivered`);
+  }
+  const note = (input.note ?? "").trim();
+  if (notAccepted > 0 && note.length < 5) {
+    invalid("note", "Explain what was wrong or missing so the group can fix it");
+  }
+  return { accepted, notAccepted, note };
+}
+
 // The receiving organization's decision on a delivery. Each delivery is
 // decided exactly once (the update only matches a "submitted" delivery), and
 // every unit is either accepted or not accepted with an explanation.
@@ -445,19 +467,7 @@ export async function reviewDelivery(
     if (delivery.status !== "submitted") {
       throw new DomainError("conflict", "This delivery was already reviewed or taken back. Reload to see its current state.");
     }
-    const accepted = parseCount(input.accepted, "accepted", { allowZero: true });
-    const notAccepted =
-      input.notAccepted === undefined || input.notAccepted === ""
-        ? delivery.quantity - accepted
-        : parseCount(input.notAccepted, "notAccepted", { allowZero: true });
-    if (accepted > delivery.quantity) invalid("accepted", `This delivery reported ${delivery.quantity}. Enter ${delivery.quantity} or fewer.`);
-    if (accepted + notAccepted !== delivery.quantity) {
-      invalid("notAccepted", `Accepted and not accepted must add up to the ${delivery.quantity} delivered`);
-    }
-    const note = (input.note ?? "").trim();
-    if (notAccepted > 0 && note.length < 5) {
-      invalid("note", "Explain what was wrong or missing so the group can fix it");
-    }
+    const { accepted, notAccepted, note } = parseReviewDecision(delivery.quantity, input);
     const updated = await tx`
       update deliveries
       set status = 'reviewed', accepted_quantity = ${accepted}, not_accepted_quantity = ${notAccepted},

@@ -17,6 +17,8 @@ import {
 } from "@/components/drives/drive-forms";
 import { ConnectForm } from "@/components/drives/connect-form";
 import { ImportSignups } from "@/components/drives/import-signups";
+import { ReceiptLink } from "@/components/drives/receipt-link";
+import { TierStamp, tierExplanation } from "@/components/ui/confirmation";
 import { ShareDrive } from "@/components/drives/share-drive";
 import { DonationJourneySection } from "@/components/drives/journey";
 import { StageSummary } from "@/components/drives/stages";
@@ -216,7 +218,7 @@ export default async function DrivePage({
                   {countNoun(d.quantity, unit)} reported {formatTimestamp(d.submittedAt, request.timezone)}
                 </p>
                 {d.status === "submitted" ? (
-                  <Pill tone="info">Awaiting {org.name}'s review</Pill>
+                  <Pill tone="info">Awaiting {org.name}&apos;s {drive.tier === "recipient" ? "confirmation" : "review"}</Pill>
                 ) : d.status === "cancelled" ? (
                   <Pill>Taken back</Pill>
                 ) : d.notAccepted ? (
@@ -227,14 +229,23 @@ export default async function DrivePage({
                   <Pill tone="forest">All {formatCount(d.accepted ?? 0)} accepted</Pill>
                 )}
               </div>
+              {d.status === "reviewed" ? (
+                <p className="text-sm">
+                  <TierStamp tier={d.confirmedVia === "receipt" ? "recipient" : "verified"} />{" "}
+                  {d.confirmedVia === "receipt" && d.signedName ? `by ${d.signedName}, ${org.name}, through the receipt link` : `by ${org.name}`}
+                </p>
+              ) : null}
               {d.note ? <p className="text-sm text-muted">Your note: “{d.note}”</p> : null}
               {d.reviewNote ? <p className="text-sm">{org.name}: “{d.reviewNote}”</p> : null}
+              {isCoordinator && d.status === "submitted" && drive.tier === "recipient" ? (
+                <ReceiptLink deliveryId={d.id} recipientName={org.name} alreadyIssued={Boolean(d.receiptIssuedAt)} />
+              ) : null}
               {isCoordinator && d.status === "submitted" ? <CancelDeliveryButton deliveryId={d.id} /> : null}
             </li>
           ))}
         </ul>
       )}
-      {pending.length > 0 ? <p className="text-sm text-muted">Reported deliveries stay reserved for your group until {org.name} reviews them.</p> : null}
+      {pending.length > 0 ? <p className="text-sm text-muted">Reported deliveries stay reserved for your group until {org.name} {drive.tier === "recipient" ? "confirms them" : "reviews them"}.</p> : null}
     </Section>
   );
 
@@ -250,7 +261,7 @@ export default async function DrivePage({
     <Container className="space-y-6 pb-24 lg:pb-10">
       <nav aria-label="Breadcrumb" className="flex flex-wrap gap-x-4 text-sm">
         <AppLink href="/drives">← My drives</AppLink>
-        <AppLink href={`/requests/${request.id}`}>View the request</AppLink>
+        {drive.tier === "verified" ? <AppLink href={`/requests/${request.id}`}>View the request</AppLink> : null}
         <AppLink href={`/record/group/${group.id}`}>Confirmed record</AppLink>
       </nav>
 
@@ -281,7 +292,7 @@ export default async function DrivePage({
         <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">{request.title}</h1>
         <div className="flex flex-wrap items-center gap-2">
           {active ? <Pill tone="forest">Drive active</Pill> : <Pill tone="danger">Withdrawn</Pill>}
-          <PhaseBadge phase={drive.phase} />
+          {drive.tier === "recipient" ? <Pill>Your own drive · not listed</Pill> : <PhaseBadge phase={drive.phase} />}
           {role === "organization" ? <Pill tone="info">Viewing as the receiving organization</Pill> : null}
           {role === "contributor" ? <Pill>You're a member</Pill> : null}
           {request.neededBy ? (
@@ -293,6 +304,9 @@ export default async function DrivePage({
             </span>
           ) : null}
         </div>
+        {drive.tier === "recipient" && role !== "organization" ? (
+          <p className="max-w-2xl text-sm text-muted">{tierExplanation("recipient", org.name)}</p>
+        ) : null}
       </header>
 
       {!active ? (

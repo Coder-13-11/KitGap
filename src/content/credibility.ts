@@ -33,7 +33,7 @@ export const PROOF_POINTS: { title: string; text: string; where: string }[] = [
 export const TEST_FACTS = {
   asOf: "October 24, 2026",
   unit: 85,
-  integration: 50,
+  integration: 54,
   browser: 6,
 };
 

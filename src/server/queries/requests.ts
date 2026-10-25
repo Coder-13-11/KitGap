@@ -150,6 +150,8 @@ export async function listPublicRequests(ctx: ServiceContext, filters: Directory
       select r.* from requests r
       join workspaces o on o.id = r.org_id
       where r.status in ${tx(PUBLIC_STATUSES)}
+        -- A club's own drive (recipient not on KitGap) is never listed.
+        and o.kind = 'organization'
         and (${category}::text is null or r.category = ${category})
         and (
           ${pattern}::text is null
@@ -229,6 +231,10 @@ export async function getRequestDetail(ctx: ServiceContext, requestId: string): 
   return read(ctx, async (tx) => {
     const [request] = (await tx`select * from requests where id = ${requestId}`) as unknown as RequestRecord[];
     if (!request) return null;
+    // A club's own drive has no public request page: the club sees it on its
+    // drive page, and everyone else on the drive's share page.
+    const [owner] = await tx`select kind from workspaces where id = ${request.orgId}`;
+    if (owner?.kind === "recipient") return null;
     const userId = ctx.userId;
     const [orgMembership] = userId
       ? await tx`select role from workspace_members where workspace_id = ${request.orgId} and user_id = ${userId}`

@@ -42,9 +42,9 @@ const ROLES = [
   },
   {
     title: "I lead a club or group",
-    text: "Take a number of kits your group can finish. KitGap multiplies the recipe into one supply checklist.",
-    href: "/requests",
-    cta: "Find a request",
+    text: "Run a kit drive for a shelter or school you already know, or take a share of a posted request. They confirm what arrived with a receipt link, no account needed.",
+    href: "/drives/new",
+    cta: "Run your own drive",
   },
   {
     title: "I was sent a link",

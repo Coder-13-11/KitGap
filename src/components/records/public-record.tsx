@@ -3,6 +3,7 @@ import { countNoun, formatCount, listPhrase } from "@/domain/text";
 import type { PublicRecord } from "@/server/queries/records";
 import { AppLink } from "../ui/base";
 import { Container, Panel, Section } from "../ui/layout-bits";
+import { RecipientStamp } from "../ui/confirmation";
 
 function counts(totals: { unitName: string; accepted: number }[]): string {
   return listPhrase(totals.map((total) => countNoun(total.accepted, total.unitName)));
@@ -26,7 +27,14 @@ export function PublicRecordView({ record }: { record: PublicRecord }) {
           {lead ? (
             <p className="font-serif text-6xl leading-none font-semibold tracking-tight text-forest tabular">{formatCount(lead.accepted)}</p>
           ) : null}
-          <p className="text-lg">{totalSentence(record.totals)}</p>
+          {record.totals.length > 0 || record.recipientTotals.length === 0 ? <p className="text-lg">{totalSentence(record.totals)}</p> : null}
+          {record.recipientTotals.length > 0 ? (
+            <p>
+              <RecipientStamp /> {record.totals.length > 0 ? "Also " : ""}
+              {counts(record.recipientTotals)} confirmed by recipients that aren&rsquo;t on KitGap, through a receipt link.{" "}
+              {record.totals.length > 0 ? "Those aren\u2019t counted above." : "None yet from a KitGap-verified organization."}
+            </p>
+          ) : null}
           <p className="text-muted">Promises and kits awaiting review are not included.</p>
         </div>
         {record.milestone ? (
@@ -74,14 +82,25 @@ export function PublicRecordView({ record }: { record: PublicRecord }) {
                 </p>
                 <div>
                   <p>
-                    {record.kind === "group"
-                      ? `${countNoun(event.accepted, event.unitName)} confirmed by ${event.partnerName}`
-                      : `${countNoun(event.accepted, event.unitName)} confirmed from ${event.partnerName}`}
+                    {event.tier === "recipient" ? (
+                      <>
+                        <RecipientStamp /> {countNoun(event.accepted, event.unitName)} confirmed by {event.partnerName}, through a receipt
+                        link
+                      </>
+                    ) : record.kind === "group" ? (
+                      `${countNoun(event.accepted, event.unitName)} confirmed by ${event.partnerName}`
+                    ) : (
+                      `${countNoun(event.accepted, event.unitName)} confirmed from ${event.partnerName}`
+                    )}
                   </p>
                   <p className="text-sm">
-                    <AppLink href={`/requests/${event.requestId}`} className="underline">
-                      {event.requestTitle}
-                    </AppLink>
+                    {event.tier === "recipient" ? (
+                      event.requestTitle
+                    ) : (
+                      <AppLink href={`/requests/${event.requestId}`} className="underline">
+                        {event.requestTitle}
+                      </AppLink>
+                    )}
                   </p>
                 </div>
               </li>

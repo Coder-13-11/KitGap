@@ -49,6 +49,10 @@ export async function adoptRequest(ctx: ServiceContext, input: AdoptInput): Prom
   return mutate(ctx, { action: "drive.start", idempotencyKey: input.idempotencyKey }, async (tx, userId) => {
     const state = await loadRequestState(tx, input.requestId, { lock: true });
     const { request } = state;
+    const [owner] = await tx`select kind from workspaces where id = ${request.orgId}`;
+    if (owner?.kind === "recipient") {
+      throw new DomainError("not_allowed", "This is another club's own drive, so other groups can't join it.");
+    }
     const totals = totalsOf(state);
     const phase = requestPhase(request, totals, now(ctx));
     const unit = unitWord(request);

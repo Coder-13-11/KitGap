@@ -2,6 +2,7 @@
 // Counts come only from reviewed deliveries. Pledges are not read.
 
 import { confirmedMilestone } from "@/domain/guidance";
+import type { ConfirmationTier } from "@/domain/types";
 import type { Tx } from "../db/client";
 import { isUuid, read, roleIn, type ServiceContext } from "../services/core";
 
@@ -27,6 +28,8 @@ export interface RecordEvent {
   requestTitle: string;
   partnerId: string;
   partnerName: string;
+  // "recipient": confirmed through a receipt link on a club's own drive.
+  tier: ConfirmationTier;
 }
 
 export interface PublicRecord {
@@ -34,7 +37,10 @@ export interface PublicRecord {
   id: string;
   name: string;
   city: string;
+  // Confirmed by KitGap-verified organizations. Milestones count only these.
   totals: RecordTotal[];
+  // Confirmed through a receipt link by a recipient that isn't on KitGap.
+  recipientTotals: RecordTotal[];
   milestone: ReturnType<typeof confirmedMilestone>;
   partners: RecordPartner[];
   timeline: RecordEvent[];
@@ -58,6 +64,7 @@ interface AcceptedRow {
   unitName: string;
   partnerId: string;
   partnerName: string;
+  partnerKind: string;
 }
 
 function totalsFrom(rows: { unitName: string; accepted: number }[]): RecordTotal[] {
@@ -71,7 +78,7 @@ async function acceptedRows(tx: Tx, kind: "group" | "organization", id: string):
     return (await tx`
       select d.id, d.accepted_quantity, d.reviewed_at,
              r.id as request_id, r.title as request_title, r.unit_name,
-             o.id as partner_id, o.name as partner_name
+             o.id as partner_id, o.name as partner_name, o.kind as partner_kind
       from deliveries d
       join commitments c on c.id = d.commitment_id
       join requests r on r.id = c.request_id
@@ -86,7 +93,7 @@ async function acceptedRows(tx: Tx, kind: "group" | "organization", id: string):
   return (await tx`
     select d.id, d.accepted_quantity, d.reviewed_at,
            r.id as request_id, r.title as request_title, r.unit_name,
-           g.id as partner_id, g.name as partner_name
+           g.id as partner_id, g.name as partner_name, g.kind as partner_kind
     from deliveries d
     join commitments c on c.id = d.commitment_id
     join requests r on r.id = c.request_id
@@ -109,20 +116,23 @@ function toRecord(kind: "group" | "organization", workspace: { id: string; name:
     requestTitle: row.requestTitle,
     partnerId: row.partnerId,
     partnerName: row.partnerName,
+    tier: row.partnerKind === "recipient" ? "recipient" : "verified",
   }));
+  const verified = timeline.filter((row) => row.tier === "verified");
   const partners = new Map<string, { id: string; name: string; rows: { unitName: string; accepted: number }[] }>();
-  for (const row of timeline) {
+  for (const row of verified) {
     const partner = partners.get(row.partnerId) ?? { id: row.partnerId, name: row.partnerName, rows: [] };
     partner.rows.push({ unitName: row.unitName, accepted: row.accepted });
     partners.set(row.partnerId, partner);
   }
-  const kitAccepted = timeline.filter((row) => row.unitName.trim().toLowerCase() === "kit").reduce((sum, row) => sum + row.accepted, 0);
+  const kitAccepted = verified.filter((row) => row.unitName.trim().toLowerCase() === "kit").reduce((sum, row) => sum + row.accepted, 0);
   return {
     kind,
     id: workspace.id,
     name: workspace.name,
     city: workspace.city,
-    totals: totalsFrom(timeline),
+    totals: totalsFrom(verified),
+    recipientTotals: totalsFrom(timeline.filter((row) => row.tier === "recipient")),
     milestone: confirmedMilestone(kitAccepted),
     partners: [...partners.values()]
       .map((partner) => ({ id: partner.id, name: partner.name, totals: totalsFrom(partner.rows) }))

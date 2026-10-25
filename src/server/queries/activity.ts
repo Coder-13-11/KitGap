@@ -104,9 +104,12 @@ export function describeActivity(kind: string, data: Record<string, unknown>, un
     case "delivery.reviewed": {
       const accepted = n("accepted");
       const notAccepted = n("notAccepted");
-      if (notAccepted === 0) return `confirmed receiving ${countNoun(accepted, unit)} from ${groupName}`;
-      return `accepted ${accepted} of ${countNoun(n("quantity"), unit)} from ${groupName}; ${notAccepted} not accepted: “${String(data.note ?? "")}”`;
+      const via = data.via === "receipt" ? " through the receipt link" : "";
+      if (notAccepted === 0) return `confirmed receiving ${countNoun(accepted, unit)} from ${groupName}${via}`;
+      return `accepted ${accepted} of ${countNoun(n("quantity"), unit)} from ${groupName}${via}; ${notAccepted} not accepted: “${String(data.note ?? "")}”`;
     }
+    case "receipt.issued":
+      return `made a receipt link for a delivery of ${units("quantity")}`;
     case "member.joined":
       return "joined";
     case "workspace.created":
@@ -153,11 +156,14 @@ export async function activityFor(
     id: String(row.id),
     kind: row.kind,
     actorName:
-      row.actorId && row.actorId === options.viewerId
-        ? "You"
-        : options.showNames
-          ? row.actorName ?? "Someone"
-          : "A member",
+      // A recipient confirming through a receipt link has no account; show the name they signed with.
+      !row.actorId && row.data?.via === "receipt"
+        ? `${String(row.data.signedName ?? "The recipient")} (recipient)`
+        : row.actorId && row.actorId === options.viewerId
+          ? "You"
+          : options.showNames
+            ? row.actorName ?? "Someone"
+            : "A member",
     text: describeActivity(row.kind, row.data ?? {}, row.unitName ?? "unit", row.groupName),
     createdAt: row.createdAt,
     context: options.commitmentId ? null : row.requestTitle,

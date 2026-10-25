@@ -6,6 +6,7 @@ import { AppLink } from "@/components/ui/base";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Pill } from "@/components/ui/status";
+import { RecipientStamp } from "@/components/ui/confirmation";
 import { formatCalendarDate } from "@/domain/dates";
 import { kitsStillToConfirm, shareDriveSentence } from "@/domain/guidance";
 import { countNoun, formatCount } from "@/domain/text";
@@ -42,7 +43,8 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
           {countNoun(drive.quantity, unit)} for {drive.org.name}
         </h1>
         <p className="text-lg text-muted">
-          Part of the request “{drive.request.title}”, needed by {formatCalendarDate(drive.request.neededBy)}.
+          {drive.tier === "recipient" ? `“${drive.request.title}”` : `Part of the request “${drive.request.title}”`}, needed by{" "}
+          {formatCalendarDate(drive.request.neededBy)}.
         </p>
         {drive.status !== "active" ? <Pill tone="danger">This drive was withdrawn</Pill> : null}
       </header>
@@ -56,6 +58,12 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
         <p>
           {formatCount(drive.progress.stages.accepted)} of {countNoun(drive.quantity, unit)} confirmed received by {drive.org.name}.
         </p>
+        {drive.tier === "recipient" ? (
+          <p className="text-sm text-muted">
+            <RecipientStamp /> {drive.org.name} isn&rsquo;t on KitGap. It confirms what arrived with a receipt link the club gives it
+            at handover.
+          </p>
+        ) : null}
         <StageSummary stages={drive.progress.stages} committed={drive.quantity} requestType={drive.request.requestType} unitName={unit} />
         <div className="rounded-lg bg-forest-tint px-4 py-4">
           <p className="text-lg font-semibold">{sentence}</p>

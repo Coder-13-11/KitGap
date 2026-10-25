@@ -16,6 +16,7 @@ import type {
   KitMovementRecord,
   PledgeRecord,
   RequestRecord,
+  ConfirmationTier,
 } from "@/domain/types";
 import type { Tx } from "../db/client";
 import { isUuid, now, read, roleIn, type ServiceContext } from "../services/core";
@@ -69,6 +70,11 @@ export interface DeliveryView {
   notAccepted: number | null;
   reviewNote: string;
   reviewedAt: Date | null;
+  // "receipt": confirmed by the recipient through a receipt link.
+  confirmedVia: "receipt" | null;
+  signedName: string | null;
+  // A receipt link exists for this delivery (the link itself is never stored).
+  receiptIssuedAt: Date | null;
 }
 
 export type DriveRole = "coordinator" | "contributor" | "organization";
@@ -95,6 +101,8 @@ export interface DriveWorkspace {
     | "coordinatorContact"
   > & { targetQuantity: number };
   org: { id: string; name: string; city: string };
+  // "recipient" for a club's own drive, whose recipient isn't on KitGap.
+  tier: ConfirmationTier;
   components: ComponentRecord[];
   progress: ProgressView;
   requestAvailable: number;
@@ -139,7 +147,7 @@ async function loadDrive(tx: Tx, commitmentId: string) {
     select * from kit_movements where commitment_id = ${commitmentId} order by created_at
   `) as unknown as KitMovementRecord[];
   const [group] = await tx`select id, name, city, invite_token from workspaces where id = ${commitment.groupId}`;
-  const [org] = await tx`select id, name, city from workspaces where id = ${request.orgId}`;
+  const [org] = await tx`select id, name, city, kind from workspaces where id = ${request.orgId}`;
   return { commitment, request, components, commitments, deliveries, pledges, collections, movements, group, org };
 }
 
@@ -246,6 +254,9 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         notAccepted: d.notAcceptedQuantity,
         reviewNote: d.reviewNote,
         reviewedAt: d.reviewedAt,
+        confirmedVia: d.confirmedVia ?? null,
+        signedName: d.receiptSignedName ?? null,
+        receiptIssuedAt: d.receiptIssuedAt ?? null,
       }));
 
     const visiblePledgeIds = new Set(visiblePledges.map((p) => p.id));
@@ -350,6 +361,7 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         coordinatorContact: data.request.coordinatorContact,
       },
       org: { id: data.org.id, name: data.org.name, city: data.org.city },
+      tier: data.org.kind === "recipient" ? "recipient" : "verified",
       components: data.components,
       progress: toProgressView(progress),
       requestAvailable: totals.available,
@@ -378,6 +390,7 @@ export interface PublicDrive {
   group: { id: string; name: string; city: string };
   request: { id: string; title: string; requestType: RequestRecord["requestType"]; unitName: string; neededBy: string; timezone: string; status: RequestRecord["status"] };
   org: { name: string; city: string };
+  tier: ConfirmationTier;
   progress: ProgressView;
   deadline: DeadlineInfo;
   bottleneck: Bottleneck;
@@ -407,6 +420,7 @@ export async function getPublicDrive(ctx: ServiceContext, commitmentId: string):
         status: data.request.status,
       },
       org: { name: data.org.name, city: data.org.city },
+      tier: data.org.kind === "recipient" ? "recipient" : "verified",
       progress: toProgressView(progress),
       deadline: data.request.neededBy
         ? describeDeadline(data.request.neededBy, data.request.timezone, at)

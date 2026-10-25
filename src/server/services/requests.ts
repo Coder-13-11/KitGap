@@ -8,8 +8,8 @@
 
 import { DomainError } from "@/domain/errors";
 import { acceptsDeliveries } from "@/domain/phase";
-import { validateRequestInput, type CleanRequest, type RequestInput } from "@/domain/request-input";
-import type { Tx } from "../db/client";
+import { validateRequestInput, type RequestInput } from "@/domain/request-input";
+import { requestColumns, writeComponents } from "./request-rows";
 import {
   assertInvariants,
   loadRequestState,
@@ -24,42 +24,6 @@ import {
 
 function fieldError(errors: Record<string, string>): never {
   throw new DomainError("invalid_input", "Some answers need attention.", { fieldErrors: errors });
-}
-
-async function writeComponents(tx: Tx, requestId: string, clean: CleanRequest) {
-  await tx`delete from request_components where request_id = ${requestId}`;
-  for (const [position, component] of clean.components.entries()) {
-    await tx`
-      insert into request_components ${tx({
-        requestId,
-        position,
-        name: component.name,
-        normalizedKey: component.normalizedKey,
-        quantityPerUnit: component.quantityPerUnit,
-        details: component.details,
-      })}
-    `;
-  }
-}
-
-function requestColumns(clean: CleanRequest) {
-  return {
-    title: clean.title,
-    need: clean.need,
-    beneficiaries: clean.beneficiaries,
-    category: clean.category,
-    requestType: clean.requestType,
-    unitName: clean.unitName,
-    targetQuantity: clean.targetQuantity,
-    conditionNotes: clean.conditionNotes,
-    substitutions: clean.substitutions,
-    neededBy: clean.neededBy,
-    timezone: clean.timezone,
-    location: clean.location,
-    handoverInstructions: clean.handoverInstructions,
-    coordinatorContact: clean.coordinatorContact,
-    fundraisingUrl: clean.fundraisingUrl,
-  };
 }
 
 export async function createRequestDraft(

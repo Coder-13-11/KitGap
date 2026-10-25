@@ -115,4 +115,17 @@ export interface DeliveryRecord {
   notAcceptedQuantity: number | null;
   reviewNote: string;
   reviewedAt: Date | null;
+  // "receipt" when the recipient confirmed through a receipt link (a club's
+  // own drive); null when a member of the receiving organization confirmed it.
+  // Missing (undefined) on databases that predate migration 0005.
+  confirmedVia?: "receipt" | null;
+  receiptIssuedAt?: Date | null;
+  receiptSignedName?: string | null;
 }
+
+/**
+ * Who confirmed what a drive delivered:
+ * - "verified": a KitGap organization whose contact a reviewer confirmed.
+ * - "recipient": a recipient off KitGap, through a receipt link the club shared.
+ */
+export type ConfirmationTier = "verified" | "recipient";

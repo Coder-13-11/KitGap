@@ -26,7 +26,14 @@ export default async function MyDrivesPage() {
       <PageHeader
         title="My drives"
         description="Drives for every group you belong to, with the next thing each one needs."
-        actions={<ButtonLink href="/requests">Find a request to adopt</ButtonLink>}
+        actions={
+          <>
+            <ButtonLink href="/drives/new">Run your own drive</ButtonLink>
+            <ButtonLink href="/requests" variant="secondary">
+              Find a request to adopt
+            </ButtonLink>
+          </>
+        }
       />
 
       {groups.length === 0 ? (
@@ -35,21 +42,22 @@ export default async function MyDrivesPage() {
           icon={<Users />}
           action={
             <>
-              <ButtonLink href="/requests">Find a drive to start</ButtonLink>
-              <ButtonLink href="/groups/new" variant="secondary">
-                Create a group
+              <ButtonLink href="/drives/new">Run your own drive</ButtonLink>
+              <ButtonLink href="/requests" variant="secondary">
+                Find a request to adopt
               </ButtonLink>
             </>
           }
         >
-          Pick a request and start a drive. KitGap sets up your group in the same step. Got an invite link from a coordinator? Open
-          it to join their group.
+          Run a drive for any shelter, school or pantry you already know, or take a share of a request posted on KitGap. Either way
+          KitGap sets up your group in the same step. Got an invite link from a coordinator? Open it to join their group.
         </EmptyState>
       ) : null}
 
       {groups.length > 0 && active.length === 0 ? (
-        <EmptyState title="No active drives" icon={<PackageOpen />} action={<ButtonLink href="/requests">Find a drive to start</ButtonLink>}>
-          Your groups aren't running a drive right now. Coordinators can start one from any open request.
+        <EmptyState title="No active drives" icon={<PackageOpen />} action={<ButtonLink href="/drives/new">Run your own drive</ButtonLink>}>
+          Your groups aren't running a drive right now. Coordinators can run their own for a recipient they know, or take a share of an
+          open request.
         </EmptyState>
       ) : null}
 
