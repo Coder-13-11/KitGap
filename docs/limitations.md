@@ -63,6 +63,7 @@ These two features work, but they sit outside KitGap's main loop (request, drive
 - No real users have tested it yet. Use `docs/user-testing.md`.
 - Not tested with screen readers, real phones, browsers other than Chromium, or under load (see `docs/accessibility.md` and `docs/testing.md`).
 - Not deployed. The deployment steps in `docs/setup.md` haven't been run against a real Supabase project or Vercel.
+- Saving is slow when the app runs far from the database. Running locally against the hosted Supabase database, a save takes about 4 to 7 seconds, because each save makes many small checked queries and each one crosses the internet (about 40 ms). Hosted in the same region as the database, each query takes about 1 ms, so this should drop well under a second. That hasn't been measured yet.
 - Email delivery was tested only with the local mail catcher. Production needs an SMTP provider.
 - The demo uses fixed sample people instead of real sign-in. It shows the rules and the interface, not real authentication; the real sign-in path is covered separately by `tests/e2e/live-auth.spec.ts`.
 

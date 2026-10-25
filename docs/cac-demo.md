@@ -6,20 +6,34 @@ Rules were read only through House office web pages (the official PDF was blocke
 
 ## Video outline (about 2½ minutes)
 
-Record the demo at `/demo` on the deployed site or locally. Use a browser zoom around 125% so the text is readable, and close other tabs. Speak in your own words; the lines below are prompts, not a script. The sample people and organizations are fictional.
+Record the demo at `/demo` on the deployed site or locally. Use a browser zoom around 125% so the text is readable, and close other tabs. Speak in your own words; the lines below are prompts, not a script. Every place and person in the demo is made up, and the names say "(sample)".
+
+The story: **a local place posts exactly what it needs, people help, and only what the place confirms counts.**
 
 | Time | Screen | What to say and do |
 | --- | --- | --- |
-| 0:00–0:15 | Home | Who you are and your district. Organizations know the kit they need. Clubs want to help. People rarely learn what was actually confirmed. |
-| 0:15–0:35 | Request, as Jordan | School-supply kits. Point at “One kit still needs 1 backpack, 2 notebooks and 1 pencil pack,” then the line that a pledge is not collected. |
-| 0:35–0:55 | Sam's drive | Pledge 10 notebooks. Show “10 notebooks are enough for 5 kits” and “Where your items went,” still on “Pledged.” |
-| 0:55–1:20 | Jordan's drive | Record Sam's 10 notebooks against the pledge. Pack and report the delivery. The timeline says “Recorded as received,” then “Handed over.” Confirmed is not there yet. |
-| 1:20–1:45 | Maya's review | Accept 13, not 15. Message: “Thank you. The pencil packs were missing from 2 kits.” Say the message stays with the group and is not posted publicly. |
-| 1:45–2:05 | Sam, then the group record | Sam sees “Confirmed” and how many kits are still to be confirmed. Open Lakeside's confirmed record: 13 kits, “10 kits confirmed,” Riverbend listed, Sam's name absent. |
-| 2:05–2:20 | Public drive | “Share this drive” and the sentence “Help finish this drive.” One line on how this differs from a wish list: the group collects and packs, and the organization confirms. KitGap is not the only goods tool. |
-| 2:20–2:30 | Your code | Show `requestTotals` or the unit test that a pledge does not count as confirmed. Mention the AI help honestly (see `docs/ai-usage.md`). |
+| 0:00–0:15 | Home page | Who you are and your district. Why you built it, in one sentence of your own (for example, a drive you saw that collected the wrong things). |
+| 0:15–0:40 | Find, in the demo | The sample town: a food pantry, a senior home, an animal rescue and a school. Tap the Food icon. Open "Weekend food bags": 40 bags, exactly what goes in each, and a bar where only the 12 bags the pantry confirmed count as done. |
+| 0:40–0:55 | Share kit on that need | Show the square post image with the QR code and "Copy caption". One line: people already use Instagram and group chats, so KitGap makes a post for them. |
+| 0:55–1:25 | The guided tour (school kits) | As Jordan, offer to help with 20 kits. As Sam, pledge 10 notebooks; the page says a pledge isn't counted yet. As Jordan, record what arrived, pack 15 kits and report the handover. |
+| 1:25–1:50 | Maya's review | Accept 13 of 15 with a note: "The pencil packs were missing from 2 kits." Say the note goes to the group, not the public. |
+| 1:50–2:10 | Confirmed | Sam sees "Confirmed". Open the group's confirmed record: 13 kits, the family center listed, no personal names. Show the phone layout or the installed app for a few seconds. |
+| 2:10–2:30 | Your code | Show `requestTotals` or the unit test that a pledge doesn't count as confirmed. Mention the AI help honestly (see `docs/ai-usage.md`). |
 
 Don't claim partnerships, real deliveries, users or impact that haven't happened. "I tested it with 4 people" is fine only if it's true.
+
+## Questions a judge may ask
+
+Short, honest answers. Put them in your own words.
+
+- **Isn't this just a wish list or a sign-up sheet?** A wish list stops at "someone said they'd bring it". KitGap tracks what actually arrived and only counts what the receiving place confirmed. It also checks that two groups can't take the same part of a need.
+- **Who would use it first?** A local food pantry, shelter, school or senior home with a specific need, and the neighbors and clubs who want to help. School clubs can also run their own drive with a receipt link.
+- **Why would a busy organization bother?** Posting a need takes a few minutes, and they get exactly what they listed instead of random donations. Reviewing a handover is one screen.
+- **How do you stop fake organizations?** A KitGap reviewer confirms each organization's contact before its needs go public. Needs show "Contact confirmed" when that happened.
+- **What about privacy?** Public pages show totals only. Helpers' names, notes and drop-off details are visible only to the people running the drive and the organization. The view counter stores a number per day, nothing about the visitor.
+- **What happens if two people take the last bags at the same time?** The database locks the need while a change is saved, so the second person gets a clear message instead of a double count. There's an automated test for exactly this.
+- **What would you build next?** Photo proof of drop-offs, a pledge link that doesn't need an account, and volunteer-hours certificates for students. All are listed in `docs/repurpose-plan.md`.
+- **What did AI do, and what did you do?** Answer from `docs/ai-usage.md`, and point to the change you made yourself.
 
 ## Submission checklist
 

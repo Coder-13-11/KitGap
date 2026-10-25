@@ -107,4 +107,11 @@ Renaming touches the logo, icons, native app IDs and every page, so it's safer a
 - **Share kit** on each need: a square post image with a QR code (`/requests/[id]/post-image`), the share sheet (Instagram, WhatsApp and more through the phone), Save image, Copy caption, Facebook, WhatsApp and Email.
 - **Reach:** view counts on need pages and drive share pages (migration 0006, `page_views`).
 
+Added the same day, while polishing for judging:
+
+- **A full sample board in the demo:** Westside Food Pantry (weekend food bags, 12 of 40 already confirmed), Palm Grove Senior Living (comfort kits) and Osceola Paws Rescue (dry dog food), next to the school and winter needs. All marked "(sample)". Checked by `tests/integration/demo-community.test.ts`.
+- **Empty boards point somewhere:** when the live board has no needs yet, Find and Home offer drives found online and the sample board.
+- **Shorter drive page on phones:** only the newest entries of the received-supplies log and activity are shown, with "Show more", and "Change this drive" is folded.
+- **Fixes found by the browser tests:** a success message could vanish when a save finished just as the previous message expired, and the error box could scroll under the sticky header.
+
 Not built yet: photo proof of drop-offs, a no-account pledge link, hours log, kit tags, check-in mode, certificate (see section 3, "Later").

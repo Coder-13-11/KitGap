@@ -1,8 +1,8 @@
 # KitGap
 
-**Turn a community need into a drive your group can complete.**
+**Help your community get exactly what it needs.**
 
-KitGap connects a specific material need with the groups willing to meet it. An organization (a school, shelter or family center) posts exactly what it needs, for example 100 school-supply kits, each with a backpack, two notebooks and a pencil pack. School clubs and community groups adopt part of it. Members pledge items; the coordinator records what actually arrives, packs complete kits and hands them over. The receiving organization confirms what it received, and only that counts as fulfilled.
+Local places such as food pantries, shelters, schools, senior homes and animal rescues post exactly what they need, for example 40 weekend food bags with 2 cans of soup, a bag of rice, a jar of peanut butter and a box of cereal in each. Neighbors, families and school clubs find a need, say how much they'll help with, collect it and drop it off. The organization confirms what actually arrived, and only that counts.
 
 Built for the 2026 Congressional App Challenge. See [docs/ai-usage.md](docs/ai-usage.md) for how AI was used.
 
@@ -10,14 +10,15 @@ Built for the 2026 Congressional App Challenge. See [docs/ai-usage.md](docs/ai-u
 
 ## What works
 
-- Public request directory with search, category, status and sort; request pages showing the exact recipe, live availability and progress.
-- Organizations: register, write requests in a four-step form (drafts saved, recipe preview, duplicate checks), submit for review, review deliveries (accept all, or part with a reason), close, reopen, cancel, copy, post updates, invite staff.
-- KitGap reviewers: confirm an organization's contact, then approve or return requests. Reviewer access is granted only with SQL.
-- Groups: start a drive for a chosen quantity (checked against live availability), invite members, record received supplies (usable or not, from a pledge or not), pack kits, report deliveries, fix or set aside kits that weren't accepted, change the quantity, withdraw.
-- Contributors: join with an invitation link, pledge, withdraw a pledge.
-- Plain-language guidance ("10 more notebooks complete the remaining 20 kits"), a printable packing sheet, CSV export, a public share page with totals only, and in-app updates.
-- Email-and-password accounts with confirmation, password reset and expired-session handling (Supabase Auth).
-- **Try the demo:** a private sandbox per visitor with sample data, four sample people and a reset.
+- **Find:** every open need near you, with big category icons (food, school, seniors, pets, hygiene, winter, babies), search and filters. A "Found online" tab lists drives posted elsewhere, so there's always something to help with.
+- **A need's page** shows exactly what to bring, how much is still needed, and a progress bar where only what the organization confirmed counts as done.
+- **Share kit:** a ready-made square post image with a QR code, a caption to copy, and buttons for the phone's share sheet (Instagram, WhatsApp and more), Facebook and email. A view counter shows how far a need has travelled, without storing anything about visitors.
+- **Organizations:** register, post needs in a four-step form (drafts saved, a preview of each kit, duplicate checks), review what was handed over (accept all, or part with a reason), close, reopen, cancel, post updates and invite staff.
+- **Helpers and groups:** offer to help with part of a need, invite others, record what arrives, pack kits, report the handover, and fix or replace anything not accepted.
+- **Two kinds of confirmation:** *Verified* means a reviewed organization member confirmed the handover in KitGap. *Recipient* means someone at the receiving place signed a one-time receipt link, for drives you run yourself.
+- **KitGap reviewers** confirm each organization's contact before its needs go public.
+- **Installable app:** works from the home screen on phones (PWA), with native iOS and Android projects ready in `ios/` and `android/` (see [docs/mobile.md](docs/mobile.md)).
+- **Try the demo:** a private sample town for each visitor, with a food pantry, a senior home, an animal rescue and a school, sample people to switch between, a step-by-step guide and a reset.
 
 ## Run it locally
 
@@ -34,7 +35,7 @@ Full instructions, including deployment to Supabase and Vercel, are in [docs/set
 ## Checks
 
 ```bash
-npm run typecheck && npm run lint && npm test   # 71 unit and integration tests
+npm run typecheck && npm run lint && npm test   # 85 unit and 56 integration tests
 npm run test:e2e                                # browser and accessibility tests
 ```
 
@@ -50,7 +51,9 @@ npm run test:e2e                                # browser and accessibility test
 | [docs/research.md](docs/research.md) | UX research note and the design decisions it informed |
 | [docs/user-testing.md](docs/user-testing.md) | Task sheet for testing with real people |
 | [docs/limitations.md](docs/limitations.md) | What doesn't exist or hasn't been verified |
-| [docs/cac-demo.md](docs/cac-demo.md) | Demo video outline and submission checklist |
+| [docs/cac-demo.md](docs/cac-demo.md) | Demo video outline, judge questions and submission checklist |
+| [docs/mobile.md](docs/mobile.md) | Installable app, native projects and store checklist |
+| [docs/repurpose-plan.md](docs/repurpose-plan.md) | Why KitGap became a community needs board, and what changed |
 | [docs/ai-usage.md](docs/ai-usage.md) | AI usage and credits (to be completed by the student) |
 | [docs/screenshots/](docs/screenshots/) | Screenshots of the main screens |
 
