@@ -333,6 +333,171 @@
   }
 }
 
+/*
+  KitPacking: one 3.6 s loop. Items drop in (0–45%), the flaps fold shut
+  (45–62%), the tag swings on (62–86%), the hole fills (84–92%), it rests,
+  then everything resets. Decorative SVG, so opacity is used for the reset.
+*/
+.kit-packing .kp-drop {
+  animation: kp-drop 3.6s ease-in-out infinite both;
+}
+.kit-packing .kp-d1 {
+  --sink: 56px;
+}
+.kit-packing .kp-d2 {
+  --sink: 54px;
+  animation-delay: 0.32s;
+}
+.kit-packing .kp-d3 {
+  --sink: 66px;
+  animation-delay: 0.64s;
+}
+.kit-packing .kp-flap {
+  transform-box: view-box;
+  animation: kp-flap-l 3.6s ease-in-out infinite both;
+}
+.kit-packing .kp-flap-l {
+  transform-origin: 42px 82px;
+}
+.kit-packing .kp-flap-r {
+  transform-origin: 158px 82px;
+  animation-name: kp-flap-r;
+}
+.kit-packing .kp-tape {
+  transform-box: view-box;
+  transform-origin: 100px 84px;
+  animation: kp-tape 3.6s ease-out infinite both;
+}
+.kit-packing .kp-tag {
+  transform-box: view-box;
+  transform-origin: 150px 86px;
+  animation: kp-tag 3.6s ease-out infinite both;
+}
+.kit-packing .kp-hole {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kp-hole 3.6s cubic-bezier(0.3, 1.6, 0.5, 1) infinite both;
+}
+.kp-dots::after {
+  content: "…";
+}
+
+@keyframes kp-drop {
+  0% {
+    transform: translateY(-70px);
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  /* Lands on the rim, so you can see what it is... */
+  14%,
+  20% {
+    transform: translateY(0);
+  }
+  /* ...then drops into the box. */
+  30%,
+  96% {
+    transform: translateY(var(--sink));
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--sink));
+    opacity: 0;
+  }
+}
+
+@keyframes kp-flap-l {
+  0%,
+  44% {
+    transform: rotate(-32deg) scaleY(1);
+  }
+  54% {
+    transform: rotate(0deg) scaleY(1);
+  }
+  62%,
+  96% {
+    transform: rotate(0deg) scaleY(0.06);
+  }
+  100% {
+    transform: rotate(-32deg) scaleY(1);
+  }
+}
+
+@keyframes kp-flap-r {
+  0%,
+  44% {
+    transform: rotate(32deg) scaleY(1);
+  }
+  54% {
+    transform: rotate(0deg) scaleY(1);
+  }
+  62%,
+  96% {
+    transform: rotate(0deg) scaleY(0.06);
+  }
+  100% {
+    transform: rotate(32deg) scaleY(1);
+  }
+}
+
+@keyframes kp-tape {
+  0%,
+  62% {
+    transform: scaleX(0);
+  }
+  68%,
+  96% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes kp-tag {
+  0%,
+  62% {
+    transform: translate(40px, -36px) rotate(-55deg);
+    opacity: 0;
+  }
+  66% {
+    opacity: 1;
+  }
+  72% {
+    transform: translate(0, 0) rotate(16deg);
+  }
+  77% {
+    transform: rotate(-8deg);
+  }
+  82% {
+    transform: rotate(4deg);
+  }
+  86%,
+  96% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+}
+
+@keyframes kp-hole {
+  0%,
+  84% {
+    transform: scale(0);
+  }
+  90%,
+  96% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
 @keyframes kg-scan {
   from {
     transform: translateY(-40%);
@@ -363,6 +528,20 @@
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
+    animation: none !important;
+  }
+  /* The packing loader rests on its finished state: box shut, tag on, hole filled. */
+  .kit-packing .kp-drop {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+  .kit-packing .kp-flap {
+    animation: none !important;
+    transform: scaleY(0.06);
+  }
+  .kit-packing .kp-tape,
+  .kit-packing .kp-tag,
+  .kit-packing .kp-hole {
     animation: none !important;
   }
 }

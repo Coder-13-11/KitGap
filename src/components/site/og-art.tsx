@@ -11,11 +11,17 @@ const MANILA = "#fbf6ec";
 const INK = "#1c2921";
 
 export function OgMark({ size = 56 }: { size?: number }) {
+  // Same drawing as LogoMark, on a kraft tile.
   return (
     <svg width={size} height={size} viewBox="0 0 32 32">
-      <rect width="32" height="32" rx="6" fill={FOREST} />
-      <path d="M6.2 8.4h13.4L26.2 15.4v8.4c0 .9-.7 1.6-1.6 1.6H6.2c-.9 0-1.6-.7-1.6-1.6V10c0-.9.7-1.6 1.6-1.6z" fill={MANILA} />
-      <circle cx="11.2" cy="16.2" r="2.3" fill={FOREST} />
+      <rect width="32" height="32" rx="7" fill={KRAFT} />
+      <path d="M9.6 15.6C7 12.6 5.4 8 7.4 4.6c1.2-2 3.6-1.8 4.1.4" fill="none" stroke="#a64b2a" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M4.2 9.2h15.2L28 17.6v8.2c0 1.1-.9 2-2 2H4.2c-1.1 0-2-.9-2-2V11.2c0-1.1.9-2 2-2z" fill={FOREST} />
+      <circle cx="9.6" cy="17.8" r="3.3" fill="#e0a43a" />
+      <circle cx="9.6" cy="17.8" r="1.9" fill={KRAFT} />
+      <rect x="14.6" y="14.4" width="10.2" height="8.6" rx="1" fill={MANILA} />
+      <rect x="16.2" y="16.4" width="6.8" height="1.5" rx="0.75" fill="#a64b2a" />
+      <rect x="16.2" y="19.5" width="4.6" height="1.5" rx="0.75" fill="#7fa58f" />
     </svg>
   );
 }
