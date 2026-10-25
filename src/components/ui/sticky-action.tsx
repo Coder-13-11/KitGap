@@ -52,7 +52,7 @@ export function StickyAction({
 
   if (targetVisible || typing) return null;
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 py-3 lg:hidden no-print">
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] standalone:bottom-[calc(4rem+env(safe-area-inset-bottom))] standalone:pb-3 lg:hidden no-print">
       <a
         href={href}
         onClick={(event) => {

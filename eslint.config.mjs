@@ -20,6 +20,10 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "supabase/**",
     "test-results/**",
+    // Native app projects (Capacitor) and their build output.
+    "android/**",
+    "ios/**",
+    "mobile/**",
     "playwright-report/**",
     ".shots.mjs",
   ]),

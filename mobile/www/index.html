@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#234d3b" />
+    <title>KitGap</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+        background: #f1e6d6;
+        color: #1c2921;
+        font: 17px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      main {
+        max-width: 26rem;
+      }
+      h1 {
+        margin: 20px 0 8px;
+        font: 600 2rem/1.15 Georgia, ui-serif, serif;
+        letter-spacing: -0.015em;
+      }
+      p {
+        margin: 0 0 12px;
+        color: #4a534e;
+      }
+      button {
+        margin-top: 12px;
+        min-height: 44px;
+        padding: 8px 20px;
+        border: 0;
+        border-radius: 2px 8px 8px 2px;
+        background: #234d3b;
+        color: #fff;
+        font: 600 1rem/1 ui-sans-serif, system-ui, sans-serif;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 3px solid #1e6b9a;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg viewBox="0 0 32 32" width="88" height="88" aria-hidden="true">
+        <path d="M9.6 15.6C7 12.6 5.4 8 7.4 4.6c1.2-2 3.6-1.8 4.1.4" fill="none" stroke="#a64b2a" stroke-width="1.7" stroke-linecap="round" />
+        <path d="M4.2 9.2h15.2L28 17.6v8.2c0 1.1-.9 2-2 2H4.2c-1.1 0-2-.9-2-2V11.2c0-1.1.9-2 2-2z" fill="#234d3b" />
+        <circle cx="9.6" cy="17.8" r="3.3" fill="#e0a43a" />
+        <circle cx="9.6" cy="17.8" r="1.9" fill="#f1e6d6" />
+        <rect x="14.6" y="14.4" width="10.2" height="8.6" rx="1" fill="#fbf6ec" />
+        <rect x="16.2" y="16.4" width="6.8" height="1.5" rx=".75" fill="#a64b2a" />
+        <rect x="16.2" y="19.5" width="4.6" height="1.5" rx=".75" fill="#7fa58f" />
+      </svg>
+      <h1>You're offline</h1>
+      <p>KitGap shows live counts, so it needs a connection to load them.</p>
+      <p>Anything you already saved is safe. Reconnect and try again.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>

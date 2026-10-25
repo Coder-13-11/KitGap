@@ -17,6 +17,11 @@ An honest list of what KitGap does not do, or has not been checked to do.
 - The number of kits in a club's own drive can be lowered, not raised. To make more, start another drive.
 - If the recipient later joins KitGap, there's no way yet to move the drive to its account or upgrade earlier receipt confirmations to "Confirmed". That needs a reviewer tool.
 
+## Phones and app stores
+
+- KitGap installs as an app from the browser (iPhone and Android) and has native iOS and Android projects (Capacitor). It isn't in the App Store or Google Play yet. See `docs/mobile.md` for what's built, what the stores still require, and why it can't be listed before the CAC deadline.
+- There's no account deletion page, which both stores require before an app that lets people create accounts can be listed.
+
 ## Experimental features
 
 These two features work, but they sit outside KitGap's main loop (request, drive, delivery, confirmation). Nothing they produce counts toward any total.

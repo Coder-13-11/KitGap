@@ -7,6 +7,9 @@
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { issueReceiptAction } from "@/actions/club-drives";
+import { shareLink } from "@/lib/native";
+import { Share2 } from "lucide-react";
+import { buttonClass } from "../ui/button-class";
 import { SubmitButton } from "../ui/button";
 import { CopyLink } from "../ui/copy-link";
 import { ErrorSummary } from "../ui/error-summary";
@@ -60,7 +63,17 @@ export function ReceiptLink({
               They scan it, check what arrived and confirm. No account needed. This link is shown only now; copy it if you&rsquo;ll send
               it instead.
             </p>
-            <CopyLink url={url} label="Copy receipt link" />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={buttonClass("secondary")}
+                onClick={() => shareLink({ title: `Receipt for ${recipientName}`, text: "Confirm what arrived:", url })}
+              >
+                <Share2 aria-hidden className="size-4" />
+                Share
+              </button>
+              <CopyLink url={url} label="Copy receipt link" />
+            </div>
           </div>
         </div>
       ) : (

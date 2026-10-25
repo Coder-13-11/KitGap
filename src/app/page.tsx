@@ -89,6 +89,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   Explore requests
                 </AppLink>
               </div>
+              <p className="mt-4 text-sm">
+                On your phone? <AppLink href="/install">Install KitGap</AppLink> to your home screen.
+              </p>
               <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-ink">
                 <li className="flex items-center gap-2">
                   <span aria-hidden className="size-2 rounded-full bg-forest" />

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Running as an installed app (home screen, or inside the native shell). */
+@custom-variant standalone (@media (display-mode: standalone));
+
 /*
   KitGap — The Shipping Room.
   Tokens and contrast: see /DESIGN.md. Ratios are WCAG 2.2, normal text unless noted.

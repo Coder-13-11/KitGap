@@ -3,6 +3,7 @@ import { ReceiptForm } from "@/components/drives/receipt-form";
 import { LogoMark } from "@/components/site/logo";
 import { AppLink } from "@/components/ui/base";
 import { RecipientStamp } from "@/components/ui/confirmation";
+import { SuccessHaptic } from "@/components/ui/success-haptic";
 import { Container } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
 import { formatTimestamp } from "@/domain/dates";
@@ -64,6 +65,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ token:
 
       {receipt.status === "reviewed" ? (
         <section className="tag-shape border border-forest/40 bg-forest-tint p-5 sm:p-6" aria-live="polite">
+          <SuccessHaptic />
           <p className="kg-stamp inline-block">
             <RecipientStamp className="bg-surface text-base" />
           </p>

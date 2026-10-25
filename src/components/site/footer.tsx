@@ -13,6 +13,7 @@ export function SiteFooter() {
           <ul className="mt-2 space-y-2">
             <li><AppLink href="/requests" className="text-forest">Explore requests</AppLink></li>
             <li><AppLink href="/demo" className="text-forest">Try the demo</AppLink></li>
+            <li><AppLink href="/install" className="text-forest">Get the app</AppLink></li>
             <li><AppLink href="/about#how-numbers-work" className="text-forest">How the numbers work</AppLink></li>
             <li><AppLink href="/organization/new" className="text-forest">Post what you need</AppLink></li>
             <li><AppLink href="/about" className="text-forest">About and credits</AppLink></li>

@@ -5,6 +5,9 @@ import { signOutAction } from "@/actions/auth";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type AccountLink, type NavItem } from "@/components/site/header";
+import { NativeShell } from "@/components/site/native-shell";
+import { ServiceWorker } from "@/components/site/service-worker";
+import { TabBar, type Tab } from "@/components/site/tab-bar";
 import { BaseProvider } from "@/components/ui/base";
 import { ToastProvider } from "@/components/ui/toast";
 import { PERSONAS } from "@/server/demo/sandbox";
@@ -36,9 +39,19 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   openGraph: { siteName: "KitGap", type: "website", description: DESCRIPTION },
   twitter: { card: "summary_large_image" },
+  // Installed on an iPhone home screen, KitGap opens full screen.
+  appleWebApp: { capable: true, title: "KitGap", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
 };
 
-export const viewport: Viewport = { themeColor: "#234d3b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = {
+  themeColor: "#234d3b",
+  width: "device-width",
+  initialScale: 1,
+  // Lets the installed app draw under the notch; the header and tab bar pad
+  // themselves with the safe-area insets.
+  viewportFit: "cover",
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAppContext();
@@ -58,6 +71,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (workspaces.isReviewer) nav.push({ href: "/admin", label: "Review queue" });
   if (ctx.user) nav.push({ href: "/updates", label: "Updates", count: workspaces.unreadUpdates });
 
+  const tabs: Tab[] = ctx.user
+    ? [
+        { href: "/home", label: "Home", icon: "home" },
+        { href: "/requests", label: "Requests", icon: "requests" },
+        { href: "/drives", label: "My drives", icon: "drives" },
+        { href: "/updates", label: "Updates", icon: "updates", count: workspaces.unreadUpdates },
+      ]
+    : [
+        { href: "/", label: "Home", icon: "home" },
+        { href: "/requests", label: "Requests", icon: "requests" },
+        { href: "/demo", label: "Demo", icon: "demo" },
+        { href: "/sign-in", label: "Sign in", icon: "signin" },
+      ];
+
   const accountLinks: AccountLink[] = [];
   if (ctx.user) {
     if (ctx.mode === "live") accountLinks.push({ href: "/account", label: "Account settings" });
@@ -71,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex min-h-dvh flex-col standalone:max-lg:pb-[calc(4rem+env(safe-area-inset-bottom))] standalone:pt-[env(safe-area-inset-top)] in-data-[native=true]:max-lg:pb-[calc(4rem+env(safe-area-inset-bottom))]">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:font-semibold"
@@ -96,6 +123,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ViewTransition default="page">{children}</ViewTransition>
           </main>
           <SiteFooter />
+          <TabBar tabs={tabs} />
+          <ServiceWorker />
+          <NativeShell />
           </ToastProvider>
         </BaseProvider>
       </body>
