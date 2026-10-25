@@ -37,6 +37,10 @@ export function hasAuthCookie(names: string[]): boolean {
   return names.some((name) => name.startsWith("sb-") && name.includes("-auth-token"));
 }
 
+// The public address used in emails, share links and QR codes. Set
+// NEXT_PUBLIC_SITE_URL; on Vercel, the project's production domain is the
+// fallback, so a missing setting never sends people to localhost.
 export function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return (process.env.NEXT_PUBLIC_SITE_URL || (vercel ? `https://${vercel}` : "http://localhost:3000")).replace(/\/$/, "");
 }
