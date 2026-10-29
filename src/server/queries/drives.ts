@@ -4,7 +4,6 @@
 
 import { describeDeadline, type DeadlineInfo } from "@/domain/dates";
 import { describeBottleneck, driveChecklist, nextStepForCoordinator, type Bottleneck, type ChecklistStep, type NextStep } from "@/domain/guidance";
-import { cleanWebhookQuestions, DEFAULT_WEBHOOK_QUESTIONS, IMPORT_SOURCE_LABEL, type WebhookQuestions } from "@/domain/import";
 import { donationJourney, type DonationJourney } from "@/domain/journey";
 import { requestPhase, type RequestPhase } from "@/domain/phase";
 import { driveProgress, requestTotals, type ComponentProgress, type UnitStages } from "@/domain/quantities";
@@ -41,8 +40,6 @@ export interface PledgeView {
   outstanding: number;
   status: "waiting" | "partly_received" | "received" | "withdrawn" | "released";
   contributorName: string | null; // coordinators only
-  // Coordinators only: set for pledges imported from a sign-up sheet.
-  imported: { source: string; email: string | null } | null;
   isMine: boolean;
   note: string;
   createdAt: Date;
@@ -116,7 +113,6 @@ export interface DriveWorkspace {
   deliveries: DeliveryView[];
   activity: ActivityItem[];
   journey: DonationJourney;
-  formWebhook: { connected: boolean; disabled: boolean; lastUsedAt: Date | null; questions: WebhookQuestions } | null;
 }
 
 function pledgeStatus(p: PledgeRecord, received: number): PledgeView["status"] {
@@ -219,8 +215,6 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         outstanding: p.status === "open" ? Math.max(0, p.quantity - received) : 0,
         status: pledgeStatus(p, received),
         contributorName: role === "coordinator" ? (p.guestName ?? (p.userId ? names.get(p.userId) : undefined) ?? "Member") : null,
-        imported:
-          role === "coordinator" && p.importSource ? { source: IMPORT_SOURCE_LABEL[p.importSource], email: p.guestEmail } : null,
         isMine: p.userId !== null && p.userId === ctx.userId,
         note: role === "coordinator" || p.userId === ctx.userId ? p.note : "",
         createdAt: p.createdAt,
@@ -304,19 +298,6 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
         })),
     });
 
-    const [hook] =
-      role === "coordinator"
-        ? await tx`select last_used_at, disabled_at, questions from form_webhooks where commitment_id = ${commitmentId}`
-        : [];
-    const formWebhook =
-      role === "coordinator"
-        ? {
-            connected: Boolean(hook),
-            disabled: Boolean(hook?.disabledAt),
-            lastUsedAt: (hook?.lastUsedAt as Date) ?? null,
-            questions: cleanWebhookQuestions(hook?.questions ?? DEFAULT_WEBHOOK_QUESTIONS),
-          }
-        : null;
 
     const activity = await activityFor(tx, {
       commitmentId,
@@ -377,7 +358,6 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
       deliveries,
       activity,
       journey,
-      formWebhook,
     };
   });
 }

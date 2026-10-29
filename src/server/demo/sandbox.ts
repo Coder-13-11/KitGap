@@ -3,9 +3,8 @@
 // labelled sample data. Demo transactions set search_path to that schema
 // only, so they cannot read or change real data or another visitor's sandbox.
 //
-// What this proves and what it doesn't: the demo runs the real server code
-// (the same rules, locks and checks). The people in it are fixed sample
-// personas, so it does not exercise real sign-in; see docs/testing.md.
+// The demo runs the real server code, but as fixed sample people, so it
+// doesn't test real sign-in (tests/e2e/live-auth.spec.ts does).
 
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { addDays, todayIn } from "@/domain/dates";
@@ -45,7 +44,6 @@ export const DEMO_IDS = {
   itemRequest: "00000000-0000-4000-8000-00000000c002",
   hatComponent: "00000000-0000-4000-8000-00000000c102",
   hatDrive: "00000000-0000-4000-8000-00000000d001",
-  hatImport: "00000000-0000-4000-8000-00000000e001",
   // More of the community: a food pantry part-way through a need, a senior
   // home and an animal rescue. Not selectable people; they fill the board.
   ana: "00000000-0000-4000-8000-00000000a006",
@@ -331,44 +329,27 @@ export async function seedDemo(tx: Tx, now: Date = new Date()): Promise<void> {
     })}
   `;
 
-  // The club already runs a small hat drive, with one sign-up brought in from
-  // a sample Google Forms export, so the import shows up without any setup.
+  // The club already runs a small hat drive, with one pledge from Sam.
   await tx`
     insert into commitments ${tx({ id: DEMO_IDS.hatDrive, requestId: DEMO_IDS.itemRequest, groupId: DEMO_IDS.group, quantity: 15, createdBy: DEMO_IDS.jordan })}
-  `;
-  await tx`
-    insert into import_batches ${tx({
-      id: DEMO_IDS.hatImport,
-      commitmentId: DEMO_IDS.hatDrive,
-      source: "google_forms_csv",
-      fileName: "hat-drive-sign-ups (sample).csv",
-      createdCount: 1,
-      skippedCount: 0,
-      createdBy: DEMO_IDS.jordan,
-    })}
   `;
   await tx`
     insert into pledges ${tx({
       commitmentId: DEMO_IDS.hatDrive,
       componentId: DEMO_IDS.hatComponent,
-      userId: null,
-      guestName: "Priya N. (sample)",
-      guestEmail: "priya.sample@example.com",
-      importSource: "google_forms_csv",
-      sourceRowId: "sample-row-1",
-      importBatchId: DEMO_IDS.hatImport,
+      userId: DEMO_IDS.sam,
       quantity: 4,
-      note: "Sample sign-up from a Google Form",
+      note: "My grandma is knitting these",
     })}
   `;
   const activity = [
-    { kind: "drive.started", audience: "both", data: { quantity: 15 } },
-    { kind: "pledges.imported", audience: "group", data: { source: "google_forms_csv", count: 1, quantity: 4, overCap: 0, duplicates: 0 } },
+    { kind: "drive.started", audience: "both", actor: DEMO_IDS.jordan, data: { quantity: 15 } },
+    { kind: "pledge.created", audience: "group", actor: DEMO_IDS.sam, data: { component: "Child's knit hat", quantity: 4 } },
   ];
   for (const a of activity) {
     await tx`
       insert into activity (kind, audience, actor_id, request_id, commitment_id, workspace_id, data)
-      values (${a.kind}, ${a.audience}, ${DEMO_IDS.jordan}, ${DEMO_IDS.itemRequest}, ${DEMO_IDS.hatDrive}, ${DEMO_IDS.group}, ${tx.json(a.data)})
+      values (${a.kind}, ${a.audience}, ${a.actor}, ${DEMO_IDS.itemRequest}, ${DEMO_IDS.hatDrive}, ${DEMO_IDS.group}, ${tx.json(a.data)})
     `;
   }
 

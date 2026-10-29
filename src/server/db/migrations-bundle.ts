@@ -27,5 +27,9 @@ export const MIGRATION_FILES: { name: string; sql: string }[] = [
   {
     "name": "0007_ai_usage.sql",
     "sql": "-- How much of the paid AI service (Kit's answers and voice) each person or\n-- demo used each day, so daily caps hold across server instances. Only the\n-- live schema's copy is used; sandboxes get an unused copy like every table.\n-- No personal data: the caller is \"user:<id>\" or \"demo:<sandbox id>\".\n\ncreate table ai_usage (\n  caller text not null check (char_length(caller) <= 80),\n  day date not null,\n  kind text not null check (kind in ('ai', 'voice')),\n  count integer not null default 0 check (count >= 0),\n  primary key (caller, day, kind)\n);\n\nalter table ai_usage enable row level security;\n\ndo $$\nbegin\n  if exists (select 1 from pg_roles where rolname = 'anon') then\n    execute format('revoke all on all tables in schema %I from anon, authenticated', current_schema());\n  end if;\nend\n$$;\n"
+  },
+  {
+    "name": "0008_drop_form_webhooks.sql",
+    "sql": "-- Live Google Forms sync was removed from the app. Imported pledges already\n-- saved in pledges/import_batches stay, so old drives still add up.\ndrop table if exists form_webhook_hits;\ndrop table if exists form_webhooks;\n"
   }
 ];

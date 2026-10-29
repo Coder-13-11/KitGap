@@ -15,8 +15,6 @@ import {
   VoidEntryButton,
   WithdrawDrive,
 } from "@/components/drives/drive-forms";
-import { ConnectForm } from "@/components/drives/connect-form";
-import { ImportSignups } from "@/components/drives/import-signups";
 import { ReceiptLink } from "@/components/drives/receipt-link";
 import { TierStamp, tierExplanation } from "@/components/ui/confirmation";
 import { ShareDrive } from "@/components/drives/share-drive";
@@ -27,7 +25,6 @@ import { AskKitCard } from "@/components/kit/ask-kit-card";
 import { ShowMore } from "@/components/ui/show-more";
 import { ActivityList } from "@/components/site/activity-list";
 import { AppLink } from "@/components/ui/base";
-import { buttonClass } from "@/components/ui/button-class";
 import { CopyLink } from "@/components/ui/copy-link";
 import { Container, Panel, Section } from "@/components/ui/layout-bits";
 import { Notice } from "@/components/ui/notice";
@@ -98,7 +95,6 @@ export default async function DrivePage({
   const openPledges = drive.pledges.filter((p) => p.outstanding > 0);
   const pending = drive.deliveries.filter((d) => d.status === "submitted");
   const next = NEXT_ANCHOR[drive.nextStep.action];
-  const canImport = isCoordinator && active && request.status !== "cancelled";
 
   const heroAction = isCoordinator
     ? {
@@ -120,7 +116,6 @@ export default async function DrivePage({
 
   const jumpLinks = [
     { href: "#supplies", label: "Supplies" },
-    ...(canImport ? [{ href: "#import", label: "Import sign-ups" }] : []),
     ...(isCoordinator && active ? [{ href: "#record", label: "Record received supplies" }] : []),
     ...(isCoordinator && isKit && active ? [{ href: "#pack", label: "Pack kits" }] : []),
     ...(isCoordinator && stages.needsFollowUp > 0 ? [{ href: "#follow-up", label: "Not accepted" }] : []),
@@ -191,12 +186,6 @@ export default async function DrivePage({
                   {p.outstanding > 0 && p.received > 0 ? ` · ${formatCount(p.outstanding)} still to come` : ""}
                   {p.note ? ` · “${p.note}”` : ""}
                 </p>
-                {p.imported ? (
-                  <p className="text-sm text-muted">
-                    Imported from {p.imported.source}
-                    {p.imported.email ? ` · ${p.imported.email}` : ""}
-                  </p>
-                ) : null}
               </div>
               {p.outstanding > 0 && (p.isMine || isCoordinator) && active ? (
                 <ClosePledgeButton pledgeId={p.id} label={p.isMine ? "Withdraw pledge" : "Close unfulfilled pledge"} />
@@ -375,11 +364,6 @@ export default async function DrivePage({
                 ) : null}
                 <SuppliesTable components={progress.components} committed={commitment.quantity} unitName={unit} requestType={request.requestType} />
               </Panel>
-              {canImport ? (
-                <a href="#import" className={buttonClass("secondary")}>
-                  Import sign-ups
-                </a>
-              ) : null}
             </section>
           </div>
         </div>
@@ -452,12 +436,6 @@ export default async function DrivePage({
 
               <Section title="Contributors" id="contributors" className="scroll-mt-32" description="Who is bringing supplies, and how to ask for more.">
                 <div className="space-y-8">
-                {canImport ? (
-                  <div className="space-y-4">
-                    <ImportSignups commitmentId={commitment.id} unitName={unit} sample={ctx.mode === "demo"} />
-                    <ConnectForm commitmentId={commitment.id} live={ctx.mode === "live"} webhook={drive.formWebhook} />
-                  </div>
-                ) : null}
                 {pledgesSection}
                 {pledgeFormSection}
                 {active ? (

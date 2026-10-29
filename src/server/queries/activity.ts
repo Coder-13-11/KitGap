@@ -1,7 +1,6 @@
 // The activity log, turned into short sentences: who did what, and when.
 
-import { IMPORT_SOURCE_LABEL, type ImportSource } from "@/domain/import";
-import { countNoun, formatCount, listPhrase } from "@/domain/text";
+import { countNoun, listPhrase } from "@/domain/text";
 import type { Tx } from "../db/client";
 
 export interface ActivityItem {
@@ -77,11 +76,9 @@ export function describeActivity(kind: string, data: Record<string, unknown>, un
       return `withdrew a pledge for ${String(data.component ?? "an item")}`;
     case "pledge.released":
       return `closed an unfulfilled pledge for ${String(data.component ?? "an item")}`;
-    case "pledges.imported": {
-      const from = IMPORT_SOURCE_LABEL[data.source as ImportSource] ?? "a spreadsheet";
-      const over = n("overCap") > 0 ? `; left out ${countNoun(n("overCap"), "row")} asking for more than was still needed` : "";
-      return `imported ${countNoun(n("count"), "pledge")} (${formatCount(n("quantity"))} items) from ${from}${over}`;
-    }
+    // Sign-up imports were removed, but older drives still have these entries.
+    case "pledges.imported":
+      return `imported ${countNoun(n("count"), "pledge")} from a sign-up sheet`;
     case "collection.recorded": {
       const usable = countNoun(n("usable"), String(data.component ?? "item"));
       const unusable = n("unusable") > 0 ? `, plus ${n("unusable")} not usable` : "";

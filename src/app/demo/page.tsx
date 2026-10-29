@@ -16,7 +16,7 @@ const STEPS: { persona: string; path: string; title: string; detail: string; exp
     title: "Start a drive for 20 kits",
     detail: "As Jordan, the club coordinator, open the school-supply request and adopt 20 of the 100 kits.",
     expect:
-      "The drive needs 20 backpacks, 40 notebooks and 20 pencil packs. The request shows 80 kits still open. (The club's hat drive already has one sample sign-up imported from Google Forms.)",
+      "The drive needs 20 backpacks, 40 notebooks and 20 pencil packs. The request shows 80 kits still open.",
   },
   {
     persona: "contributor",
@@ -52,15 +52,6 @@ const STEPS: { persona: string; path: string; title: string; detail: string; exp
     title: "Post a new request",
     detail: "As Maya, draft a new request and submit it. Then switch to Riley, the KitGap reviewer, to approve it.",
     expect: "The request isn't listed publicly until Riley approves it.",
-  },
-  {
-    persona: "coordinator",
-    path: "/drives",
-    title: "Optional: bring in sign-ups from Google Forms",
-    detail:
-      "Reset the demo and start a 20-kit drive as Jordan. On the drive page, choose “Try it with a sample Google Forms file”, check the preview, and import.",
-    expect:
-      "5 sample sign-ups become pledges (15 items). The preview flags a repeat, an item the kit doesn't need, a quantity it can't read, and a row asking for more than is still needed. Collected stays at 0.",
   },
 ];
 
