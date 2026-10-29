@@ -1,7 +1,4 @@
-// The KitGap mark: a shipping tag. A forest body, a manila label with two
-// item lines, a marigold eyelet around the punched hole and a loop of rust
-// twine through it. Kraft shows through the hole; confirmed receipt fills
-// that hole in progress meters (see RequestProgress) and in KitPacking.
+// The KitGap logo: a shipping tag with a label and a loop of string.
 
 export const LOGO_COLORS = {
   forest: "#234d3b",

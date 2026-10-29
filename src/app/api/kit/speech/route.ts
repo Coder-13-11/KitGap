@@ -1,4 +1,4 @@
-// Kit's voice: turns a short answer into speech with the kokoro model on the
+// Text to speech for Kit: reads a short answer with the kokoro model on the
 // AI endpoint. Only for signed-in people and demo visitors. Returns 204 when
 // voice isn't available, and the browser's own speech takes over.
 

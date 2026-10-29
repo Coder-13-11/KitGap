@@ -4,8 +4,7 @@
 @custom-variant standalone (@media (display-mode: standalone));
 
 /*
-  KitGap — The Shipping Room.
-  Tokens and contrast: see /DESIGN.md. Ratios are WCAG 2.2, normal text unless noted.
+  Colors and their contrast ratios (WCAG 2.2, normal text unless noted).
 
     ink #1C2921 on kraft #F1E6D6 .............. 12.26
     ink on manila #FBF6EC ..................... 14.04
@@ -75,7 +74,7 @@
     background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    /* Phones read at 16px; larger screens at 17px (DESIGN.md body). */
+    /* 16px on phones, 17px on larger screens. */
     font-size: 1rem;
     line-height: 1.55;
     letter-spacing: 0.012em;

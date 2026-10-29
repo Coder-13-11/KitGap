@@ -9,8 +9,8 @@
 | Claude Code (Anthropic) | Claude Opus 5.5 in the October 25 sessions. ⚠️ CONFIRM the model shown in your earlier sessions (October 23–24). | Most of the code, the database migrations, the tests, the documentation, the research notes, design changes and code reviews | Commits by "KitGap Builder" and "Claude" on October 23 (16 commits). Later commits under your account were also made in Claude Code sessions. |
 | Impeccable (design-review plugin, run inside Claude Code) | (runs on the Claude Code model) | Automatic design checks while pages were edited | `.impeccable/`, hook messages in the sessions |
 | Gemini (Google) | ⚠️ CONFIRM the model | A product review: cold start, AI positioning, verification friction. You reported this; it wasn't used to write code, as far as the repository shows. ⚠️ CONFIRM | Your own statement |
-| ChatGPT (OpenAI), browser agent | ⚠️ CONFIRM whether you used it, and for what | `docs/chatgpt-agent-prompt.md` is a prompt written for it | That file |
-| Codex, Cursor | ⚠️ CONFIRM whether either was used. Their folders (`.codex/`, `.cursor/`) exist in the project but aren't in the git history. | | Folders only |
+| ChatGPT (OpenAI), browser agent | ⚠️ CONFIRM whether you used it, and for what | A prompt written for it was in `docs/chatgpt-agent-prompt.md` (removed October 29; still in the git history) | That file's history |
+| Codex, Cursor | ⚠️ CONFIRM whether either was used. A Cursor rule file (`.cursor/rules/kitgap.mdc`) was committed on October 23 and removed on October 29. | | Git history |
 
 ### What the AI assistant did
 
@@ -28,6 +28,7 @@
   - Kit, the helper;
   - security fixes from the audit;
   - this document's first draft.
+- **October 29, at your direction (Claude Code):** a cleanup pass. It removed the sign-up import feature and unused pages and docs, shortened the "Run your own drive" and "Help with this" forms, rewrote the About page's explanation of the numbers, simplified the home page and fixed bugs found while testing.
 
 ## 2. AI that KitGap uses while running
 
@@ -63,13 +64,13 @@
   - choosing the UF NaviGator models;
   - refusing fake testimonials;
   - asking for these audits.
-- **Testing:** ⚠️ CONFIRM who tested it (your brother?) and what changed because of it. `docs/user-testing.md` has the task sheet.
-- **Code you wrote or changed yourself:** ⚠️ FILL IN with file names. If the answer is "none so far", say so honestly, and make one change yourself before submitting (ideas in `docs/cac-demo.md`).
+- **Testing:** ⚠️ CONFIRM who tested it (your brother?) and what changed because of it.
+- **Code you wrote or changed yourself:** ⚠️ FILL IN with file names. If the answer is "none so far", say so honestly, and make one change yourself before submitting.
 - **Deployment and accounts:** you set up the Supabase project, the Vercel deployment, the GitHub repository and the UF NaviGator key. ⚠️ CONFIRM.
 
 ## 4. What the student can explain
 
-⚠️ FILL IN. Practice explaining at least these, without notes (see `docs/cac-demo.md`):
+⚠️ FILL IN. Practice explaining at least these, without notes:
 
 1. Why two groups can't take the same last kits: the `for update` lock in `loadRequestState` (`src/server/services/core.ts`), and the test in `tests/integration/drives.test.ts`.
 2. How a retry doesn't create a duplicate: the idempotency key in `mutate()` (`core.ts`).

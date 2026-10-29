@@ -28,7 +28,7 @@ For a request with target **T**:
 - **reserved** = the sum over all drives.
 - **available** = max(0, T − accepted − reserved).
 
-Worked example (the one from the brief, checked in `tests/unit/quantities.test.ts` and `tests/integration/drives.test.ts`):
+Worked example (checked in `tests/unit/quantities.test.ts` and `tests/integration/drives.test.ts`):
 
 | Step | accepted | reserved | available |
 | --- | --- | --- | --- |

@@ -1,5 +1,5 @@
 // Where a drive found through Discover lives, and well-known programs that
-// run every year. Each featured link was checked by hand; see docs/research.md.
+// run every year. Each featured link was checked by hand.
 
 export type PlatformId =
   | "signupgenius"

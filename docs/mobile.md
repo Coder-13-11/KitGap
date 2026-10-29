@@ -25,11 +25,11 @@ Checked on October 24 with a production build in Chrome: the service worker acti
   - a themed status bar and splash screen
 - In a browser, each of these falls back to the web version or does nothing.
 
-## What can't happen before the CAC deadline (Monday, Oct 26, 12:00 p.m. ET)
+## Store listing
 
-- **Google Play:** a new *personal* developer account must run a closed test with at least 12 testers for 14 days in a row before it can publish. An organization account (with a D-U-N-S number) is exempt.
-- **App Store:** review usually takes one to several days. The Apple Developer Program costs $99 a year and requires an adult; a student under 18 needs a parent or guardian to enroll.
-- **CAC itself doesn't require a store listing.** Apps can be web, mobile or desktop, and judges score the demo video. Confirm this in the current official rules. For the video, show KitGap installed on a phone from `/install`.
+- **Google Play:** a new personal developer account has to run a closed test with at least 12 testers for 14 days before it can publish.
+- **App Store:** the Apple Developer Program costs $99 a year and needs an adult to enroll. Review takes one to several days.
+- Both stores need an account deletion page first, which KitGap doesn't have yet.
 
 ## Deploy (needed before the native apps can work)
 

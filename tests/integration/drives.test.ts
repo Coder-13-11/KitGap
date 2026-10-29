@@ -138,7 +138,7 @@ describe("starting a drive", () => {
 });
 
 describe("acceptance and withdrawal", () => {
-  it("follows the brief's example: A 20, B 30, 5 accepted from A, A withdraws", async () => {
+  it("follows the worked example: A 20, B 30, 5 accepted from A, A withdraws", async () => {
     const s = await standardScenario(h);
     const a = await adoptRequest(h.as(s.coordA), { requestId: s.requestId, groupId: s.groupA, quantity: 20 });
     await adoptRequest(h.as(s.coordB), { requestId: s.requestId, groupId: s.groupB, quantity: 30 });

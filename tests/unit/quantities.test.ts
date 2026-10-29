@@ -47,7 +47,7 @@ describe("supply list", () => {
 });
 
 describe("request availability", () => {
-  // The worked example from the brief, step by step.
+  // The worked example from docs/quantity-model.md, step by step.
   it("follows the adopt / accept / withdraw example exactly", () => {
     const a = commitment(20);
     const b = commitment(30);

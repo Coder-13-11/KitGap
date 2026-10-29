@@ -1,10 +1,7 @@
 import { LOGO_COLORS } from "./logo";
 
-// A kit being packed, drawn from the logo: a backpack, a notebook and a
-// pencil drop into a cardboard box, the flaps fold shut, the KitGap tag
-// swings on by its twine and its hole fills forest. Shown while a new screen
-// loads. Decorative: the label beside it is what screen readers hear, and
-// with reduced motion it shows the packed box without moving.
+// Loading animation: supplies drop into a box and the KitGap tag swings on.
+// Screen readers only hear the label. With reduced motion it doesn't move.
 
 const BOX = "#c99c62";
 const BOX_DARK = "#a97e47";

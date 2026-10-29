@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // End-to-end tests drive a real browser against the app and the local
-// Supabase stack (see docs/testing.md). They share one database, so they run
+// Supabase stack (see README). They share one database, so they run
 // one at a time.
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined;
 
