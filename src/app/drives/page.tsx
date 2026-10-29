@@ -127,25 +127,20 @@ export default async function MyDrivesPage() {
         </Section>
       ) : null}
 
-      <Section
-        title="Drives you joined elsewhere"
-        id="elsewhere"
-        description="Sign-ups you found through Discover, on SignUpGenius, Facebook and other sites."
-        actions={
-          <ButtonLink href="/discover" variant="secondary">
-            Find more drives
-          </ButtonLink>
-        }
-      >
-        {elsewhere.length === 0 ? (
-          <p className="rounded-xl bg-sunken px-5 py-4 text-muted">
-            Nothing yet. When you sign up for a drive from <AppLink href="/discover">Discover</AppLink>, it shows up here so you can track
-            what you give.
-          </p>
-        ) : (
+      {elsewhere.length > 0 ? (
+        <Section
+          title="Drives you joined elsewhere"
+          id="elsewhere"
+          description="Drives on other sites that you said you signed up for."
+          actions={
+            <ButtonLink href="/requests?tab=online" variant="secondary">
+              Find more drives
+            </ButtonLink>
+          }
+        >
           <ElsewhereList items={elsewhere} />
-        )}
-      </Section>
+        </Section>
+      ) : null}
 
       {groups.length > 0 ? (
         <Section title="Your groups" id="groups">

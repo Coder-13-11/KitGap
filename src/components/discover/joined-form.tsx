@@ -102,7 +102,7 @@ export function JoinedForm({ url, title, signedIn }: { url: string; title: strin
           >
             Create an account
           </AppLink>
-          <AppLink href="/discover" className="press inline-flex min-h-12 items-center rounded-lg border border-line-strong px-5 font-semibold no-underline hover:bg-sunken">
+          <AppLink href="/requests?tab=online" className="press inline-flex min-h-12 items-center rounded-lg border border-line-strong px-5 font-semibold no-underline hover:bg-sunken">
             Find another drive
           </AppLink>
         </div>
