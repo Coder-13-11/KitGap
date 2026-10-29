@@ -1,6 +1,5 @@
-// A request's progress as a shipping tag plus the numbers in words. The tag is
-// decorative (hidden from screen readers); the sentence carries the meaning.
-// The punched hole fills forest only when confirmed receipt is greater than zero.
+// A request's progress bar plus the numbers in words. The bar is hidden from
+// screen readers; the sentence carries the meaning.
 
 import type { RequestTotals } from "@/domain/quantities";
 import { countNoun, formatCount } from "@/domain/text";
@@ -22,7 +21,7 @@ export function RequestProgress({
     <div className="space-y-2">
       <div
         aria-hidden
-        className="relative flex h-8 w-full overflow-hidden rounded-[3px_10px_10px_3px] border border-line-strong bg-sunken"
+        className="flex h-8 w-full overflow-hidden rounded-[3px_10px_10px_3px] border border-line-strong bg-sunken"
       >
         <span className="h-8 bg-forest" style={{ width: `${pct(accepted)}%` }} />
         <span
@@ -30,12 +29,6 @@ export function RequestProgress({
           style={{ width: `${pct(pendingReview)}%` }}
         />
         <span className="h-8 bg-forest-500" style={{ width: `${pct(inProgress)}%` }} />
-        <span
-          className={cn(
-            "absolute top-1/2 left-2 z-10 size-2.5 -translate-y-1/2 rounded-full",
-            accepted > 0 ? "bg-forest ring-2 ring-paper" : "bg-paper ring-2 ring-line-strong",
-          )}
-        />
       </div>
       <dl className={cn("grid gap-x-8 gap-y-1.5 text-sm", compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
         <Stat swatch="bg-forest" label="Confirmed received" value={accepted} />

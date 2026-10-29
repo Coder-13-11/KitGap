@@ -1,9 +1,7 @@
 import { Check, Milk, Soup, Wheat } from "lucide-react";
 import { VerifiedStamp } from "../ui/confirmation";
 
-// What KitGap is, as one picture: a food pantry's list, what neighbors have
-// brought so far, and how many bags the pantry confirmed. An example,
-// labelled as one.
+// Example card for the home page (marked "Example" on screen).
 
 const ITEMS = [
   { name: "Canned soup", have: 40, need: 40, Icon: Soup },
@@ -22,12 +20,13 @@ export function DriveSnapshot() {
           <p className="font-serif text-lg font-semibold tracking-tight sm:text-xl">Weekend food bags</p>
           <p className="text-sm text-muted">Westside Food Pantry · Kissimmee, FL</p>
         </div>
-        <span className="shrink-0 rounded-[2px_8px_8px_2px] border border-clay/30 bg-clay-tint px-2 py-0.5 text-xs font-semibold text-clay">
+        <span className="shrink-0 rounded-md border border-clay/30 bg-clay-tint px-2 py-0.5 text-xs font-semibold text-clay">
           Example
         </span>
       </div>
 
-      <ul className="mt-4 space-y-2.5 sm:mt-5 sm:space-y-3">
+      <p className="mt-4 text-sm font-semibold text-muted sm:mt-5">Brought so far</p>
+      <ul className="mt-2 space-y-2.5 sm:space-y-3">
         {ITEMS.map(({ name, have, need, Icon }) => {
           const done = have >= need;
           return (
