@@ -231,10 +231,13 @@ export function shareDriveSentence(remaining: number, unitName: string, orgName:
 }
 
 /** What a single kit contains, from the recipe. Item requests have no kit sentence. */
-export function oneKitNeedsSentence(components: readonly { name: string; quantityPerUnit: number }[]): string | null {
+export function oneKitNeedsSentence(
+  components: readonly { name: string; quantityPerUnit: number }[],
+  unitName = "kit",
+): string | null {
   if (components.length === 0) return null;
   const parts = components.map((c) => countNoun(c.quantityPerUnit, c.name));
-  return `One kit still needs ${listPhrase(parts)}.`;
+  return `Each ${unitName.trim().toLowerCase()} has ${listPhrase(parts)}.`;
 }
 
 export function pledgeImpact(

@@ -137,22 +137,22 @@ export function KitsReadyMark({
     <section aria-labelledby="kits-ready-title" className="tag-shape border border-line-strong bg-surface px-5 py-5 shadow-card sm:px-6 sm:py-6">
       <h2 id="kits-ready-title" className="font-serif text-4xl leading-none font-semibold tracking-tight">
         <span className="tabular">
-          {formatCount(stages.ready)} of {formatCount(committed)}
+          {formatCount(Math.min(accounted, committed))} of {formatCount(committed)}
         </span>
-        <span className="mt-1 block font-sans text-base font-semibold tracking-normal">{units} ready</span>
+        {/* Counts kits handed over too, so a finished drive doesn't read "0 ready". */}
+        <span className="mt-1 block font-sans text-base font-semibold tracking-normal">
+          {units} {requestType === "kit" ? "packed" : "collected"}
+        </span>
       </h2>
-      <div aria-hidden className="mt-4 flex h-11 overflow-hidden rounded-[2px_14px_14px_2px] border border-line-strong bg-surface">
-        <span className="grid h-11 w-11 shrink-0 place-items-center border-r border-line-strong">
-          <span className={cn("size-3.5 rounded-full", stages.accepted > 0 ? "bg-forest" : "bg-paper ring-2 ring-line-strong")} />
-        </span>
-        <span className="flex h-11 min-w-0 flex-1">
-          <span className="h-11 bg-forest" style={{ width: `${width(stages.accepted)}%` }} />
+      <div aria-hidden className="mt-4 flex h-8 overflow-hidden rounded-[3px_10px_10px_3px] border border-line-strong bg-surface">
+        <span className="flex min-w-0 flex-1">
+          <span className="bg-forest" style={{ width: `${width(stages.accepted)}%` }} />
           <span
-            className="h-11 bg-[repeating-linear-gradient(135deg,var(--color-forest)_0_4px,var(--color-forest-500)_4px_8px)]"
+            className="bg-[repeating-linear-gradient(135deg,var(--color-forest)_0_4px,var(--color-forest-500)_4px_8px)]"
             style={{ width: `${width(stages.pendingReview)}%` }}
           />
-          <span className="h-11 bg-forest-500" style={{ width: `${width(stages.ready)}%` }} />
-          <span className="h-11 min-w-0 flex-1 bg-sunken" />
+          <span className="bg-forest-500" style={{ width: `${width(stages.ready)}%` }} />
+          <span className="min-w-0 flex-1 bg-sunken" />
         </span>
       </div>
       <p className="mt-3 max-w-prose text-muted">{facts.join(". ")}.</p>

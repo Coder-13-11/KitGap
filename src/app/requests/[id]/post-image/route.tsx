@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import QRCode from "qrcode";
 import { PostCard } from "@/components/site/og-art";
-import { countNoun, formatCount } from "@/domain/text";
+import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { formatCalendarDate } from "@/domain/dates";
 import { getRequestDetail } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
@@ -18,8 +18,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { request, org, totals } = detail;
   const url = `${siteUrl()}${ctx.base}/requests/${request.id}`;
   const qr = await QRCode.toDataURL(url, { margin: 1, width: 440, color: { dark: "#1c2921", light: "#fbf6ec" } });
-  const still = totals.available + Math.max(0, totals.promised - totals.accepted);
-  const headline = still > 0 ? `${formatCount(totals.target - totals.accepted)} more ${countNoun(2, request.unitName).replace(/^2 /, "")}` : "Almost there";
+  // Same number as the page's "still needed": what nobody has offered yet.
+  const headline = totals.available > 0 ? `${formatCount(totals.available)} more ${pluralize(request.unitName).toLowerCase()}` : "Almost there";
   return new ImageResponse(
     (
       <PostCard

@@ -1,4 +1,4 @@
-// Kit's ears: turns a short recording into text with whisper on the AI
+// Speech to text for Kit: sends a short recording to whisper on the AI
 // endpoint. Only for signed-in people and demo visitors. The audio is passed
 // straight through and never stored.
 
@@ -14,6 +14,10 @@ export async function POST(request: Request): Promise<Response> {
   if (!caller) return Response.json({ error: "Sign in, or try the demo, to talk to Kit." }, { status: 401 });
   if (!base || !key) return Response.json({ error: "Voice isn't set up here." }, { status: 503 });
   if (!voiceAllowed(caller)) return Response.json({ error: "Too many voice questions. Wait a minute." }, { status: 429 });
+  // Refuse big uploads before reading them into memory.
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_BYTES + 10_000) {
+    return Response.json({ error: "That was a bit long. Try a shorter question." }, { status: 413 });
+  }
   if (!(await allowKitUse(caller, "voice"))) return Response.json({ error: "Voice is resting for today. Type your question instead." }, { status: 429 });
   const form = await request.formData().catch(() => null);
   const audio = form?.get("audio");

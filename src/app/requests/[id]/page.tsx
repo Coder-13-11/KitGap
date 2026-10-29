@@ -55,7 +55,7 @@ export default async function RequestPage({ params }: Params) {
   const pageUrl = `${siteUrl()}${ctx.base}/requests/${request.id}`;
   const caption = shareCaption({
     orgName: org.name,
-    still: totals.target - totals.accepted,
+    still: totals.available,
     unitName: unit,
     items: request.requestType === "kit" ? detail.components.map((c) => countNoun(c.quantityPerUnit, c.name).toLowerCase()) : [],
     neededBy: request.neededBy,
@@ -111,7 +111,7 @@ export default async function RequestPage({ params }: Params) {
               {formatCount(totals.promised)} of {countNoun(totals.target, unit)} promised by groups; {formatCount(totals.accepted)} confirmed
               received by {org.name}.
             </p>
-            {request.requestType === "kit" && detail.components.length > 0 ? <p className="mt-3">{oneKitNeedsSentence(detail.components)}</p> : null}
+            {request.requestType === "kit" && detail.components.length > 0 ? <p className="mt-3">{oneKitNeedsSentence(detail.components, unit)}</p> : null}
             <p className="mt-3 text-sm text-muted">{PHASE_EXPLANATION[phase]}</p>
             {request.statusNote ? (
               <p className="mt-2 text-sm">

@@ -30,14 +30,15 @@ describe("kits still to be confirmed", () => {
 });
 
 describe("one kit and a pledge", () => {
-  it("lists the recipe for one kit", () => {
+  it("lists the recipe for one kit, in the request's own unit", () => {
+    expect(oneKitNeedsSentence([{ name: "Can of soup", quantityPerUnit: 2 }], "Bag")).toBe("Each bag has 2 cans of soup.");
     expect(
       oneKitNeedsSentence([
         { name: "Backpack", quantityPerUnit: 1 },
         { name: "Notebook", quantityPerUnit: 2 },
         { name: "Pencil pack", quantityPerUnit: 1 },
       ]),
-    ).toBe("One kit still needs 1 backpack, 2 notebooks, and 1 pencil pack.");
+    ).toBe("Each kit has 1 backpack, 2 notebooks, and 1 pencil pack.");
   });
 
   it("says how many kits a pledge could complete, without calling the pledge collected", () => {
