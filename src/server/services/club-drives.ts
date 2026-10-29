@@ -79,6 +79,8 @@ export async function createClubDrive(
       if (group?.kind !== "group") fieldErrors({ groupId: "Choose a school club or community group" });
       groupName = group.name as string;
     } else if (input.newGroup) {
+      // A new group is usually from the same town as the recipient.
+      input.newGroup = { name: input.newGroup.name, city: text(input.newGroup.city, 120) || recipientCity };
       const groupErrors = validateWorkspaceInput({ kind: "group", ...input.newGroup });
       for (const [k, v] of Object.entries(groupErrors)) errors[`group.${k}`] = v;
       groupName = text(input.newGroup.name, 120);
@@ -90,7 +92,7 @@ export async function createClubDrive(
     // recipe, date and title follow the same rules.
     const { value, errors: requestErrors } = validateRequestInput(
       {
-        title: input.title,
+        title: text(input.title, 140) || (recipientName ? `Kits for ${recipientName}` : ""),
         need: `${groupName || "A club"} is collecting kits for ${recipientName || "a local organization"}.`,
         beneficiaries: `People served by ${recipientName || "the recipient"}`,
         category: input.category,
@@ -113,6 +115,7 @@ export async function createClubDrive(
     for (const [k, v] of Object.entries(requestErrors)) {
       if (k === "location") continue; // reported as recipientCity above
       if (k === "targetQuantity") continue; // reported as quantity above
+      if (k === "title" && !text(input.title, 140)) continue; // defaults to the recipient, reported above
       errors[k] = v;
     }
     if (Object.keys(errors).length > 0) fieldErrors(errors);

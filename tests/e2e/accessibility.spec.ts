@@ -2,8 +2,8 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 // Automated WCAG 2.2 A/AA checks with axe-core on the main screens, in the
-// demo (so every screen has data). Automated checks find only some problems;
-// docs/accessibility.md lists the manual checks done and still needed.
+// demo (so every screen has data). axe only catches some problems, so this
+// doesn't replace testing with a keyboard and a screen reader.
 
 const ORG = "00000000-0000-4000-8000-00000000b001";
 const REQUEST = "00000000-0000-4000-8000-00000000c001";
@@ -48,7 +48,7 @@ test("signed-in screens in the demo have no automatically detectable WCAG A/AA p
   await page.getByRole("button", { name: /I'll help with 20 kits/ }).click();
   await page.waitForURL(/adopt/);
   await scan(page, "adopt");
-  await page.getByRole("button", { name: "Confirm and start helping" }).click();
+  await page.getByRole("button", { name: "Help with 20 kits" }).click();
   await page.waitForURL(/\/demo\/drives\//);
   await scan(page, "drive (coordinator)");
   const drive = new URL(page.url()).pathname;

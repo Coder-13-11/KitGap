@@ -1,22 +1,20 @@
 "use client";
 
-// "Run your own drive": a club sets up a kit drive for a recipient that isn't
-// on KitGap. One form: who it's for, what goes in a kit, how many, by when,
-// and which group runs it. The supply list updates as the recipe changes.
+// "Run your own drive": a club collects kits for a place that isn't on
+// KitGap. Only what's needed to start is asked up front; the drive name and
+// drop-off notes are under "More options" and have sensible defaults.
 
-import { Minus, Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { createClubDriveAction } from "@/actions/club-drives";
 import { addDays, todayIn } from "@/domain/dates";
-import { CATEGORY_LABEL } from "@/domain/phase";
-import { CATEGORIES } from "@/domain/request-input";
 import { REQUEST_TEMPLATES } from "@/domain/request-templates";
-import { formatCount } from "@/domain/text";
+import { countNoun, listPhrase } from "@/domain/text";
 import { newIdempotencyKey } from "@/lib/keys";
 import { SubmitButton } from "../ui/button";
 import { cn } from "../ui/cn";
 import { ErrorSummary, fieldId } from "../ui/error-summary";
-import { Fieldset, SelectField, TextArea, TextField } from "../ui/field";
+import { inputClass, SelectField, TextArea, TextField } from "../ui/field";
 import { PendingContext, useActionSubmit } from "../ui/use-action-submit";
 
 interface Row {
@@ -41,23 +39,22 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
 
   const first = KIT_TEMPLATES[0];
   const [templateId, setTemplateId] = useState<string>(first.id);
-  const [title, setTitle] = useState(first.fields.title ?? "");
-  const [category, setCategory] = useState<string>(first.fields.category ?? "school_supplies");
+  const [category, setCategory] = useState<string>(first.fields.category ?? "other");
   const [rows, setRows] = useState<Row[]>(() => rowsFrom(first.fields.components ?? []));
   const [quantity, setQuantity] = useState("20");
+  const [recipient, setRecipient] = useState("");
   const [groupChoice, setGroupChoice] = useState<string>(groups[0]?.id ?? "new");
   const today = todayIn("America/New_York");
 
   const kits = /^\d+$/.test(quantity) ? Number(quantity) : 0;
   const filled = rows.filter((r) => r.name.trim());
+  const moreOpen = Boolean(errors.title || errors.handoverInstructions);
 
   const applyTemplate = (id: string) => {
-    const t = KIT_TEMPLATES.find((x) => x.id === id);
-    if (!t) return;
     setTemplateId(id);
-    setTitle(t.fields.title ?? "");
-    setCategory(t.fields.category ?? "other");
-    setRows(rowsFrom(t.fields.components ?? []));
+    const t = KIT_TEMPLATES.find((x) => x.id === id);
+    setCategory(t?.fields.category ?? "other");
+    setRows(t ? rowsFrom(t.fields.components ?? []) : [{ key: ++rowKey, name: "", quantityPerUnit: "1", details: "" }]);
   };
   const update = (k: number, patch: Partial<Row>) => setRows((all) => all.map((r) => (r.key === k ? { ...r, ...patch } : r)));
 
@@ -65,6 +62,7 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
     <PendingContext value={pending}>
       <form onSubmit={onSubmit} className="space-y-10" noValidate>
         <input type="hidden" name="idempotencyKey" value={key} />
+        <input type="hidden" name="category" value={category} />
         {failed ? <ErrorSummary message={failed.message} fieldErrors={failed.fieldErrors} token={state} code={failed.code} /> : null}
 
         <section className="space-y-4">
@@ -73,37 +71,37 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
             <TextField
               id={fieldId("recipientName")}
               name="recipientName"
-              label="Recipient"
-              hint="The shelter, school office or pantry you'll hand the kits to"
+              label="Place you're giving to"
+              hint="A shelter, school, pantry or similar"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
               error={errors.recipientName}
               maxLength={120}
             />
             <TextField
               id={fieldId("recipientCity")}
               name="recipientCity"
-              label="City or area"
+              label="City"
               hint="For example “Kissimmee, FL”"
               error={errors.recipientCity}
+              autoComplete="address-level2"
               maxLength={120}
             />
           </div>
-          <p className="max-w-prose text-sm text-muted">
-            They don&rsquo;t need an account. At handover you give them a receipt link, and they confirm what arrived. Ask them first
-            what they need: bring only what&rsquo;s on their list.
-          </p>
+          <p className="text-sm text-muted">Ask them what they need first. They don&rsquo;t need an account.</p>
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-serif text-2xl font-semibold tracking-tight">What goes in one kit?</h2>
-          <div role="group" aria-label="Start from a template" className="flex flex-wrap gap-2">
-            {KIT_TEMPLATES.map((t) => (
+          <h2 className="font-serif text-2xl font-semibold tracking-tight">What goes in each kit?</h2>
+          <div role="group" aria-label="Start from" className="flex flex-wrap gap-2">
+            {[...KIT_TEMPLATES.map((t) => ({ id: t.id as string, label: t.label })), { id: "blank", label: "My own list" }].map((t) => (
               <button
                 key={t.id}
                 type="button"
                 aria-pressed={templateId === t.id}
                 onClick={() => applyTemplate(t.id)}
                 className={cn(
-                  "press min-h-10 rounded-[2px_8px_8px_2px] border px-3 text-sm font-semibold",
+                  "press min-h-10 rounded-md border px-3 text-sm font-semibold",
                   templateId === t.id ? "border-forest bg-forest text-white" : "border-line-strong bg-surface text-forest hover:bg-forest-tint",
                 )}
               >
@@ -112,49 +110,67 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
             ))}
           </div>
           {errors.components ? <p className="text-sm font-semibold text-danger">{errors.components}</p> : null}
-          <ol className="space-y-3">
-            {rows.map((r, i) => (
-              <li key={r.key} className="tag-shape grid gap-3 border border-line-strong bg-surface p-4 sm:grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)_auto] sm:items-end">
-                <TextField
-                  id={fieldId(`components.${i}.name`)}
-                  name={`components.${i}.name`}
-                  label="Item"
-                  value={r.name}
-                  onChange={(e) => update(r.key, { name: e.target.value })}
-                  error={errors[`components.${i}.name`]}
-                  maxLength={80}
-                />
-                <TextField
-                  id={fieldId(`components.${i}.quantityPerUnit`)}
-                  name={`components.${i}.quantityPerUnit`}
-                  label="Per kit"
-                  inputMode="numeric"
-                  value={r.quantityPerUnit}
-                  onChange={(e) => update(r.key, { quantityPerUnit: e.target.value })}
-                  error={errors[`components.${i}.quantityPerUnit`]}
-                />
-                <TextField
-                  id={fieldId(`components.${i}.details`)}
-                  name={`components.${i}.details`}
-                  label="Details"
-                  optional
-                  value={r.details}
-                  onChange={(e) => update(r.key, { details: e.target.value })}
-                  error={errors[`components.${i}.details`]}
-                  maxLength={300}
-                />
-                <button
-                  type="button"
-                  onClick={() => setRows((all) => all.filter((x) => x.key !== r.key))}
-                  disabled={rows.length === 1}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-sm font-semibold text-danger hover:bg-danger-tint disabled:text-muted"
-                >
-                  <Minus className="size-4" aria-hidden="true" />
-                  Remove<span className="sr-only"> {r.name || `item ${i + 1}`}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
+
+          <div className="rounded-lg border border-line-strong bg-surface">
+            <div aria-hidden className="hidden grid-cols-[minmax(0,1fr)_5rem_minmax(0,1fr)_2.75rem] gap-2 border-b border-line px-3 py-2 text-sm font-semibold text-muted sm:grid">
+              <span>Item</span>
+              <span>Per kit</span>
+              <span>Details (optional)</span>
+            </div>
+            <ol className="divide-y divide-line">
+              {rows.map((r, i) => {
+                const nameError = errors[`components.${i}.name`];
+                const qtyError = errors[`components.${i}.quantityPerUnit`];
+                return (
+                  <li key={r.key} className="px-3 py-2.5">
+                    <div className="grid grid-cols-[minmax(0,1fr)_4.5rem_2.75rem] gap-2 sm:grid-cols-[minmax(0,1fr)_5rem_minmax(0,1fr)_2.75rem]">
+                      <input
+                        id={fieldId(`components.${i}.name`)}
+                        name={`components.${i}.name`}
+                        aria-label={`Item ${i + 1}`}
+                        placeholder="Item"
+                        value={r.name}
+                        onChange={(e) => update(r.key, { name: e.target.value })}
+                        aria-invalid={nameError ? true : undefined}
+                        className={inputClass(nameError)}
+                        maxLength={80}
+                      />
+                      <input
+                        id={fieldId(`components.${i}.quantityPerUnit`)}
+                        name={`components.${i}.quantityPerUnit`}
+                        aria-label={`How many ${r.name || `of item ${i + 1}`} per kit`}
+                        inputMode="numeric"
+                        value={r.quantityPerUnit}
+                        onChange={(e) => update(r.key, { quantityPerUnit: e.target.value })}
+                        aria-invalid={qtyError ? true : undefined}
+                        className={inputClass(qtyError, "text-center")}
+                      />
+                      <input
+                        id={fieldId(`components.${i}.details`)}
+                        name={`components.${i}.details`}
+                        aria-label={`Details for ${r.name || `item ${i + 1}`} (optional)`}
+                        placeholder="Details (optional)"
+                        value={r.details}
+                        onChange={(e) => update(r.key, { details: e.target.value })}
+                        className={inputClass(errors[`components.${i}.details`], "col-span-2 row-start-2 text-sm sm:col-span-1 sm:row-start-auto")}
+                        maxLength={300}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setRows((all) => all.filter((x) => x.key !== r.key))}
+                        disabled={rows.length === 1}
+                        aria-label={`Remove ${r.name || `item ${i + 1}`}`}
+                        className="col-start-3 row-start-1 grid size-11 place-items-center rounded-md text-muted hover:bg-danger-tint hover:text-danger disabled:opacity-40 sm:col-start-4"
+                      >
+                        <X aria-hidden className="size-5" />
+                      </button>
+                    </div>
+                    {nameError || qtyError ? <p className="mt-1 text-sm font-semibold text-danger">{nameError ?? qtyError}</p> : null}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
           <button
             type="button"
             onClick={() => setRows((all) => [...all, { key: ++rowKey, name: "", quantityPerUnit: "1", details: "" }])}
@@ -168,11 +184,11 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl font-semibold tracking-tight">How many, and by when?</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4">
             <TextField
               id={fieldId("quantity")}
               name="quantity"
-              label="Number of kits"
+              label="Kits"
               inputMode="numeric"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
@@ -181,116 +197,83 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
             <TextField
               id={fieldId("neededBy")}
               name="neededBy"
-              label="Hand over by"
+              label="Drop off by"
               type="date"
               min={today}
               max={addDays(today, 366)}
               defaultValue={addDays(today, 28)}
               error={errors.neededBy}
             />
-            <SelectField
-              id={fieldId("category")}
-              name="category"
-              label="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              error={errors.category}
-              options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABEL[c] }))}
-            />
           </div>
-          <TextField
-            id={fieldId("title")}
-            name="title"
-            label="Name of the drive"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            error={errors.title}
-            maxLength={140}
-          />
-          <section aria-live="polite" className="tag-shape border border-line-strong bg-paper px-4 py-4">
-            <h3 className="font-semibold">{kits > 0 ? `Your supply list for ${formatCount(kits)} kits` : "Your supply list"}</h3>
-            {kits > 0 && filled.length > 0 ? (
-              <ul className="mt-2 divide-y divide-line">
-                {filled.map((r) => {
-                  const per = /^\d+$/.test(r.quantityPerUnit) ? Number(r.quantityPerUnit) : 0;
-                  return (
-                    <li key={r.key} className="flex items-baseline justify-between gap-4 py-2">
-                      <span>{r.name}</span>
-                      <span key={per * kits} className="appear tabular text-lg font-semibold">
-                        {formatCount(per * kits)}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="mt-1 text-muted">Add items and a number of kits to see what your group will collect.</p>
-            )}
-          </section>
-          <TextArea
-            id={fieldId("handoverInstructions")}
-            name="handoverInstructions"
-            label="Handover details"
-            optional
-            hint="Where and when you'll drop off, and who to ask for. Only your group sees this."
-            error={errors.handoverInstructions}
-            rows={3}
-            maxLength={2000}
-          />
+          {kits > 0 && filled.length > 0 ? (
+            <p aria-live="polite" className="rounded-lg bg-sunken px-4 py-3">
+              <span className="font-semibold">You&rsquo;ll collect: </span>
+              {listPhrase(
+                filled.map((r) => countNoun((/^\d+$/.test(r.quantityPerUnit) ? Number(r.quantityPerUnit) : 0) * kits, r.name)),
+              )}
+            </p>
+          ) : null}
         </section>
 
-        <Fieldset
-          legend={<span className="font-serif text-2xl font-semibold tracking-tight">Which group is running it?</span>}
-          id={fieldId("groupId")}
-          error={errors.groupId}
-        >
-          <div className="space-y-2">
-            {groups.map((g) => (
-              <label
-                key={g.id}
-                className="flex min-h-12 items-start gap-3 rounded-lg border border-line-strong bg-surface px-3 py-3 has-[:checked]:border-forest has-[:checked]:bg-forest-tint"
-              >
-                <input
-                  type="radio"
-                  name="groupId"
-                  value={g.id}
-                  checked={groupChoice === g.id}
-                  onChange={() => setGroupChoice(g.id)}
-                  className="mt-1 size-5 accent-forest"
-                />
-                <span className="font-semibold">{g.name}</span>
-              </label>
-            ))}
-            <label className="flex min-h-12 items-start gap-3 rounded-lg border border-line-strong bg-surface px-3 py-3 has-[:checked]:border-forest has-[:checked]:bg-forest-tint">
-              <input
-                type="radio"
-                name="groupId"
-                value="new"
-                checked={groupChoice === "new"}
-                onChange={() => setGroupChoice("new")}
-                className="mt-1 size-5 accent-forest"
-              />
-              <span>
-                <span className="font-semibold">{groups.length ? "A new group" : "Create your group"}</span>
-                <span className="block text-sm text-muted">A name and city. You&rsquo;ll coordinate it and can invite members after.</span>
-              </span>
-            </label>
-          </div>
+        <section className="space-y-4">
+          <h2 className="font-serif text-2xl font-semibold tracking-tight">Who&rsquo;s running it?</h2>
+          {groups.length > 0 ? (
+            <SelectField
+              id={fieldId("groupId")}
+              name="groupId"
+              label="Group"
+              value={groupChoice}
+              onChange={(e) => setGroupChoice(e.target.value)}
+              error={errors.groupId}
+              options={[...groups.map((g) => ({ value: g.id, label: g.name })), { value: "new", label: "A new group…" }]}
+            />
+          ) : (
+            <input type="hidden" name="groupId" value="new" />
+          )}
           {groupChoice === "new" ? (
-            <div className="grid gap-4 rounded-lg border border-line bg-paper p-4 sm:grid-cols-2">
-              <TextField id={fieldId("group.name")} name="groupName" label="Group name" error={errors["group.name"]} maxLength={120} />
-              <TextField id={fieldId("group.city")} name="groupCity" label="City or area" error={errors["group.city"]} maxLength={120} />
-            </div>
+            <TextField
+              id={fieldId("group.name")}
+              name="groupName"
+              label={groups.length > 0 ? "New group's name" : "Your group's name"}
+              hint="Shown on the drive's public page, like “Lakeside High Key Club” or “The Garcia family”"
+              error={errors["group.name"] ?? errors["group.city"]}
+              autoComplete="organization"
+              maxLength={120}
+            />
           ) : null}
-        </Fieldset>
+        </section>
+
+        <details open={moreOpen || undefined} className="group rounded-lg border border-line bg-surface px-4 py-3">
+          <summary className="min-h-11 cursor-pointer content-center font-semibold text-forest">More options</summary>
+          <div className="mt-3 space-y-4">
+            <TextField
+              id={fieldId("title")}
+              name="title"
+              label="Drive name"
+              optional
+              placeholder={recipient.trim() ? `Kits for ${recipient.trim()}` : "Kits for …"}
+              error={errors.title}
+              maxLength={140}
+            />
+            <TextArea
+              id={fieldId("handoverInstructions")}
+              name="handoverInstructions"
+              label="Drop-off notes"
+              optional
+              hint="Where and when you'll drop off, and who to ask for. Only your group sees this."
+              error={errors.handoverInstructions}
+              rows={3}
+              maxLength={2000}
+            />
+          </div>
+        </details>
 
         <div className="space-y-3">
-          <SubmitButton pendingLabel="Starting your drive…" disabled={kits < 1} className="min-h-12 w-full px-6 sm:w-auto">
+          <SubmitButton pendingLabel="Starting…" disabled={kits < 1} className="min-h-12 w-full px-6 sm:w-auto">
             Start the drive
           </SubmitButton>
-          <p className="max-w-prose text-sm text-muted">
-            This drive is yours: it isn&rsquo;t listed on KitGap and other groups can&rsquo;t join it. You get the supply checklist, an
-            invitation link for members, sign-up import, packing and a public progress page.
+          <p className="text-sm text-muted">
+            Only your group can see this drive. When you drop off, the place confirms what arrived from a link you give them.
           </p>
         </div>
       </form>

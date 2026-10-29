@@ -103,10 +103,9 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   await signUpAndConfirm(visitor, "Cam Coordinator", coordEmail, PASSWORD, next);
   await visitor.getByRole("link", { name: "Continue" }).click();
   await visitor.waitForURL(new RegExp(`/requests/${requestId}/adopt\\?quantity=20`));
-  await expect(visitor.getByLabel("How many hygiene kits will your group provide?")).toHaveValue("20");
+  await expect(visitor.getByLabel("How many hygiene kits?")).toHaveValue("20");
   await visitor.getByLabel("Name to show").fill("Osceola Robotics Club");
-  await visitor.getByLabel("City or area").fill("St. Cloud, FL");
-  await visitor.getByRole("button", { name: "Confirm and start helping" }).click();
+  await visitor.getByRole("button", { name: "Help with 20 hygiene kits" }).click();
   await visitor.waitForURL(/\/drives\/[0-9a-f-]+\?started=1/);
   await expect(visitor.getByText("20 hygiene kits are reserved for Osceola Robotics Club")).toBeVisible();
   await expect(visitor.getByText("Front desk, Suite 4")).toBeVisible(); // now visible to the coordinator

@@ -91,6 +91,8 @@ export async function adoptRequest(ctx: ServiceContext, input: AdoptInput): Prom
         );
       }
     } else if (input.newGroup) {
+      // Most helpers live near the place they're helping.
+      if (!input.newGroup.city.trim()) input.newGroup = { ...input.newGroup, city: request.location };
       const errors = validateWorkspaceInput({ kind: "group", ...input.newGroup });
       if (Object.keys(errors).length > 0) {
         const fieldErrors = Object.fromEntries(Object.entries(errors).map(([k, v]) => [`group.${k}`, v]));

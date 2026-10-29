@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ClubDriveForm } from "@/components/drives/club-drive-form";
 import { AppLink } from "@/components/ui/base";
-import { Container } from "@/components/ui/layout-bits";
+import { Container, PageHeader } from "@/components/ui/layout-bits";
 import { getAppContext } from "@/server/next/context";
 import { getMyWorkspaces } from "@/server/queries/organization";
 
@@ -19,13 +19,10 @@ export default async function NewClubDrivePage() {
       <nav aria-label="Breadcrumb" className="text-sm">
         <AppLink href="/drives">← My drives</AppLink>
       </nav>
-      <header className="rise space-y-3">
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">Run your own drive</h1>
-        <p className="max-w-2xl text-lg text-muted">
-          For a shelter, school or pantry you already know, even if they&rsquo;ve never heard of KitGap. You get the supply checklist,
-          member pledges, sign-up import and packing. At handover, they confirm what arrived with a receipt link: no account needed.
-        </p>
-      </header>
+      <PageHeader
+        title="Run your own drive"
+        description="Collect kits for a place you already know, even if they've never heard of KitGap."
+      />
       <ClubDriveForm groups={coordinated} />
     </Container>
   );

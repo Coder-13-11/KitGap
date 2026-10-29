@@ -39,11 +39,10 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await expect(page.locator("#quick-quantity-preview")).toContainText("40 notebooks");
   await page.getByRole("button", { name: "I'll help with 20 kits" }).click();
   await page.waitForURL(/\/adopt/);
-  await expect(page.getByRole("heading", { name: "Your supply list for 20 kits" })).toBeVisible();
   const supply = page.locator("#supply-preview");
-  await expect(supply).toContainText("Backpack");
-  await expect(supply).toContainText("40");
-  await page.getByRole("button", { name: "Confirm and start helping" }).click();
+  await expect(supply).toContainText("20 backpacks");
+  await expect(supply).toContainText("40 notebooks");
+  await page.getByRole("button", { name: "Help with 20 kits" }).click();
   await page.waitForURL(/\/demo\/drives\/[0-9a-f-]+\?started=1/);
   await expect(page.getByText("Your drive has started")).toBeVisible();
   const driveUrl = page.url().split("?")[0];
