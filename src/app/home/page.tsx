@@ -14,7 +14,7 @@ import { getMyWorkspaces, getOrgDashboard, type OrgDashboard } from "@/server/qu
 import { listPublicRequests } from "@/server/queries/requests";
 import { getAppContext } from "@/server/next/context";
 
-export const metadata: Metadata = { title: "Home" };
+export const metadata: Metadata = { title: "Today" };
 
 // Where people land after signing in. Three things only: what to do next,
 // needs near you, and what you're already helping with. Updates and your

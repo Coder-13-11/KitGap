@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
-import { useBase, withBase } from "../ui/base";
+import { AppLink, useBase, withBase } from "../ui/base";
 import { buttonClass } from "../ui/button";
 import { QuantityPicker } from "../ui/quantity-picker";
 
@@ -24,14 +24,14 @@ export function QuickAdopt({
   components: { id: string; name: string; quantityPerUnit: number }[];
 }) {
   const base = useBase();
-  const suggested = Math.min(available, requestType === "kit" ? 20 : 25);
+  const suggested = Math.min(available, 1);
   const [value, setValue] = useState(String(suggested));
   const n = /^\d+$/.test(value) ? Number(value) : 0;
   const valid = n >= 1 && n <= available;
   const units = pluralize(unitName).toLowerCase();
 
   return (
-    <form action={withBase(base, `/requests/${requestId}/adopt`)} method="get" className="space-y-4">
+    <form action={withBase(base, `/requests/${requestId}/help`)} method="get" className="space-y-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="quick-quantity" className="font-semibold">
           How many {units} can you help with?
@@ -40,7 +40,7 @@ export function QuickAdopt({
           Between 1 and {formatCount(available)}. You can start small and add more later if some are still available.
         </p>
       </div>
-      <QuantityPicker
+      <QuantityPicker smallPicks
         id="quick-quantity"
         name="quantity"
         value={value}
@@ -73,8 +73,9 @@ export function QuickAdopt({
         )}
       </div>
       <button type="submit" className={buttonClass("primary", "md", true)} disabled={!valid}>
-        I'll help with {valid ? countNoun(n, unitName) : units}
+        I’ll bring {valid ? countNoun(n, unitName) : units}
       </button>
+      <AppLink href={`/requests/${requestId}/adopt`} className="flex min-h-12 items-center justify-center font-semibold">Organize a drive instead</AppLink>
     </form>
   );
 }

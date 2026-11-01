@@ -82,7 +82,7 @@ export type DriveRole = "coordinator" | "contributor" | "organization";
 export interface DriveWorkspace {
   role: DriveRole;
   commitment: Pick<CommitmentRecord, "id" | "quantity" | "status" | "withdrawnAt" | "withdrawNote" | "createdAt">;
-  group: { id: string; name: string; city: string; inviteToken: string | null };
+  group: { id: string; name: string; city: string; inviteToken: string | null; personal: boolean };
   coordinators: string[];
   request: Pick<
     RequestRecord,
@@ -146,7 +146,7 @@ async function loadDrive(tx: Tx, commitmentId: string) {
   const movements = (await tx`
     select * from kit_movements where commitment_id = ${commitmentId} order by created_at
   `) as unknown as KitMovementRecord[];
-  const [group] = await tx`select id, name, city, invite_token from workspaces where id = ${commitment.groupId}`;
+  const [group] = await tx`select id, name, city, invite_token, personal_owner_id from workspaces where id = ${commitment.groupId}`;
   const [org] = await tx`select id, name, city, kind from workspaces where id = ${request.orgId}`;
   return { commitment, request, components, commitments, deliveries, pledges, collections, movements, group, org };
 }
@@ -340,6 +340,7 @@ export async function getDriveWorkspace(ctx: ServiceContext, commitmentId: strin
       group: {
         id: data.group.id,
         name: data.group.name,
+        personal: Boolean(data.group.personalOwnerId),
         city: data.group.city,
         inviteToken: role === "coordinator" ? (data.group.inviteToken as string) : null,
       },
@@ -402,7 +403,7 @@ export async function getPublicDrive(ctx: ServiceContext, commitmentId: string):
   const at = now(ctx);
   return read(ctx, async (tx) => {
     const data = await loadDrive(tx, commitmentId);
-    if (!data || !["published", "closed", "cancelled"].includes(data.request.status)) return null;
+    if (!data || data.group.personalOwnerId || !["published", "closed", "cancelled"].includes(data.request.status)) return null;
     const progress = computeProgress(data);
     const viewerIsMember = Boolean(await roleIn(tx, data.commitment.groupId, ctx.userId));
     return {
@@ -433,6 +434,7 @@ export async function getPublicDrive(ctx: ServiceContext, commitmentId: string):
 
 // "My drives": every drive of every group the person belongs to.
 export interface MyDriveItem {
+  personal: boolean;
   commitmentId: string;
   groupId: string;
   groupName: string;
@@ -487,6 +489,7 @@ export async function getMyDrives(ctx: ServiceContext): Promise<{ drives: MyDriv
       const group = groups.find((g) => g.id === data.commitment.groupId)!;
       drives.push({
         commitmentId: data.commitment.id,
+        personal: Boolean(data.group.personalOwnerId),
         groupId: group.id,
         groupName: group.name,
         role: group.role === "admin" ? "coordinator" : "contributor",

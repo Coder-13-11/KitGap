@@ -2,7 +2,6 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactConfirmed } from "@/components/requests/contact-badge";
-import { WhatHappensNext } from "@/components/drives/what-happens-next";
 import { QuickAdopt } from "@/components/requests/quick-adopt";
 import { SupplyTable } from "@/components/requests/supply-table";
 import { StickyAction } from "@/components/ui/sticky-action";
@@ -44,7 +43,8 @@ export default async function RequestPage({ params }: Params) {
   const unit = request.unitName;
   const units = pluralize(unit).toLowerCase();
   const myActiveDrive = viewer.adminGroups.find((g) => g.existingCommitmentId) ?? null;
-  const memberDrive = viewer.memberDriveIds[0] ?? null;
+  const personalDrive = viewer.personalDriveId;
+  const memberDrive = viewer.memberDriveIds.find((d) => d !== personalDrive) ?? null;
   const activeDrives = detail.drives.filter((d) => d.status === "active");
   const pastDrives = detail.drives.filter((d) => d.status !== "active");
   const isDraftView = !["published", "closed", "cancelled"].includes(request.status);
@@ -65,7 +65,7 @@ export default async function RequestPage({ params }: Params) {
   return (
     <Container className="space-y-8 pb-24 lg:pb-0">
       <nav aria-label="Breadcrumb" className="text-sm">
-        <AppLink href="/requests">← Find</AppLink>
+        <AppLink href="/requests">← Needs</AppLink>
       </nav>
 
       {isDraftView ? (
@@ -75,7 +75,7 @@ export default async function RequestPage({ params }: Params) {
       ) : null}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0 space-y-8 lg:col-start-1 lg:row-start-1">
+        <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-1">
           <header className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <PhaseBadge phase={phase} />
@@ -99,20 +99,20 @@ export default async function RequestPage({ params }: Params) {
             </p>
           </header>
 
-          <section aria-labelledby="open-count" className="tag-shape border border-line-strong bg-surface px-5 py-5 shadow-card sm:px-6">
+          <section aria-labelledby="open-count" className="rounded-2xl bg-forest-tint px-5 py-5 sm:px-6">
             <h2 id="open-count" className="font-serif text-4xl leading-none font-semibold tracking-tight">
               <span className="tabular">{formatCount(totals.available)}</span>{" "}
-              <span className="text-[0.6em]">{totals.available === 1 ? unit.toLowerCase() : units} still needed</span>
+              <span className="text-[0.6em]">{totals.available === 1 ? unit.toLowerCase() : units} still unclaimed</span>
             </h2>
             <div className="mt-4">
               <RequestProgress totals={totals} unitName={unit} />
             </div>
-            <p className="mt-3">
+            <p className="sr-only">
               {formatCount(totals.promised)} of {countNoun(totals.target, unit)} promised by groups; {formatCount(totals.accepted)} confirmed
               received by {org.name}.
             </p>
             {request.requestType === "kit" && detail.components.length > 0 ? <p className="mt-3">{oneKitNeedsSentence(detail.components)}</p> : null}
-            <p className="mt-3 text-sm text-muted">{PHASE_EXPLANATION[phase]}</p>
+            <p className="sr-only">{PHASE_EXPLANATION[phase]}</p>
             {request.statusNote ? (
               <p className="mt-2 text-sm">
                 <span className="font-semibold">Note from {org.name}:</span> “{request.statusNote}”
@@ -124,7 +124,7 @@ export default async function RequestPage({ params }: Params) {
         <aside className="space-y-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start" aria-labelledby="adopt-title" id="adopt-panel">
           <Panel className="space-y-4">
             <h2 id="adopt-title" className="text-xl font-semibold">
-              {myActiveDrive ? "You're helping with this" : "Help with this need"}
+              {myActiveDrive || personalDrive ? "You're helping with this" : "Help with this need"}
             </h2>
             {myActiveDrive ? (
               <>
@@ -132,6 +132,18 @@ export default async function RequestPage({ params }: Params) {
                 <ButtonLink href={`/drives/${myActiveDrive.existingCommitmentId}`} full>
                   Go to your drive
                 </ButtonLink>
+              </>
+            ) : personalDrive ? (
+              <>
+                <p>You’ve pledged to bring some of this yourself.</p>
+                <ButtonLink href={`/drives/${personalDrive}`} full>
+                  See my pledge
+                </ButtonLink>
+                {viewer.canAdopt ? (
+                  <AppLink href={`/requests/${request.id}/adopt`} className="flex min-h-12 items-center justify-center font-semibold">
+                    Organize a club drive too
+                  </AppLink>
+                ) : null}
               </>
             ) : viewer.canAdopt ? (
               <>
@@ -167,18 +179,17 @@ export default async function RequestPage({ params }: Params) {
           </Panel>
           {shareable && (viewer.isOrgMember || myActiveDrive || memberDrive) ? <AskKitCard requestId={request.id} /> : null}
           {shareable ? (
-            <Panel className="space-y-3">
-              <h2 className="text-xl font-semibold">Share this need</h2>
+            <details className="rounded-xl border border-line bg-surface p-5"><summary className="min-h-12 cursor-pointer font-semibold">Share this need</summary>
+            <div className="space-y-3">
+
               <p className="text-sm text-muted">Post it where your neighbors already look: Instagram, Facebook, a group chat or a school announcement.</p>
               <ShareKit url={pageUrl} caption={caption} imagePath={`${ctx.base}/requests/${request.id}/post-image`} fileName="kitgap-need" views={views} />
-            </Panel>
+            </div></details>
           ) : null}
-          {viewer.canAdopt && !myActiveDrive ? (
-            <WhatHappensNext orgName={org.name} isKit={request.requestType === "kit"} neededBy={formatCalendarDate(request.neededBy)} share={null} />
-          ) : null}
+
         </aside>
 
-        <div className="min-w-0 space-y-8 lg:col-start-1 lg:row-start-2">
+        <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-2">
           <Section title={request.requestType === "kit" ? `What goes in each ${unit.toLowerCase()}` : "What's requested"} id="recipe">
             <Panel>
               <SupplyTable
@@ -300,7 +311,7 @@ export default async function RequestPage({ params }: Params) {
 
       </div>
 
-      {viewer.canAdopt && !myActiveDrive ? (
+      {viewer.canAdopt && !myActiveDrive && !personalDrive ? (
         <StickyAction targetId="adopt-panel" href="#adopt-title">
           Help with this · {formatCount(totals.available)} {totals.available === 1 ? unit.toLowerCase() : units} needed
         </StickyAction>

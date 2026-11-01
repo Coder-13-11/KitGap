@@ -43,10 +43,13 @@ export function StickyAction({
       const el = e.target as HTMLElement;
       setTyping(el.matches("input, textarea, select"));
     };
+    const onBlur = () => requestAnimationFrame(() => setTyping(Boolean(document.activeElement?.matches("input, textarea, select"))));
     document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
     return () => {
       observer.disconnect();
       document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
     };
   }, [targetId, hideWhenId]);
 
@@ -59,7 +62,7 @@ export function StickyAction({
           const target = document.getElementById(targetId);
           if (target) {
             event.preventDefault();
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            target.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
             target.querySelector<HTMLElement>("input, button, a")?.focus({ preventScroll: true });
           }
         }}

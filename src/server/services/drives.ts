@@ -41,6 +41,7 @@ export interface AdoptInput {
   requestId: string;
   quantity: unknown;
   groupId?: string | null;
+  individual?: boolean;
   newGroup?: { name: string; city: string } | null;
   idempotencyKey?: string;
 }
@@ -76,6 +77,18 @@ export async function adoptRequest(ctx: ServiceContext, input: AdoptInput): Prom
     const quantity = parseQuantity(input.quantity);
 
     let groupId = input.groupId ?? null;
+    if (input.individual) {
+      if (groupId || input.newGroup) throw new DomainError("invalid_input", "Choose individual help or a group drive, not both.");
+      await tx`select pg_advisory_xact_lock(hashtext(${"personal:" + userId}))`;
+      const [personal] = await tx`select id from workspaces where personal_owner_id = ${userId}`;
+      if (personal) groupId = personal.id as string;
+      else {
+        groupId = newId();
+        await tx`insert into workspaces(id,kind,name,city,created_by,personal_owner_id,invite_token)
+          values(${groupId},'group','Individual helper',${request.location},${userId},${userId},null)`;
+        await tx`insert into workspace_members(workspace_id,user_id,role) values(${groupId},${userId},'admin')`;
+      }
+    }
     if (groupId) {
       await requireRole(tx, groupId, userId, "admin", "Only a group's coordinators can start a drive for it.");
       const [group] = await tx`select kind from workspaces where id = ${groupId}`;

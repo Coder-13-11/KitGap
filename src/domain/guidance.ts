@@ -74,7 +74,7 @@ export function describeBottleneck(progress: DriveProgress, unitName: string): B
   } else if (shortages.length === 1) {
     const only = shortages[0];
     const pledged = pledgedFor.get(only.name) ?? 0;
-    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} ${only.quantity === 1 ? "completes" : "complete"} the remaining ${remaining}${pledged > 0 ? ` (${formatCount(pledged)} already pledged)` : ""}.`;
+    headline = `${formatCount(only.quantity)} more ${nounFor(only.quantity, only.name)} would let you pack ${formatCount(Math.max(0, stages.toBuild - progress.packableNow))} more ${pluralize(unit).toLowerCase()}${pledged > 0 ? ` (${formatCount(pledged)} already pledged)` : ""}.`;
   } else {
     headline = `To complete the remaining ${remaining}, you still need ${listPhrase(needList)}.`;
   }

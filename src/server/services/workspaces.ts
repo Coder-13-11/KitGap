@@ -123,7 +123,8 @@ export async function insertWorkspace(tx: Tx, userId: string, input: WorkspaceIn
 export async function updateWorkspace(ctx: ServiceContext, input: WorkspaceInput & { workspaceId: string }) {
   return mutate(ctx, { action: "workspace.update" }, async (tx, userId) => {
     await requireRole(tx, input.workspaceId, userId, "admin", "Only coordinators and managers can edit these details.");
-    const [workspace] = await tx`select kind, contact_name, contact_email, contact_phone from workspaces where id = ${input.workspaceId}`;
+    const [workspace] = await tx`select kind, contact_name, contact_email, contact_phone, personal_owner_id from workspaces where id = ${input.workspaceId}`;
+    if (workspace?.personalOwnerId) throw new DomainError("not_allowed", "Personal contributions use a private workspace and cannot be renamed or shared.");
     const kind = workspace.kind as WorkspaceKind;
     const errors = validateWorkspaceInput({ ...input, kind });
     if (Object.keys(errors).length > 0) {
@@ -183,6 +184,8 @@ export async function joinWorkspace(ctx: ServiceContext, input: { token: string 
 export async function rotateInviteToken(ctx: ServiceContext, input: { workspaceId: string }) {
   return mutate(ctx, { action: "workspace.rotate_invite" }, async (tx, userId) => {
     await requireRole(tx, input.workspaceId, userId, "admin", "Only coordinators and managers can change the invitation link.");
+    const [workspace] = await tx`select personal_owner_id from workspaces where id = ${input.workspaceId}`;
+    if (workspace?.personalOwnerId) throw new DomainError("not_allowed", "Individual contributions cannot invite other people.");
     const token = newInviteToken();
     await tx`update workspaces set invite_token = ${token} where id = ${input.workspaceId}`;
     return { ok: true };

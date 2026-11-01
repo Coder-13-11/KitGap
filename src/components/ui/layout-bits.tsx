@@ -69,8 +69,8 @@ export function Panel({
   as?: "div" | "section" | "article" | "aside";
   tone?: "default" | "forest";
 }) {
-  const toneClass = tone === "forest" ? "border-forest/25 bg-forest-tint" : "border-line-strong bg-surface";
-  return <As className={cn("tag-shape border p-5 shadow-card sm:p-6", toneClass, className)}>{children}</As>;
+  const toneClass = tone === "forest" ? "border-forest/25 bg-forest-tint" : "border-line bg-surface";
+  return <As className={cn("tag-shape border p-5 sm:p-6", toneClass, className)}>{children}</As>;
 }
 
 export function Container({ children, className, narrow = false }: { children: ReactNode; className?: string; narrow?: boolean }) {
@@ -89,11 +89,11 @@ export function EmptyState({
   icon?: ReactNode;
 }) {
   return (
-    <div className="rise tag-shape relative overflow-hidden border border-line-strong bg-surface px-6 py-10 text-center shadow-card">
+    <div className="rise tag-shape relative overflow-hidden border border-line bg-surface px-6 py-10 text-center shadow-card">
       <div className="relative">
         <div
           aria-hidden="true"
-          className="mx-auto grid size-14 place-items-center rounded-[3px_10px_10px_3px] bg-forest text-white shadow-card [&_svg]:size-6"
+          className="mx-auto grid size-14 place-items-center rounded-xl bg-forest text-white shadow-card [&_svg]:size-6"
         >
           {icon ?? <Inbox />}
         </div>

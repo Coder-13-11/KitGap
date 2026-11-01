@@ -65,7 +65,7 @@ export default async function OrganizationPage({
         </Notice>
       ) : null}
       {flags.reviewed ? (
-        <Notice tone="success" live="polite" title="Decision saved">
+        <Notice tone="success" live="polite" title="It arrived. Confirmation saved.">
           The group can see your decision, and the request's received total is updated.
         </Notice>
       ) : null}
@@ -78,7 +78,7 @@ export default async function OrganizationPage({
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <p className="text-sm font-semibold text-muted">Receiving organization · {org.city}</p>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">{org.name}</h1>
+          <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">Today at {org.name}</h1>
           {org.contactConfirmedAt ? (
             <p className="inline-flex items-center gap-1 text-sm font-semibold text-forest">
               <BadgeCheck aria-hidden className="size-4" /> Contact confirmed by a KitGap reviewer
@@ -91,7 +91,7 @@ export default async function OrganizationPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <ButtonLink href={`/organization/${org.id}/requests/new`}>
-            <Plus aria-hidden className="size-4" /> New request
+            <Plus aria-hidden className="size-4" /> Post a need
           </ButtonLink>
           <ButtonLink href={`/record/organization/${org.id}`} variant="secondary">
             Confirmed record

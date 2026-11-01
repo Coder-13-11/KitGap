@@ -1,6 +1,6 @@
 "use client";
 
-// The organization's request form, in four short steps with a review step.
+// The organization's request form, in three short steps with a review step.
 // "Continue" checks the current step and saves a draft; "Submit for review"
 // runs the full check on the server. If the session has expired, the answers
 // are kept in this browser tab and restored after signing in again.
@@ -231,7 +231,7 @@ export function RequestForm({
       ) : null}
 
       <nav aria-label="Form steps">
-        <ol className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {REQUEST_STEPS.map((s, i) => (
             <li key={s.key}>
               <button
@@ -274,13 +274,13 @@ export function RequestForm({
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          if (step < 3) goTo(step + 1);
+          if (step < 2) goTo(step + 1);
           else submitForReview();
         }}
         className="space-y-6 rounded-lg border border-line bg-surface p-5 sm:p-6"
       >
         <h2 ref={headingRef} tabIndex={-1} className="text-xl font-semibold outline-none">
-          Step {step + 1} of 4: {REQUEST_STEPS[step].title}
+          Step {step + 1} of 3: {REQUEST_STEPS[step].title}
         </h2>
 
         {step === 0 ? (
@@ -324,7 +324,7 @@ export function RequestForm({
           </>
         ) : null}
 
-        {step === 1 ? (
+        {step === 0 ? (
           <>
             <Fieldset legend="What are you asking for?" id={fieldId("requestType")} error={errors.requestType}>
               {[
@@ -443,7 +443,7 @@ export function RequestForm({
           </>
         ) : null}
 
-        {step === 2 ? (
+        {step === 1 ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
               <TextField
@@ -512,7 +512,7 @@ export function RequestForm({
           </>
         ) : null}
 
-        {step === 3 ? <ReviewStep values={values} orgName={orgName} onEdit={(i) => (setStepErrors(null), setStep(i))} /> : null}
+        {step === 2 ? <ReviewStep values={values} orgName={orgName} onEdit={(i) => (setStepErrors(null), setStep(i))} /> : null}
 
         <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
@@ -528,7 +528,7 @@ export function RequestForm({
               {saving ? "Saving…" : savedAt ? `Draft saved at ${new Date(savedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
             </p>
           </div>
-          {step < 3 ? (
+          {step < 2 ? (
             <Button type="submit" pending={busy && pendingKind === "advance"} pendingLabel="Saving…">
               Save and continue
             </Button>
@@ -654,12 +654,12 @@ function ReviewStep({ values, orgName, onEdit }: { values: RequestInput; orgName
     { step: 0, label: "Who it helps", content: value.beneficiaries },
     { step: 0, label: "Category", content: CATEGORY_LABEL[value.category] },
     {
-      step: 1,
+      step: 0,
       label: "Requested",
       content: value.requestType === "kit" ? `${countNoun(target, value.unitName)}, each containing:` : `${countNoun(target, value.unitName)}`,
     },
     {
-      step: 1,
+      step: 0,
       label: "Total supplies",
       content: (
         <ul className="space-y-0.5">
@@ -673,13 +673,13 @@ function ReviewStep({ values, orgName, onEdit }: { values: RequestInput; orgName
         </ul>
       ),
     },
-    { step: 1, label: "Accepted condition", content: value.conditionNotes || "Not specified" },
-    { step: 1, label: "Substitutions", content: value.substitutions || "None" },
-    { step: 2, label: "Needed by", content: value.neededBy ? `${value.neededBy} (${US_TIMEZONES.find((t) => t.value === value.timezone)?.label ?? value.timezone})` : "Not set" },
-    { step: 2, label: "Location", content: value.location || "Not set" },
-    { step: 2, label: "Handover instructions (private)", content: value.handoverInstructions || "Not provided" },
-    { step: 2, label: "Contact for groups (private)", content: value.coordinatorContact || "Not provided" },
-    { step: 2, label: "External fundraising link", content: value.fundraisingUrl || "None" },
+    { step: 0, label: "Accepted condition", content: value.conditionNotes || "Not specified" },
+    { step: 0, label: "Substitutions", content: value.substitutions || "None" },
+    { step: 1, label: "Needed by", content: value.neededBy ? `${value.neededBy} (${US_TIMEZONES.find((t) => t.value === value.timezone)?.label ?? value.timezone})` : "Not set" },
+    { step: 1, label: "Location", content: value.location || "Not set" },
+    { step: 1, label: "Handover instructions (private)", content: value.handoverInstructions || "Not provided" },
+    { step: 1, label: "Contact for groups (private)", content: value.coordinatorContact || "Not provided" },
+    { step: 1, label: "External fundraising link", content: value.fundraisingUrl || "None" },
   ];
   return (
     <div className="space-y-5">

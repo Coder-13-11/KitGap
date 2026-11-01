@@ -90,6 +90,7 @@ export function ReviewDeliveryForm({
             <TextArea id={f("note")} name="note" label={`Message for ${groupName}`} optional rows={2} maxLength={1000} hint="The group will see this with the delivery. It is not posted publicly." />
           )}
 
+          <div className="rounded-xl bg-forest-tint p-4" aria-live="polite"><p className="font-semibold">{decision === "all" ? `${countNoun(quantity, unitName)} will be confirmed received.` : n !== null && n <= quantity ? `${countNoun(n, unitName)} accepted; ${countNoun(quantity - n, unitName)} need follow-up.` : "Enter how many you are accepting."}</p><p className="mt-1 text-sm">Check these numbers before saving. This decision cannot be edited.</p></div>
           <SubmitButton pendingLabel="Saving decision…">Save decision</SubmitButton>
           <p className="text-sm text-muted">You can record a decision once. If you're unsure, check the delivery first.</p>
         </>
