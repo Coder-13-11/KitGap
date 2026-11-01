@@ -30,6 +30,8 @@ export default async function NeedsPage({ searchParams }: { searchParams: Promis
     if (q) sp.set("q", q);
     return `/requests?${sp}`;
   };
+  const tabClass = (on: boolean) =>
+    cn("flex min-h-11 flex-1 items-center justify-center rounded-md px-3 text-center font-semibold no-underline sm:flex-none sm:px-5", on ? "bg-surface text-forest-dark shadow-card" : "text-ink hover:bg-surface/60");
   return <Container className="space-y-8 sm:space-y-10">
     <header className="grid gap-6 border-b border-line pb-8 md:grid-cols-[1fr_auto] md:items-end">
       <div>
@@ -48,7 +50,11 @@ export default async function NeedsPage({ searchParams }: { searchParams: Promis
         <h2 id="needs-title" className="font-serif text-2xl font-semibold">{online ? "Drives found elsewhere" : "Needs near you"}</h2>
         {ctx.mode === "demo" ? <span className="text-sm font-semibold text-muted">Sample community · fictional needs</span> : <AppLink href="/demo" className="inline-flex min-h-12 items-center text-sm">Try a sample community</AppLink>}
       </div>
-      {online ? <><p className="text-muted">These external listings have not been reviewed by KitGap.</p><ButtonLink href="/requests" variant="secondary">Back to KitGap needs</ButtonLink><OnlineDrives place={one("place").slice(0,80)} topic={one("topic").slice(0,80)} searched={"place" in params || Boolean(one("topic"))} /></> : <>
+      <div role="tablist" aria-label="Where to look" className="flex gap-1 rounded-lg bg-sunken p-1 sm:inline-flex">
+        <AppLink href={`/requests${category !== "all" ? `?category=${category}` : ""}`} role="tab" aria-selected={!online} className={tabClass(!online)}>On KitGap</AppLink>
+        <AppLink href="/requests?tab=online" role="tab" aria-selected={online} className={tabClass(online)}>Discover</AppLink>
+      </div>
+      {online ? <><p className="text-muted">Drives posted elsewhere online. These listings have not been reviewed by KitGap.</p><OnlineDrives place={one("place").slice(0,80)} topic={one("topic").slice(0,80)} searched={"place" in params || Boolean(one("topic"))} /></> : <>
         <nav aria-label="Kinds of need"><ul className="flex flex-wrap gap-2">
           <li><AppLink href={categoryHref("all")} aria-current={category === "all" ? "true" : undefined} className={cn("inline-flex min-h-12 items-center rounded-full border px-4 font-semibold no-underline", category === "all" ? "border-forest bg-forest text-white" : "border-line bg-surface text-ink")}>All needs</AppLink></li>
           {CATEGORIES.map(c => <li key={c}><AppLink href={categoryHref(category === c ? "all" : c)} aria-current={category === c ? "true" : undefined} className={cn("inline-flex min-h-12 items-center gap-2 rounded-full border px-4 font-semibold no-underline hover:border-forest",category === c ? "border-forest bg-forest text-white" : "border-line bg-surface text-ink")}><CategoryIcon category={c} className="size-4" />{CATEGORY_SHORT[c]}</AppLink></li>)}
