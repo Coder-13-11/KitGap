@@ -75,9 +75,10 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
       <header className="rise space-y-3">
         <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">See a whole drive in two minutes</h1>
         <p className="text-lg text-muted">
-          You get a private copy of KitGap with a fictional family center, a fictional school club and a 100-kit school-supply request.
-          A guide in the bar at the top takes you through each side of the drive and switches people for you. Nothing you do here
-          affects real requests or other visitors.
+          You get a private copy of KitGap: a sample town with a family center, a food pantry, a senior home, an animal rescue and a
+          school club, all made up. A guide in the bar at the top takes you through each side of a drive and switches people for you,
+          and Kit, the helper in the bottom right, answers questions by text or voice. Nothing you do here affects real requests or
+          other visitors.
         </p>
       </header>
 

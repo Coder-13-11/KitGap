@@ -211,10 +211,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <Container>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <h2 id="open-title" className={H2}>
-                Open requests
+                Open needs
               </h2>
               <AppLink href="/requests" className="font-semibold">
-                See every request
+                See every need
               </AppLink>
             </div>
             <ul className={GRID}>
@@ -234,7 +234,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <h2 id="start-title" className={H2}>
               See a whole drive in two minutes.
             </h2>
-            <p className="mt-2 text-lg text-muted">The demo uses fictional sample people. Nothing in it is real.</p>
+            <p className="mt-2 text-lg text-muted">Play a family center, a school club, a member and a reviewer in a sample town, and watch kits go from request to confirmed. Everyone in it is made up.</p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <AppLink href="/demo" className={buttonClass("primary")}>
