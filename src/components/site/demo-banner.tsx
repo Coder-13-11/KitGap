@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, ChevronDown, FlaskConical } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, FlaskConical, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { demoGuideAction, exitDemoAction, resetDemoAction, switchPersonaAction } from "@/actions/demo";
@@ -177,20 +177,25 @@ export function DemoBanner({
                 Switch
               </button>
             </form>
-            <div className="mt-2 flex gap-2">
-              <form action={resetDemoAction}>
-                <button type="submit" className="min-h-10 rounded-md px-2 text-sm font-semibold text-clay underline underline-offset-2 hover:bg-clay-tint">
-                  Start over
-                </button>
-              </form>
-              <form action={exitDemoAction}>
-                <button type="submit" className="min-h-10 rounded-md px-2 text-sm font-semibold text-ink underline underline-offset-2 hover:bg-sunken">
-                  Exit demo
-                </button>
-              </form>
-            </div>
+            <form action={resetDemoAction} className="mt-2">
+              <button type="submit" className="min-h-10 rounded-md px-2 text-sm font-semibold text-clay underline underline-offset-2 hover:bg-clay-tint">
+                Start over
+              </button>
+            </form>
           </div>
         </details>
+
+        {/* One tap out, from any page: deletes the sample copy and returns home. */}
+        <form action={exitDemoAction} className="shrink-0">
+          <button
+            type="submit"
+            aria-label="Exit demo"
+            className="press inline-flex min-h-9 items-center gap-1 rounded-lg border border-line-strong bg-surface px-2.5 text-sm font-semibold text-ink hover:bg-sunken"
+          >
+            <X aria-hidden className="size-4" />
+            <span className="hidden sm:inline">Exit demo</span>
+          </button>
+        </form>
       </div>
     </div>
   );
