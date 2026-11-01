@@ -73,11 +73,11 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
   return (
     <Container narrow className="space-y-8">
       <header className="rise space-y-3">
-        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">See a whole drive in two minutes</h1>
+        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">See a small promise become real help</h1>
         <p className="text-lg text-muted">
-          You get a private copy of KitGap with a fictional family center, a fictional school club and a 100-kit school-supply request.
-          A guide in the bar at the top takes you through each side of the drive and switches people for you. Nothing you do here
-          affects real requests or other visitors.
+          You get a private copy of KitGap: a sample town with a family center, a food pantry, a senior home, an animal rescue and a
+          school club, all made up. A guide at the top takes you from a promise to a confirmed delivery and switches people for you. Nothing you do here affects real requests or
+          other visitors.
         </p>
       </header>
 
@@ -112,7 +112,7 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
               {PERSONAS.map((p, i) => (
                 <li
                   key={p.key}
-                  className="rise rounded-[2px_14px_14px_2px] border border-line-strong bg-surface p-4 shadow-card"
+                  className="rise rounded-2xl border border-line-strong bg-surface p-4 shadow-card"
                   style={{ ["--i" as string]: i + 1 }}
                 >
                   <p className="font-serif text-lg font-semibold">{p.name}</p>

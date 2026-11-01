@@ -7,7 +7,6 @@ import type { UnitStages } from "@/domain/quantities";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { buttonClass } from "../ui/button-class";
 import { cn } from "../ui/cn";
-import { ProgressRing } from "../ui/motion";
 
 export function DriveHero({
   stages,
@@ -37,7 +36,6 @@ export function DriveHero({
       : stages.accepted === 0
         ? `None have been confirmed yet. ${formatCount(remaining)} to go.`
         : `${formatCount(stages.accepted)} arrived and ${stages.accepted === 1 ? "was" : "were"} checked. ${formatCount(remaining)} to go.`;
-  const pct = committed > 0 ? Math.round((Math.min(stages.accepted, committed) / committed) * 100) : 0;
 
   return (
     <section aria-labelledby="drive-glance" className="overflow-hidden rounded-2xl border border-line/80 bg-surface shadow-card">
@@ -46,12 +44,6 @@ export function DriveHero({
       </h2>
       <div className="flex flex-col gap-5 p-5 sm:p-6 md:flex-row md:items-center">
         <div className="flex items-center gap-5 md:flex-1">
-          <ProgressRing value={stages.accepted} max={committed} size={120} stroke={12} className="shrink-0">
-            <span aria-hidden>
-              <span className="tabular block font-serif text-3xl leading-none font-semibold">{pct}%</span>
-              <span className="mt-1 block text-xs text-muted">confirmed</span>
-            </span>
-          </ProgressRing>
           <div className="min-w-0 space-y-1">
             <p className="font-semibold sm:text-lg">{promise}</p>
             <p className="text-muted">{sofar}</p>
@@ -67,7 +59,6 @@ export function DriveHero({
         <div className="border-t border-forest/20 bg-forest-tint px-5 py-4 sm:px-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 space-y-1">
-              <p className="text-sm font-semibold text-forest-dark">{action.eyebrow}</p>
               <h2 className="font-serif text-2xl font-semibold">{action.title}</h2>
               {action.detail ? <p>{action.detail}</p> : null}
             </div>
@@ -141,7 +132,7 @@ export function KitsReadyMark({
         </span>
         <span className="mt-1 block font-sans text-base font-semibold tracking-normal">{units} ready</span>
       </h2>
-      <div aria-hidden className="mt-4 flex h-11 overflow-hidden rounded-[2px_14px_14px_2px] border border-line-strong bg-surface">
+      <div aria-hidden className="mt-4 flex h-11 overflow-hidden rounded-xl border border-line-strong bg-surface">
         <span className="grid h-11 w-11 shrink-0 place-items-center border-r border-line-strong">
           <span className={cn("size-3.5 rounded-full", stages.accepted > 0 ? "bg-forest" : "bg-paper ring-2 ring-line-strong")} />
         </span>

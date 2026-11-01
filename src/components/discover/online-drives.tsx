@@ -47,7 +47,7 @@ export function OnlineDrives({ place, topic, searched }: { place: string; topic:
                   <span className="mt-1 text-lg font-semibold group-hover:underline">{p.title}</span>
                   <span className="mt-2 flex-1 text-muted">{p.text}</span>
                   <span className="mt-4 flex items-center justify-between text-sm">
-                    <span className="rounded-[2px_8px_8px_2px] bg-sunken px-2.5 py-1 font-medium text-muted">{p.season}</span>
+                    <span className="rounded-lg bg-sunken px-2.5 py-1 font-medium text-muted">{p.season}</span>
                     <span className="inline-flex items-center gap-1 font-semibold text-forest">
                       Open
                       <ExternalLink className="size-4" aria-hidden="true" />

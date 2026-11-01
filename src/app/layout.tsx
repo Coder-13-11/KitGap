@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ViewTransition } from "react";
-import { Archivo_Narrow, Petrona } from "next/font/google";
+import localFont from "next/font/local";
 import { signOutAction } from "@/actions/auth";
-import { KitLauncher } from "@/components/kit/kit-launcher";
-import { kitAiEnabled } from "@/server/kit/ai";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader, type AccountLink, type NavItem } from "@/components/site/header";
@@ -17,27 +15,31 @@ import { getDemoGuide } from "@/server/queries/demo-guide";
 import { getMyWorkspaces } from "@/server/queries/organization";
 import { getAppContext } from "@/server/next/context";
 import { siteUrl } from "@/server/next/supabase";
+import { RefreshOnReturn } from "@/components/site/refresh-on-return";
 import "./globals.css";
 
-const sans = Archivo_Narrow({
-  subsets: ["latin"],
-  variable: "--font-archivo-narrow",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
+const sans = localFont({
+  src: [
+    { path: "./fonts/source-sans-3-400.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/source-sans-3-600.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/source-sans-3-700.ttf", weight: "700", style: "normal" },
+  ], variable: "--font-source-sans", display: "swap",
 });
-const serif = Petrona({
-  subsets: ["latin"],
-  variable: "--font-petrona",
-  display: "swap",
-  weight: ["500", "600", "700"],
+const serif = localFont({
+  src: [
+    { path: "./fonts/dm-sans-600.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/dm-sans-700.ttf", weight: "700", style: "normal" },
+  ], variable: "--font-dm-sans", display: "swap",
 });
+
+const brand = localFont({src:"./fonts/petrona-brand-600.ttf",variable:"--font-brand",weight:"600",display:"swap"});
 
 const DESCRIPTION =
   "Local food pantries, shelters, schools, senior homes and animal rescues post exactly what they need. Neighbors, families and school clubs bring it, and the organization confirms what arrived.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
-  title: { default: "KitGap: help your community get exactly what it needs", template: "%s · KitGap" },
+  title: { default: "KitGap · Small things. Real help.", template: "%s · KitGap" },
   description: DESCRIPTION,
   openGraph: { siteName: "KitGap", type: "website", description: DESCRIPTION },
   twitter: { card: "summary_large_image" },
@@ -47,7 +49,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#234d3b",
+  themeColor: "#fff9f0",
   width: "device-width",
   initialScale: 1,
   // Lets the installed app draw under the notch; the header and tab bar pad
@@ -59,32 +61,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const ctx = await getAppContext();
   const [workspaces, guide] = await Promise.all([getMyWorkspaces(ctx), getDemoGuide(ctx)]);
 
-  // Four places, everywhere: Home, Find, My giving and Profile. Everything
-  // else (updates, organization dashboards, settings) lives under Profile.
-  const nav: NavItem[] = ctx.user
-    ? [
-        { href: "/home", label: "Home" },
-        { href: "/requests", label: "Find" },
-        { href: "/drives", label: "My giving" },
-      ]
-    : [
-        { href: "/requests", label: "Find" },
-        { href: "/about", label: "How it works" },
-      ];
-
-  const tabs: Tab[] = ctx.user
-    ? [
-        { href: "/home", label: "Home", icon: "home" },
-        { href: "/requests", label: "Find", icon: "requests" },
-        { href: "/drives", label: "My giving", icon: "drives" },
-        { href: "/me", label: "Profile", icon: "profile", count: workspaces.unreadUpdates },
-      ]
-    : [
-        { href: "/", label: "Home", icon: "home" },
-        { href: "/requests", label: "Find", icon: "requests" },
-        { href: "/demo", label: "Demo", icon: "demo" },
-        { href: "/sign-in", label: "Sign in", icon: "signin" },
-      ];
+  const operates = workspaces.organizations.length > 0 || workspaces.groups.some(g => g.role === "admin");
+  const nav: NavItem[] = [
+    ...(ctx.user && operates ? [{ href: "/home", label: "Today" }] : []),
+    { href: "/requests", label: "Needs" },
+    ...(ctx.user ? [{ href: "/drives", label: "My help" }] : [{ href: "/about", label: "How it works" }]),
+  ];
+  const tabs: Tab[] = [
+    ...(ctx.user && operates ? [{ href: "/home", label: "Today", icon: "home" as const }] : []),
+    { href: "/requests", label: "Needs", icon: "requests" },
+    { href: "/drives", label: "My help", icon: "drives" },
+    { href: ctx.user ? "/me" : "/sign-in", label: "Account", icon: "profile", count: workspaces.unreadUpdates },
+  ];
 
   // The account menu (desktop) and Profile page (phones) share these.
   const accountLinks: AccountLink[] = [];
@@ -97,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${brand.variable}`}>
       <body className="flex min-h-dvh flex-col max-md:pb-[calc(3.5rem+env(safe-area-inset-bottom))] standalone:max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))] standalone:pt-[env(safe-area-inset-top)] in-data-[native=true]:max-lg:pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
         <a
           href="#main"
@@ -124,7 +112,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           <SiteFooter />
           <TabBar tabs={tabs} />
-          <KitLauncher ai={kitAiEnabled()} />
+          
+          <RefreshOnReturn />
           <ServiceWorker />
           <NativeShell />
           </ToastProvider>

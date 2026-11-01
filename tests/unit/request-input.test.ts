@@ -89,7 +89,7 @@ describe("request form validation", () => {
 
   it("maps fields to the form step that holds them", () => {
     expect(stepForField("title")).toBe(0);
-    expect(stepForField("components.3.name")).toBe(1);
-    expect(stepForField("fundraisingUrl")).toBe(2);
+    expect(stepForField("components.3.name")).toBe(0);
+    expect(stepForField("fundraisingUrl")).toBe(1);
   });
 });

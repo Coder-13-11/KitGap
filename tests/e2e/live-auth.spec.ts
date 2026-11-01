@@ -93,7 +93,7 @@ test("organization posts a request, reviewer approves it, a coordinator adopts a
   await expect(visitor.getByRole("heading", { name: title })).toBeVisible();
   await expect(visitor.getByText("Front desk, Suite 4")).toHaveCount(0); // private handover details
   await visitor.getByLabel("How many hygiene kits can you help with?").fill("20");
-  await visitor.getByRole("button", { name: "I'll help with 20 hygiene kits" }).click();
+  await visitor.getByRole("link", { name: "Organize a drive instead" }).click();
   await visitor.waitForURL(/\/sign-in\?next=/);
   await expect(visitor.getByText("Sign in to start a drive.")).toBeVisible();
   const next = new URL(visitor.url()).searchParams.get("next")!;

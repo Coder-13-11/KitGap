@@ -37,6 +37,9 @@ import { formatCalendarDate, formatTimestamp } from "@/domain/dates";
 import { countNoun, formatCount, pluralize } from "@/domain/text";
 import { getDriveWorkspace, type DriveWorkspace } from "@/server/queries/drives";
 import { getAppContext } from "@/server/next/context";
+import { PersonalContribution } from "@/components/drives/personal-contribution";
+import { GuestAccessToggle } from "@/components/drives/contribution-actions";
+import { guestPledgesEnabled } from "@/server/services/guest-contributions";
 import { siteUrl } from "@/server/next/supabase";
 
 export const metadata: Metadata = { title: "Drive" };
@@ -82,6 +85,8 @@ export default async function DrivePage({
     );
   }
 
+  if (drive.group.personal) return <PersonalContribution drive={drive} />;
+  const guestsEnabled = await guestPledgesEnabled(ctx, id);
   const { request, progress, role, commitment, org, group } = drive;
   const unit = request.unitName;
   const units = pluralize(unit).toLowerCase();
@@ -308,11 +313,13 @@ export default async function DrivePage({
         </Notice>
       ) : null}
 
+      {isCoordinator && active ? <details className="rounded-xl border border-line bg-surface p-5"><summary className="min-h-12 cursor-pointer font-semibold">Guest helpers · {guestsEnabled ? "open" : "invitation only"}</summary><GuestAccessToggle commitmentId={id} enabled={guestsEnabled} /><p className="mt-3"><AppLink href={`/d/${id}`}>Open the shared item list →</AppLink></p></details> : null}
       <header className="space-y-3">
         <p className="text-sm font-semibold text-muted">
           {group.name} · drive for {org.name}
         </p>
-        <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">{request.title}</h1>
+        <h1 className="font-serif text-3xl font-semibold tracking-tight break-words sm:text-4xl">Our drive</h1>
+        <p className="text-lg">{request.title}</p>
         <div className="flex flex-wrap items-center gap-2">
           {active ? <Pill tone="forest">Drive active</Pill> : <Pill tone="danger">Withdrawn</Pill>}
           {drive.tier === "recipient" ? <Pill>Your own drive · not listed</Pill> : <PhaseBadge phase={drive.phase} />}

@@ -3,47 +3,28 @@
 /* Running as an installed app (home screen, or inside the native shell). */
 @custom-variant standalone (@media (display-mode: standalone));
 
-/*
-  KitGap — The Shipping Room.
-  Tokens and contrast: see /DESIGN.md. Ratios are WCAG 2.2, normal text unless noted.
-
-    ink #1C2921 on kraft #F1E6D6 .............. 12.26
-    ink on manila #FBF6EC ..................... 14.04
-    muted #4A534E on kraft / manila / sunken .. 6.45 / 7.39 / 5.63
-    forest #234D3B on kraft / manila .......... 7.75 / 8.88
-    white on forest ........................... 9.56
-    on-forest #D7E6DC on forest ............... 7.40
-    rust #A64B2A on kraft / manila / rust-tint  4.65 / 5.32 / 4.73  (not on sunken: 4.06)
-    white on rust ............................. 5.74
-    line-strong #6F6556 on kraft .............. 4.64  (UI)
-    focus #1E6B9A on kraft .................... 4.70
-    danger #A3261B on kraft / danger-tint ..... 5.97 / 6.32
-    amber #7A5000 on kraft / amber-tint ....... 5.72 / 6.28
-    info #1E5A85 on kraft / info-tint ......... 5.96 / 6.32
-    promised #45705C on sunken ................ 3.99  (UI, not text)
-    decorative line #B9A78A on kraft .......... 1.90  (hairline only)
-*/
+/* KitGap — the community noticeboard. Shared tokens for every task. */
 @theme {
-  --color-paper: #f1e6d6;
-  --color-surface: #fbf6ec;
-  --color-sunken: #e6d7c2;
-  --color-ink: #1c2921;
-  --color-muted: #4a534e;
-  --color-line: #b9a78a;
-  --color-line-strong: #6f6556;
-  --color-forest: #234d3b;
-  --color-forest-dark: #183829;
-  --color-forest-tint: #e3ede6;
-  --color-forest-50: #e3ede6;
-  --color-forest-100: #e3ede6;
+  --color-paper: #fff9f0;
+  --color-surface: #ffffff;
+  --color-sunken: #f1eee5;
+  --color-ink: #20352d;
+  --color-muted: #53635a;
+  --color-line: #dedfd4;
+  --color-line-strong: #7a887c;
+  --color-forest: #245b45;
+  --color-forest-dark: #163e2d;
+  --color-forest-tint: #eaf2e9;
+  --color-forest-50: #eaf2e9;
+  --color-forest-100: #eaf2e9;
   --color-forest-200: #a9c6b4;
   --color-forest-300: #a9c6b4;
   --color-forest-500: #45705c;
-  --color-forest-700: #234d3b;
+  --color-forest-700: #245b45;
   --color-forest-900: #12291f;
   --color-eyebrow: #d7e6dc;
-  --color-clay: #a64b2a;
-  --color-clay-tint: #f3e7df;
+  --color-clay: #a9432d;
+  --color-clay-tint: #fcede7;
   --color-amber: #7a5000;
   --color-amber-tint: #fbf1d9;
   --color-danger: #a3261b;
@@ -52,15 +33,16 @@
   --color-info-tint: #e6eff6;
   --color-focus: #1e6b9a;
 
-  --font-sans: var(--font-archivo-narrow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: var(--font-petrona), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 10px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 16px;
 
-  --shadow-card: 0 1px 1px rgb(28 41 33 / 0.08), 0 10px 28px rgb(92 58 38 / 0.1);
+  --shadow-card: 0 6px 22px rgb(32 53 45 / 0.06);
+  --color-sun: #f4c95d;
 }
 
 @layer base {
@@ -78,7 +60,7 @@
     /* Phones read at 16px; larger screens at 17px (DESIGN.md body). */
     font-size: 1rem;
     line-height: 1.55;
-    letter-spacing: 0.012em;
+    letter-spacing: 0;
     text-rendering: optimizeLegibility;
   }
   @media (min-width: 48rem) {
@@ -143,7 +125,7 @@
 
   /* Shipping-tag silhouette: punched leading edge, open trailing edge. */
   .tag-shape {
-    border-radius: 2px 14px 14px 2px;
+    border-radius: 16px;
   }
 
   /* Confirmed receipt: a square ink stamp. No rotation, no distress. */
@@ -156,7 +138,7 @@
     color: #fff;
     padding: 0.15rem 0.5rem;
     font-weight: 600;
-    box-shadow: 2px 2px 0 rgb(24 56 41);
+    box-shadow: none;
   }
 
   /*
@@ -356,7 +338,7 @@
   }
   100% {
     transform: scale(1);
-    box-shadow: 2px 2px 0 rgb(24 56 41);
+    box-shadow: none;
   }
 }
 
@@ -652,4 +634,13 @@
 }
 @media print {
   .kit-launcher { display: none; }
+}
+
+/* Keep the reading and interaction area clear of mobile navigation/actions. */
+@layer base {
+  input, select, textarea { font-size: 1rem; }
+  button, input, select, textarea { touch-action: manipulation; }
+  main { overflow-wrap: anywhere; }
+  section[id] { scroll-margin-top: 6rem; }
+  @media (max-width: 767px) { body:has([data-sticky-action]) main { padding-bottom: 7rem; } }
 }

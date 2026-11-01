@@ -63,7 +63,7 @@ describe("guidance", () => {
       movements: [],
       deliveries: [],
     });
-    expect(describeBottleneck(progress, "kit").headline).toBe("10 more notebooks complete the remaining 20 kits.");
+    expect(describeBottleneck(progress, "kit").headline).toBe("10 more notebooks would let you pack 5 more kits.");
     expect(nextStepForCoordinator(progress, "kit", "Riverbend").action).toBe("pack");
   });
 

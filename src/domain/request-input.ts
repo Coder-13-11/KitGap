@@ -84,18 +84,9 @@ export const EMPTY_REQUEST_INPUT: RequestInput = {
 // The steps of the form, and which fields each step owns. Used to send the
 // person back to the step that holds an error.
 export const REQUEST_STEPS = [
-  { key: "basics", title: "About the need", fields: ["title", "need", "beneficiaries", "category"] },
-  {
-    key: "items",
-    title: "What's needed",
-    fields: ["requestType", "unitName", "targetQuantity", "components", "conditionNotes", "substitutions"],
-  },
-  {
-    key: "handover",
-    title: "When and where",
-    fields: ["neededBy", "timezone", "location", "handoverInstructions", "coordinatorContact", "fundraisingUrl"],
-  },
-  { key: "review", title: "Review", fields: [] },
+  { key: "items", title: "What’s needed", fields: ["title", "need", "beneficiaries", "category", "requestType", "unitName", "targetQuantity", "components", "conditionNotes", "substitutions"] },
+  { key: "handover", title: "When & where", fields: ["neededBy", "timezone", "location", "handoverInstructions", "coordinatorContact", "fundraisingUrl"] },
+  { key: "review", title: "Preview", fields: [] },
 ] as const;
 
 export function stepForField(field: string): number {

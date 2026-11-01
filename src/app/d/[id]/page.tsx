@@ -13,6 +13,8 @@ import { kitsStillToConfirm, shareDriveSentence } from "@/domain/guidance";
 import { countNoun, formatCount } from "@/domain/text";
 import { getPublicDrive } from "@/server/queries/drives";
 import { getAppContext } from "@/server/next/context";
+import { GuestPledgeForm } from "@/components/drives/guest-pledge-form";
+import { guestPledgesEnabled } from "@/server/services/guest-contributions";
 import { siteUrl } from "@/server/next/supabase";
 
 export const metadata: Metadata = { title: "Drive progress" };
@@ -26,6 +28,7 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
   if (!drive) notFound();
   if (!drive.viewerIsMember) await recordView(ctx, "drive", drive.commitmentId);
   const views = await viewCount(ctx, "drive", drive.commitmentId);
+  const guestsEnabled = await guestPledgesEnabled(ctx,id);
   const unit = drive.request.unitName;
   const needs = drive.progress.components.filter((c) => c.uncovered > 0);
   const still = kitsStillToConfirm(drive.quantity, drive.progress.stages.accepted);
@@ -102,8 +105,9 @@ export default async function PublicDrivePage({ params }: { params: Promise<{ id
         </Section>
       ) : null}
 
+      {guestsEnabled && drive.status === "active" ? <Section title="I’ll bring…" id="guest-pledge"><GuestPledgeForm commitmentId={id} items={drive.progress.components.map(c=>({id:c.componentId,name:c.name,available:c.uncovered}))} /></Section> : null}
       <Panel className="space-y-3">
-        <h2 className="text-lg font-semibold">Want to help?</h2>
+        <h2 className="text-lg font-semibold">Club members</h2>
         {drive.viewerIsMember ? (
           <ButtonLink href={`/drives/${drive.commitmentId}`}>Open the drive to pledge</ButtonLink>
         ) : (

@@ -1,83 +1,49 @@
-import { BadgeCheck, CalendarDays, MapPin } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, CalendarDays, MapPin } from "lucide-react";
 import { formatCalendarDate } from "@/domain/dates";
-import { countNoun, formatCount, pluralize } from "@/domain/text";
+import { countNoun, formatCount } from "@/domain/text";
 import type { RequestSummary } from "@/server/queries/requests";
 import { AppLink } from "../ui/base";
 import { CategoryBadge } from "../ui/category";
 import { PhaseBadge } from "../ui/status";
 import { recipeSummary } from "./recipe-text";
 
-function pct(part: number, whole: number) {
-  return whole > 0 ? Math.min(100, Math.max(0, (part / whole) * 100)) : 0;
-}
-
 export function RequestCard({ summary, headingLevel = "h3" }: { summary: RequestSummary; headingLevel?: "h2" | "h3" }) {
   const { request, org, totals, phase, deadline, components } = summary;
   const Heading = headingLevel;
-  const unitPlural = pluralize(request.unitName).toLowerCase();
-  const promised = Math.max(0, totals.promised - totals.accepted);
-  return (
-    <article className="lift tag-shape relative flex h-full flex-col gap-4 border border-line-strong bg-surface p-5 shadow-card hover:border-forest">
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <PhaseBadge phase={phase} />
-          <CategoryBadge category={request.category} />
-        </div>
-        <Heading className="font-serif text-2xl leading-tight font-semibold tracking-tight">
-          <AppLink href={`/requests/${request.id}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
-            {request.title}
-          </AppLink>
-        </Heading>
-        <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted">
-          <span>{org.name}</span>
-          {org.contactConfirmedAt ? (
-            <span className="inline-flex items-center gap-0.5 text-forest">
-              <BadgeCheck aria-hidden className="size-4" />
-              Contact confirmed
-            </span>
-          ) : null}
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <p className="leading-none">
-          <span className="tabular font-serif text-4xl font-semibold tracking-tight">{formatCount(totals.available)}</span>{" "}
-          <span className="font-semibold">{unitPlural} still needed</span>
-        </p>
-        <div aria-hidden className="flex h-3 overflow-hidden rounded-[2px_10px_10px_2px] border border-line-strong bg-sunken">
-          <span className="h-3 bg-forest" style={{ width: `${pct(totals.accepted, totals.target)}%` }} />
-          <span className="h-3 bg-forest-500" style={{ width: `${pct(promised, totals.target)}%` }} />
-          <span className="h-3 min-w-0 flex-1 bg-sunken" />
-        </div>
-        <p className="text-sm text-muted">
-          {formatCount(totals.accepted)} confirmed
-          {promised > 0 ? ` · ${formatCount(promised)} promised` : ""}
-          {" · "}
-          {formatCount(totals.target)} needed in all
-        </p>
-      </div>
-
-      <p className="sr-only">
-        {countNoun(totals.target, request.unitName)} requested, {formatCount(totals.available)} still open for groups to adopt,{" "}
-        {formatCount(totals.accepted)} confirmed received.
+  const promised = Math.max(0, totals.reserved);
+  const percent = (n: number) => totals.target ? Math.min(100, n / totals.target * 100) : 0;
+  return <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-colors hover:border-forest">
+    <div className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5">
+      <CategoryBadge category={request.category} />
+      {phase === "open" && deadline.soon ? <span className="text-sm font-semibold text-clay">{deadline.description}</span> : <PhaseBadge phase={phase} />}
+    </div>
+    <div className="flex flex-1 flex-col p-5">
+      <Heading className="font-serif text-2xl font-semibold leading-tight">
+        <AppLink href={`/requests/${request.id}`} className="text-ink no-underline after:absolute after:inset-0 group-hover:underline">
+          {phase === "open" ? `${countNoun(totals.available, request.unitName)} still unclaimed` : request.title}
+        </AppLink>
+      </Heading>
+      {phase === "open" ? <p className="mt-2 text-muted">{request.title}</p> : null}
+      <p className="mt-4 flex items-start gap-1.5 text-sm font-semibold">
+        {org.contactConfirmedAt ? <BadgeCheck className="mt-0.5 size-4 shrink-0 text-forest" aria-label="Organization contact confirmed" /> : null}
+        {org.name}
       </p>
-      <p className="text-[0.95rem]">{recipeSummary(request.requestType, request.unitName, components)}</p>
-
-      <div className="mt-auto flex flex-col gap-1 text-sm text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarDays aria-hidden className="size-4 shrink-0" />
-          <span>
-            Needed by <span className="font-semibold text-ink">{formatCalendarDate(request.neededBy)}</span>
-            {deadline.description && phase !== "fulfilled" && phase !== "cancelled" ? (
-              <span className={deadline.passed ? "font-semibold text-amber" : undefined}> · {deadline.description}</span>
-            ) : null}
-          </span>
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <MapPin aria-hidden className="size-4 shrink-0" />
-          {request.location}
-        </span>
+      <p className="mt-3 text-sm text-muted">{recipeSummary(request.requestType, request.unitName, components)}</p>
+      <div className="mt-auto pt-6">
+        <div aria-hidden className="flex h-2 overflow-hidden rounded-full bg-sunken">
+          <span className="bg-forest" style={{ width: `${percent(totals.accepted)}%` }} />
+          <span className="bg-forest-300" style={{ width: `${percent(promised)}%` }} />
+        </div>
+        <p className="mt-2 text-sm text-muted">{formatCount(totals.accepted)} confirmed · {formatCount(promised)} promised · {formatCount(totals.target)} requested</p>
+        <div className="mt-5 flex items-end justify-between gap-3 border-t border-line pt-4">
+          <div className="space-y-1 text-sm text-muted">
+            <p className="flex items-center gap-1.5"><MapPin className="size-4 shrink-0" aria-hidden />{request.location}</p>
+            <p className="flex items-center gap-1.5"><CalendarDays className="size-4 shrink-0" aria-hidden />By {formatCalendarDate(request.neededBy)}</p>
+          </div>
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-forest-tint text-forest" aria-hidden><ArrowUpRight className="size-5" /></span>
+        </div>
       </div>
-    </article>
-  );
+    </div>
+  </article>;
 }
+

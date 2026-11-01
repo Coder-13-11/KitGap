@@ -18,7 +18,11 @@ export default defineConfig({
     trace: "retain-on-failure",
     launchOptions: executablePath ? { executablePath } : {},
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: executablePath ? { executablePath } : {} } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: executablePath ? { executablePath } : {} } },
+    { name: "mobile-chromium", testMatch: /mobile-help\.spec\.ts/, use: { ...devices["Pixel 7"] } },
+    { name: "mobile-webkit", testMatch: /mobile-help\.spec\.ts/, use: { ...devices["iPhone 13"] } },
+  ],
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",

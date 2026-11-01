@@ -193,13 +193,15 @@ export async function setContactConfirmedAction(_prev: unknown, formData: FormDa
 
 export async function adoptAction(_prev: unknown, formData: FormData): Result {
   return runAction(async (ctx) => {
+    const individual = formText(formData, "individual") === "true";
     const groupChoice = formText(formData, "groupId");
     const { commitmentId } = await adoptRequest(ctx, {
       requestId: formText(formData, "requestId"),
       quantity: formText(formData, "quantity"),
-      groupId: groupChoice && groupChoice !== "new" ? groupChoice : null,
+      individual,
+      groupId: individual ? null : groupChoice && groupChoice !== "new" ? groupChoice : null,
       newGroup:
-        groupChoice === "new" || !groupChoice
+        !individual && (groupChoice === "new" || !groupChoice)
           ? { name: formText(formData, "groupName"), city: formText(formData, "groupCity") }
           : null,
       idempotencyKey: formText(formData, "idempotencyKey"),

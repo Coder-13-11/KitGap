@@ -340,7 +340,7 @@ export async function getMyWorkspaces(ctx: ServiceContext) {
   return read(ctx, async (tx) => {
     const rows = await tx`
       select w.id, w.name, w.kind, m.role from workspace_members m join workspaces w on w.id = m.workspace_id
-      where m.user_id = ${ctx.userId} order by w.name
+      where m.user_id = ${ctx.userId} and w.personal_owner_id is null order by w.name
     `;
     const [profile] = await tx`select display_name from profiles where id = ${ctx.userId}`;
     const pick = (kind: string) =>

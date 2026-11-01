@@ -17,6 +17,7 @@ export function QuantityPicker({
   unitName,
   invalid,
   describedBy,
+  smallPicks = false,
 }: {
   id: string;
   name: string;
@@ -26,12 +27,14 @@ export function QuantityPicker({
   unitName: string;
   invalid?: boolean;
   describedBy?: string;
+  smallPicks?: boolean;
 }) {
   const n = /^\d+$/.test(value) ? Number(value) : 0;
   const unit = unitName.toLowerCase();
   const set = (next: number) => onChange(String(Math.min(max, Math.max(1, next))));
-  const picks = PICKS.filter((p) => p < max);
-  if (max <= 500) picks.push(max);
+  const choices = smallPicks ? [1, 2, 5] : PICKS;
+  const picks = choices.filter((p) => p <= max);
+  if (!smallPicks && max <= 500 && !picks.includes(max)) picks.push(max);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -77,7 +80,7 @@ export function QuantityPicker({
           aria-pressed={n === p}
           aria-controls={id}
           className={cn(
-            "press min-h-12 rounded-[2px_8px_8px_2px] border px-4 text-sm font-semibold transition-colors",
+            "press min-h-12 rounded-lg border px-4 text-sm font-semibold transition-colors",
             n === p ? "border-forest bg-forest text-white" : "border-line-strong bg-surface hover:border-forest hover:bg-forest-tint",
           )}
         >

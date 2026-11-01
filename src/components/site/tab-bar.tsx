@@ -6,13 +6,10 @@
 
 import { Bell, CircleUserRound, FlaskConical, HandHeart, Home, LogIn, ScanLine, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
-import { isNativeApp } from "@/lib/native";
 import { AppLink, useBase } from "../ui/base";
 import { cn } from "../ui/cn";
 
 const ICONS = { home: Home, requests: Search, drives: HandHeart, updates: Bell, demo: FlaskConical, signin: LogIn, scan: ScanLine, profile: CircleUserRound };
-const noop = () => () => {};
 
 export interface Tab {
   href: string;
@@ -24,13 +21,12 @@ export interface Tab {
 export function TabBar({ tabs: given }: { tabs: Tab[] }) {
   const pathname = usePathname();
   // The native app adds a Scan tab for receipt and invitation QR codes.
-  const native = useSyncExternalStore(noop, isNativeApp, () => false);
-  const tabs: Tab[] = native ? [...given.slice(0, 2), { href: "/scan", label: "Scan", icon: "scan" }, ...given.slice(2)] : given;
+  const tabs: Tab[] = given;
   const base = useBase();
   const current = (href: string) => {
     const full = base + href;
     if (href === "/" || href === "/home") return pathname === full || pathname === base || pathname === `${base}/`;
-    return pathname === full || pathname.startsWith(`${full}/`);
+    return pathname === full || pathname.startsWith(`${full}/`) || (href === "/requests" && (pathname === base || pathname === `${base}/`));
   };
 
   return (

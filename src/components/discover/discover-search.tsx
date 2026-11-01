@@ -46,7 +46,7 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
         <button
           type="submit"
           disabled={pending}
-          className="press inline-flex h-13 items-center justify-center gap-2 rounded-[2px_8px_8px_2px] bg-forest px-6 text-lg font-semibold text-white hover:bg-forest-dark disabled:bg-forest/80"
+          className="press inline-flex h-13 items-center justify-center gap-2 rounded-lg bg-forest px-6 text-lg font-semibold text-white hover:bg-forest-dark disabled:bg-forest/80"
         >
           {pending ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <Search className="size-5" aria-hidden="true" />}
           {pending ? "Searching" : "Find drives"}
@@ -70,7 +70,7 @@ export function DiscoverSearch({ place, topic, topics }: { place: string; topic:
                     go(next);
                   }}
                   className={cn(
-                    "press min-h-10 rounded-[2px_8px_8px_2px] border px-4 text-sm font-semibold transition-colors",
+                    "press min-h-10 rounded-lg border px-4 text-sm font-semibold transition-colors",
                     on ? "border-forest bg-forest text-white" : "border-line-strong bg-surface text-forest hover:bg-forest-tint",
                   )}
                 >

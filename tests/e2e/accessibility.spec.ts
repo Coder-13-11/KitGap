@@ -45,7 +45,7 @@ test("signed-in screens in the demo have no automatically detectable WCAG A/AA p
   await page.waitForURL(/\/demo\/requests\//);
   await scan(page, "request detail");
 
-  await page.getByRole("button", { name: /I'll help with 20 kits/ }).click();
+  await page.getByRole("link", { name: "Organize a drive instead" }).click();
   await page.waitForURL(/adopt/);
   await scan(page, "adopt");
   await page.getByRole("button", { name: "Confirm and start helping" }).click();

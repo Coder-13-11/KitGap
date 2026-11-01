@@ -103,7 +103,7 @@ export function ClubDriveForm({ groups }: { groups: { id: string; name: string }
                 aria-pressed={templateId === t.id}
                 onClick={() => applyTemplate(t.id)}
                 className={cn(
-                  "press min-h-10 rounded-[2px_8px_8px_2px] border px-3 text-sm font-semibold",
+                  "press min-h-10 rounded-lg border px-3 text-sm font-semibold",
                   templateId === t.id ? "border-forest bg-forest text-white" : "border-line-strong bg-surface text-forest hover:bg-forest-tint",
                 )}
               >

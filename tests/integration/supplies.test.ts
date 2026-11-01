@@ -100,7 +100,7 @@ describe("pledges and received supplies", () => {
     await recordCollection(h.as(s.coordA), { commitmentId: s.commitmentId, componentId: s.pencils, usable: 20 });
     const drive = await workspace(s.coordA, s.commitmentId);
     expect(drive.progress.supportedByCollected).toBe(15);
-    expect(drive.bottleneck.headline).toBe("10 more notebooks complete the remaining 20 kits.");
+    expect(drive.bottleneck.headline).toBe("10 more notebooks would let you pack 5 more kits.");
     await expect(moveKits(h.as(s.coordA), { commitmentId: s.commitmentId, kind: "packed", quantity: 16 })).rejects.toBeInstanceOf(
       DomainError,
     );

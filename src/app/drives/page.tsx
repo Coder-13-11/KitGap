@@ -12,25 +12,25 @@ import { getMyDrives } from "@/server/queries/drives";
 import { listExternalSignups } from "@/server/services/external";
 import { getAppContext } from "@/server/next/context";
 
-export const metadata: Metadata = { title: "My drives" };
+export const metadata: Metadata = { title: "My help" };
 
 export default async function MyDrivesPage() {
   const ctx = await getAppContext();
   if (!ctx.user) redirect(`/sign-in?next=/drives${ctx.sessionExpired ? "&expired=1" : ""}`);
   const [{ drives, groups }, elsewhere] = await Promise.all([getMyDrives(ctx), listExternalSignups(ctx)]);
-  const active = drives.filter((d) => d.status === "active");
-  const past = drives.filter((d) => d.status !== "active");
+  const active = drives.filter((d) => d.status === "active" && d.accepted < d.quantity);
+  const past = drives.filter((d) => d.status !== "active" || d.accepted >= d.quantity);
 
   return (
     <Container className="space-y-8">
       <PageHeader
-        title="My drives"
-        description="Drives for every group you belong to, with the next thing each one needs."
+        title="My help"
+        description="Your promises, your shared drives, and the help that arrived."
         actions={
           <>
             <ButtonLink href="/drives/new">Run your own drive</ButtonLink>
             <ButtonLink href="/requests" variant="secondary">
-              Find a request to adopt
+              Find a need
             </ButtonLink>
           </>
         }
@@ -38,13 +38,13 @@ export default async function MyDrivesPage() {
 
       {groups.length === 0 ? (
         <EmptyState
-          title="You're not in a group yet"
+          title="Your next small thing starts here"
           icon={<Users />}
           action={
             <>
               <ButtonLink href="/drives/new">Run your own drive</ButtonLink>
               <ButtonLink href="/requests" variant="secondary">
-                Find a request to adopt
+                Find a need
               </ButtonLink>
             </>
           }
@@ -55,21 +55,21 @@ export default async function MyDrivesPage() {
       ) : null}
 
       {groups.length > 0 && active.length === 0 ? (
-        <EmptyState title="No active drives" icon={<PackageOpen />} action={<ButtonLink href="/drives/new">Run your own drive</ButtonLink>}>
+        <EmptyState title="No active commitments" icon={<PackageOpen />} action={<ButtonLink href="/drives/new">Run your own drive</ButtonLink>}>
           Your groups aren't running a drive right now. Coordinators can run their own for a recipient they know, or take a share of an
           open request.
         </EmptyState>
       ) : null}
 
       {active.length > 0 ? (
-        <Section title="Active drives" id="active">
+        <Section title="What’s next" id="active">
           <ul className="space-y-3">
             {active.map((d) => (
               <li key={d.commitmentId} className="lift relative rounded-xl border border-line/80 bg-surface p-5 shadow-card hover:border-forest/40">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm text-muted">
-                      {d.groupName} · for {d.orgName}
+                      {d.personal ? "Just you" : d.groupName} · for {d.orgName}
                     </p>
                     <h3 className="text-lg font-semibold">
                       <AppLink href={`/drives/${d.commitmentId}`} className="text-ink no-underline after:absolute after:inset-0 hover:underline">
@@ -91,11 +91,11 @@ export default async function MyDrivesPage() {
                     </p>
                   </div>
                   <div className="space-y-1 md:max-w-xs md:text-right">
-                    <Pill tone={d.role === "coordinator" ? "forest" : "neutral"}>{d.role === "coordinator" ? "Coordinator" : "Member"}</Pill>
+                    <Pill tone={d.role === "coordinator" ? "forest" : "neutral"}>{d.personal ? "Individual" : d.role === "coordinator" ? "Coordinator" : "Member"}</Pill>
                     {d.role === "coordinator" ? (
                       <p className="text-sm">
                         <span className="font-semibold">Next: </span>
-                        {d.nextStep.title}
+                        {d.personal && d.toBuild > 0 ? "Check your list and get ready to bring it." : d.nextStep.title}
                       </p>
                     ) : d.myOpenPledges > 0 ? (
                       <p className="text-sm">You've pledged {countNoun(d.myOpenPledges, "item")} still to bring.</p>

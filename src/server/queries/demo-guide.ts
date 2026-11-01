@@ -65,8 +65,8 @@ export async function getDemoGuide(ctx: AppContext): Promise<DemoGuide | null> {
       persona: "coordinator",
       who: "Jordan, club coordinator",
       title: "Offer to help with a need",
-      hint: "Tap \"I'll help with 20 kits\". They're set aside for your club right away.",
-      href: `/requests/${DEMO_IDS.kitRequest}`,
+      hint: "Start a drive for 20 kits for your club. They're set aside for you right away.",
+      href: `/requests/${DEMO_IDS.kitRequest}/adopt`,
       done: Boolean(state.driveId),
     },
     {

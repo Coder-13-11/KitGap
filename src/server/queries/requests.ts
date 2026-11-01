@@ -211,7 +211,10 @@ export interface RequestDetail extends RequestSummary {
     isOrgMember: boolean;
     isOrgAdmin: boolean;
     isReviewer: boolean;
+    // Clubs the viewer coordinates; never the private individual-helper workspace.
     adminGroups: AdoptableGroup[];
+    // The viewer's own individual pledge on this request, if active.
+    personalDriveId: string | null;
     // Drives on this request the viewer belongs to.
     memberDriveIds: string[];
     canAdopt: boolean;
@@ -249,10 +252,10 @@ export async function getRequestDetail(ctx: ServiceContext, requestId: string): 
     const summary = summarize(request, orgs.get(request.orgId)!, numbers, at);
 
     const groupRows = await tx`
-      select id, name, city from workspaces where id = any(${numbers.commitments.map((c) => c.groupId)}::uuid[])
+      select id, name, city, personal_owner_id from workspaces where id = any(${numbers.commitments.map((c) => c.groupId)}::uuid[])
     `;
     const groups = new Map(groupRows.map((g) => [g.id as string, g]));
-    const drives: PublicDriveListing[] = numbers.commitments.map((c) => {
+    const drives: PublicDriveListing[] = numbers.commitments.filter(c => !groups.get(c.groupId)?.personalOwnerId || groups.get(c.groupId)?.personalOwnerId === userId).map((c) => {
       const deliveries = numbers.deliveries.filter((d) => d.commitmentId === c.id);
       const totals = requestTotals(c.quantity, [c], deliveries);
       return {
@@ -270,19 +273,23 @@ export async function getRequestDetail(ctx: ServiceContext, requestId: string): 
 
     const myGroups = userId
       ? await tx`
-          select w.id, w.name, m.role from workspace_members m join workspaces w on w.id = m.workspace_id
+          select w.id, w.name, m.role, w.personal_owner_id from workspace_members m join workspaces w on w.id = m.workspace_id
           where m.user_id = ${userId} and w.kind = 'group' order by w.name
         `
       : [];
     const myGroupIds = new Set(myGroups.map((g) => g.id as string));
     const adminGroups: AdoptableGroup[] = myGroups
-      .filter((g) => g.role === "admin")
+      .filter((g) => g.role === "admin" && !g.personalOwnerId)
       .map((g) => ({
         id: g.id as string,
         name: g.name as string,
         existingCommitmentId:
           numbers.commitments.find((c) => c.groupId === g.id && c.status === "active")?.id ?? null,
       }));
+    const personalGroup = myGroups.find((g) => g.personalOwnerId);
+    const personalDriveId = personalGroup
+      ? numbers.commitments.find((c) => c.groupId === personalGroup.id && c.status === "active")?.id ?? null
+      : null;
     const memberDriveIds = numbers.commitments.filter((c) => myGroupIds.has(c.groupId)).map((c) => c.id);
     const hasActiveDrive = numbers.commitments.some((c) => myGroupIds.has(c.groupId) && c.status === "active");
 
@@ -305,6 +312,7 @@ export async function getRequestDetail(ctx: ServiceContext, requestId: string): 
         isOrgAdmin: orgMembership?.role === "admin",
         isReviewer,
         adminGroups,
+        personalDriveId,
         memberDriveIds,
         canAdopt: acceptsNewDrives(summary.phase),
       },

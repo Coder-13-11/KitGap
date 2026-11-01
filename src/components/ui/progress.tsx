@@ -20,34 +20,15 @@ export function RequestProgress({
   const pct = (n: number) => (target > 0 ? (n / target) * 100 : 0);
   return (
     <div className="space-y-2">
-      <div
-        aria-hidden
-        className="relative flex h-8 w-full overflow-hidden rounded-[3px_10px_10px_3px] border border-line-strong bg-sunken"
-      >
-        <span className="h-8 bg-forest" style={{ width: `${pct(accepted)}%` }} />
-        <span
-          className="h-8 bg-[repeating-linear-gradient(135deg,var(--color-forest)_0_4px,var(--color-forest-500)_4px_8px)]"
-          style={{ width: `${pct(pendingReview)}%` }}
-        />
-        <span className="h-8 bg-forest-500" style={{ width: `${pct(inProgress)}%` }} />
-        <span
-          className={cn(
-            "absolute top-1/2 left-2 z-10 size-2.5 -translate-y-1/2 rounded-full",
-            accepted > 0 ? "bg-forest ring-2 ring-paper" : "bg-paper ring-2 ring-line-strong",
-          )}
-        />
+      <div aria-hidden className="flex h-2.5 overflow-hidden rounded-full bg-sunken">
+        <span className="bg-forest" style={{ width: `${pct(accepted)}%` }} />
+        <span className="bg-forest-500" style={{ width: `${pct(pendingReview)}%` }} />
+        <span className="bg-forest-300" style={{ width: `${pct(inProgress)}%` }} />
       </div>
-      <dl className={cn("grid gap-x-8 gap-y-1.5 text-sm", compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
-        <Stat swatch="bg-forest" label="Confirmed received" value={accepted} />
-        {!compact || pendingReview > 0 ? (
-          <Stat
-            swatch="bg-[repeating-linear-gradient(135deg,var(--color-forest)_0_3px,var(--color-forest-500)_3px_6px)]"
-            label="Delivered, awaiting review"
-            value={pendingReview}
-          />
-        ) : null}
-        <Stat swatch="bg-forest-500" label="Promised by groups" value={inProgress} />
-        <Stat swatch="bg-sunken ring-1 ring-line-strong ring-inset" label="Still available" value={available} />
+      <dl className={cn("grid gap-x-5 gap-y-1 text-sm",compact ? "grid-cols-1" : "grid-cols-2")}>
+        <Stat swatch="bg-forest" label="Confirmed" value={accepted} />
+        <Stat swatch="bg-forest-300" label="Promised" value={reserved} />
+        {pendingReview > 0 ? <Stat swatch="bg-forest-500" label="Awaiting review" value={pendingReview} /> : null}
       </dl>
       <p className="sr-only">
         Of {countNoun(target, unitName)}, {formatCount(accepted)} confirmed received, {formatCount(pendingReview)} delivered

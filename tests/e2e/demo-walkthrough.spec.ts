@@ -37,7 +37,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("School-supply kits for students starting mid-year");
   await page.getByLabel("How many kits can you help with?").fill("20");
   await expect(page.locator("#quick-quantity-preview")).toContainText("40 notebooks");
-  await page.getByRole("button", { name: "I'll help with 20 kits" }).click();
+  await page.getByRole("link", { name: "Organize a drive instead" }).click();
   await page.waitForURL(/\/adopt/);
   await expect(page.getByRole("heading", { name: "Your supply list for 20 kits" })).toBeVisible();
   const supply = page.locator("#supply-preview");
@@ -50,7 +50,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   const drivePath = new URL(driveUrl).pathname.replace(/^\/demo/, "");
 
   await page.goto(requestUrl);
-  await expect(page.getByText("20 of 100 kits promised by groups; 0 confirmed received")).toBeVisible();
+  await expect(page.getByText("20 of 100 kits promised by groups; 0 confirmed received")).toBeAttached();
   await expect(page.getByText("Of 100 kits, 0 confirmed received, 0 delivered and awaiting review, 20 promised by groups and not yet delivered, and 80 still available for new drives.")).toBeAttached();
   await expect(page.getByRole("heading", { name: "You're helping with this" })).toBeVisible();
 
@@ -103,7 +103,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await record4.getByRole("button", { name: "Record received supplies" }).click();
   await expect(page.getByRole("status").getByText("Recorded 20 usable pencil packs.", { exact: false })).toBeVisible();
 
-  await expect(page.getByText("10 more notebooks complete the remaining 20 kits.")).toBeVisible();
+  await expect(page.getByText("10 more notebooks would let you pack 5 more kits.")).toBeVisible();
   await expect(page.getByText("You can pack 15 kits now with what you have.")).toBeVisible();
 
   // Pack 15 and report a delivery of 15.
@@ -134,7 +134,7 @@ test("a drive from adoption to confirmed delivery", async ({ page }) => {
   await expect(page.getByText("Decision saved")).toBeVisible();
 
   await page.goto(requestUrl);
-  await expect(page.getByText("20 of 100 kits promised by groups; 13 confirmed received")).toBeVisible();
+  await expect(page.getByText("20 of 100 kits promised by groups; 13 confirmed received")).toBeAttached();
   await page.goto("/demo/record/group/00000000-0000-4000-8000-00000000b002");
   await expect(page.getByRole("heading", { name: "Confirmed record" })).toBeVisible();
   await expect(page.getByText("13 kits confirmed by receiving organizations.")).toBeVisible();

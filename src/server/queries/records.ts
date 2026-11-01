@@ -145,7 +145,7 @@ export async function getPublicRecord(ctx: ServiceContext, kind: "group" | "orga
   if (!isUuid(id)) return null;
   return read(ctx, async (tx) => {
     const [workspace] = await tx`
-      select id, name, city, kind from workspaces where id = ${id} and kind = ${kind}
+      select id, name, city, kind from workspaces where id = ${id} and kind = ${kind} and personal_owner_id is null
     `;
     if (!workspace) return null;
     const rows = await acceptedRows(tx, kind, id);

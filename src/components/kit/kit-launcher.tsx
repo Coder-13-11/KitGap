@@ -27,6 +27,16 @@ const REFRESH_MS = 60_000;
 const noSubscribe = () => () => {};
 const SEEN_KEY = "kitgap-kit-seen";
 
+const INTRO = "intro";
+
+function markSeen(ids: string[]): void {
+  try {
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...readSeen(), ...ids])]));
+  } catch {
+    // Private browsing: the bubble may show again, which is fine.
+  }
+}
+
 function readSeen(): string[] {
   try {
     return JSON.parse(sessionStorage.getItem(SEEN_KEY) ?? "[]") as string[];
@@ -62,7 +72,14 @@ export function KitLauncher({ ai }: { ai: boolean }) {
     setSnapshot(s);
     const seen = readSeen();
     const fresh = s.nudges.find((n) => n.urgency === "now" && !seen.includes(n.id));
-    if (fresh) setTeaser(fresh.text);
+    if (fresh) {
+      setTeaser(fresh.text);
+    } else if (!seen.includes(INTRO)) {
+      // Once per visit, say who Kit is, then step aside.
+      markSeen([INTRO]);
+      setTeaser("Hi, I'm Kit. Ask me anything about KitGap, by typing or by voice.");
+      window.setTimeout(() => setTeaser((t) => (t?.startsWith("Hi, I'm Kit") ? null : t)), 8000);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -119,13 +136,7 @@ export function KitLauncher({ ai }: { ai: boolean }) {
   const openPanel = () => {
     setOpen(true);
     setTeaser(null);
-    if (snapshot) {
-      try {
-        sessionStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...readSeen(), ...snapshot.nudges.map((n) => n.id)])]));
-      } catch {
-        // Private browsing: the teaser may show again, which is fine.
-      }
-    }
+    if (snapshot) markSeen(snapshot.nudges.map((n) => n.id));
     setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 50);
   };
 
@@ -329,10 +340,10 @@ export function KitLauncher({ ai }: { ai: boolean }) {
             onClick={openPanel}
             aria-haspopup="dialog"
             aria-expanded={open}
-            className="relative grid size-14 place-items-center rounded-full border-2 border-surface bg-forest shadow-[0_10px_28px_rgb(28_41_33/0.35)] hover:bg-forest-dark"
+            className="relative grid size-12 place-items-center rounded-full border-2 border-surface bg-forest sm:size-14 shadow-[0_10px_28px_rgb(28_41_33/0.35)] hover:bg-forest-dark"
           >
-            <span aria-hidden className="grid size-10 place-items-center rounded-full bg-surface">
-              <LogoMark className="kit-bob size-7" />
+            <span aria-hidden className="grid size-9 place-items-center rounded-full bg-surface sm:size-10">
+              <LogoMark className="kit-bob size-6 sm:size-7" />
             </span>
             {badge > 0 ? (
               <span className="tabular absolute -top-1 -right-1 grid min-w-6 place-items-center rounded-full border-2 border-surface bg-clay px-1 text-xs font-bold text-white">{badge}</span>

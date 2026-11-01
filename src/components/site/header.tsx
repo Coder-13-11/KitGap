@@ -106,7 +106,7 @@ export function SiteHeader({
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-1.5 sm:px-6 md:py-2.5">
         <AppLink href="/" className="flex min-h-11 items-center gap-2 rounded-md text-ink no-underline">
           <LogoMark className="size-8 md:size-9" />
-          <span className="font-serif text-lg font-semibold tracking-tight md:text-xl">KitGap</span>
+          <span style={{fontFamily:"var(--font-brand), Georgia, serif"}} className="text-lg font-semibold tracking-tight md:text-xl">KitGap</span>
         </AppLink>
 
         <nav aria-label="Main" className="ml-4 hidden md:block">
